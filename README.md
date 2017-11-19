@@ -34,8 +34,8 @@ please get in touch.
 
 This project is released under Creative Commons 
 [CC0](https://creativecommons.org/publicdomain/zero/1.0/) 
-1.0 Universal. See LICENSE.txt or the first comment in 
-voltage_divider.html.
+1.0 Universal Public Domain Dedication. See LICENSE.txt or 
+the first comment in voltage_divider.html.
 
 ## Acknowledgments
 
