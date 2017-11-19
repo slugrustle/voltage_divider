@@ -1,4 +1,4 @@
-#Image Files
+# Image Files
 
 Minified forms of voltage\_divider.svg and CC0\_button.svg are
 inlined inside voltage_divider.html. These files are the
