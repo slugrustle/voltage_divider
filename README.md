@@ -28,7 +28,7 @@ please get in touch.
 
 ## Author
 
-* Ben Tesch - [slugrustle](https://github.com/slugrustle)
+Ben Tesch - [slugrustle](https://github.com/slugrustle)
 
 ## License
 
@@ -37,8 +37,8 @@ This project is released under Creative Commons
 1.0 Universal Public Domain Dedication. See LICENSE.txt or 
 the first comment in voltage_divider.html.
 
-## Acknowledgments
+## Acknowledgment
 
-* [svgminify](http://www.svgminify.com/) was handy 
+[svgminify](http://www.svgminify.com/) was handy 
 for reducing the size of the inline .svg images 
 used in this project.
