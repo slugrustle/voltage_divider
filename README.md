@@ -9,8 +9,8 @@ a single .html file with inline Javascript.
 
 ## Getting Started
 
-Download a local copy of voltage_divider.html
-and run it in any browser that supports modern
+Download the [latest release](https://github.com/slugrustle/voltage_divider/releases)
+of voltage_divider.html and run it in any browser that supports modern
 Javascript and HTML/CSS.
 
 The Javascript function solveDivider() forms
