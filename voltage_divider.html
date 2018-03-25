@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <!--
-Voltage Divider Calculator v1.2 - Finds voltage dividers nearest a
+Voltage Divider Calculator v1.4 - Finds voltage dividers nearest a
 target ratio using real-world resistor values.
 
 Written in 2018 by Ben Tesch
@@ -136,6 +136,7 @@ express Statement of Purpose.
     this CC0 or use of the Work.
 -->
 <head>
+<title>Voltage Divider Calculator</title>
 <style>
 #inputTable {
   border: 1px solid black;
@@ -201,7 +202,7 @@ td.paramLabel {
 </head>
 
 <body>
-<h3>Voltage Divider Calculator&#x2001;v1.3&#x2001;2018-03-24</h3>
+<h3>Voltage Divider Calculator&#x2001;v1.4&#x2001;2018-03-25</h3>
 <div style="display: inline-block;">
   <table id="inputTable">
     <tr>
@@ -229,9 +230,9 @@ td.paramLabel {
     <tr>
       <td class="labelCol">Resistor Value Series</td>
       <td>
-          E24 <input type="radio" name="valType" id="valTypeE24" value="min"/>
-          E96 <input type="radio" name="valType" id="valTypeE96" value="nom"/>
-          Both <input type="radio" name="valType" id="valTypeE24E96" checked/>
+          E24 <input type="radio" name="resSeries" id="resSeriesE24" value="min"/>
+          E96 <input type="radio" name="resSeries" id="resSeriesE96" value="nom"/>
+          Both <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
       </td>
       <td>&nbsp;</td>
     </tr>
@@ -348,20 +349,8 @@ function trimString(inString) {
   return inString.replace(/^\s*([^\s]*)\s*$/, '$1');
 }
 
-// Constructor for Candidate objects.
-function Candidate(resUpper, resLower, minRatio, nomRatio, maxRatio, diff) {
-  this.resUpper = resUpper;
-  this.resLower = resLower;
-  this.resString = resUpper + resLower;
-  this.minRatio = minRatio;
-  this.nomRatio = nomRatio;
-  this.maxRatio = maxRatio;
-  this.diff = diff;
-  this.absDiff = Math.abs(diff);
-}
-
 // Creates human-readable resistance value strings from
-// resistance values in Ohms. Values below 1 nono Ohm
+// resistance values in Ohms. Values below 1 micro Ohm
 // display as 0Ω.
 function resValToString(resVal, precision) {
   if (resVal >= 1.0e9) {
@@ -374,7 +363,7 @@ function resValToString(resVal, precision) {
     return ((resVal).toPrecision(precision) + "\u03A9");
   } else if (resVal >= 1.0e-3) {
     return ((1.0e3*resVal).toPrecision(precision) + "m\u03A9");
-  } else if (resVal >= 1.0e-6 && resVal >= 1.0e-9) {
+  } else if (resVal >= 1.0e-6) {
     return ((1.0e6*resVal).toPrecision(precision) + "\u03BC\u03A9");
   } else {
     return "0\u03A9";
@@ -426,8 +415,79 @@ var E24E96 = [1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
 // values.
 var multipliers = [1.0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6];
 
+// "enum" type containing possible resistor series
+var seriesEnum = Object.freeze({E24:1, E96:2, E24E96:3});
+
+// "enum" type with possible target ratio options
+var ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
+
+// Constructor for Settings object that stores user input settings
+function Settings(targetRatio, ratioType, ratioThresholdLow, ratioThresholdHigh,
+                  resTolerance, resSeries, minStringRes, maxStringRes) {
+  this.targetRatio = targetRatio;
+  switch (ratioType) {
+  case ratioEnum.MIN:
+    this.ratioType = ratioEnum.MIN;
+    break;
+  case ratioEnum.MAX:
+    this.ratioType = ratioEnum.MAX;
+    break;
+  default:
+    this.ratioType = ratioEnum.NOM;
+    break;
+  }
+  this.ratioThresholdLow = ratioThresholdLow;
+  this.ratioThresholdHigh = ratioThresholdHigh;
+  this.resTolerance = resTolerance;
+  switch (resSeries) {
+  case seriesEnum.E24:
+    this.resSeries = seriesEnum.E24;
+    break;
+  case seriesEnum.E96:
+    this.resSeries = seriesEnum.E96;
+    break;
+  default:
+    this.resSeries = seriesEnum.E24E96;
+    break;
+  }
+  this.minStringRes = minStringRes;
+  this.maxStringRes = maxStringRes;
+}
+
 // resArray stores the full array of resistance values.
 var resArray = [];
+
+// Create array of all valid individual resistance values, stored
+// in ascending order.
+function initialize_resArray(resSeries) {
+  resArray = [];
+  var jMult;
+  var jVal;
+
+  switch (resSeries) {
+  case seriesEnum.E24:
+    for (jMult = 0; jMult < multipliers.length; jMult++) {
+      for (jVal = 0; jVal < E24.length; jVal++) {
+        resArray.push(multipliers[jMult]*E24[jVal]);
+      }
+    }
+    break;
+  case seriesEnum.E96:
+    for (jMult = 0; jMult < multipliers.length; jMult++) {
+      for (jVal = 0; jVal < E96.length; jVal++) {
+        resArray.push(multipliers[jMult]*E96[jVal]);
+      }
+    }
+    break;
+  default:
+    for (jMult = 0; jMult < multipliers.length; jMult++) {
+      for (jVal = 0; jVal < E24E96.length; jVal++) {
+        resArray.push(multipliers[jMult]*E24E96[jVal]);
+      }
+    }
+    break;
+  }
+}
 
 // Returns the index in resArray of the value nearest to resVal.
 function findNearest(resVal) {
@@ -454,120 +514,399 @@ function findNearest(resVal) {
   }
 }
 
+// Constructor for Candidate objects.
+function Candidate(resUpper, resLower, minRatio, nomRatio, maxRatio, diff) {
+  this.resUpper = resUpper;
+  this.resLower = resLower;
+  this.resString = resUpper + resLower;
+  this.minRatio = minRatio;
+  this.nomRatio = nomRatio;
+  this.maxRatio = maxRatio;
+  this.diff = diff;
+  this.absDiff = Math.abs(diff);
+}
+
+// All potential voltage divider solutions are stored as Candidate
+// objects in this array
+var candidates = [];
+
+// Find potential voltage divider solutions near the target ratio
+// that satisfy all constraints, and store them in candidates.
+function populate_candidates(settings) {
+  candidates = [];
+  var jRes;
+  var minRatio;
+  var nomRatio;
+  var maxRatio;
+
+  // Use resTolerance to create ratio conversion constants from lower
+  // to upper resistors and vice versa
+  var tolAug = 1.0 + settings.resTolerance/100.0;
+  var tolDim = 1.0 - settings.resTolerance/100.0;
+
+  var lowToUpRatio;
+  var upToLowRatio;
+
+  switch (settings.ratioType) {
+  case ratioEnum.MIN:
+    lowToUpRatio = tolDim * ((1.0-settings.targetRatio)/settings.targetRatio) / tolAug;
+    upToLowRatio = tolAug * (settings.targetRatio/(1.0-settings.targetRatio)) / tolDim;
+    break;
+  case ratioEnum.MAX:
+    lowToUpRatio = tolAug * ((1.0-settings.targetRatio)/settings.targetRatio) / tolDim;
+    upToLowRatio = tolDim * (settings.targetRatio/(1.0-settings.targetRatio)) / tolAug;
+    break;
+  default:
+    lowToUpRatio = ((1.0-settings.targetRatio)/settings.targetRatio);
+    upToLowRatio = (settings.targetRatio/(1.0-settings.targetRatio));
+    break;
+  }  
+
+  for (jRes = 0; jRes < resArray.length; jRes++) {
+    // Test this resVal as a lower resistor.
+    var resLower = resArray[jRes];
+    var optUpper = lowToUpRatio * resLower;
+
+    if ((resLower+optUpper) >= settings.minStringRes && 
+        (resLower+optUpper) <= settings.maxStringRes) {
+      var nearUpper = resArray[findNearest(optUpper)];
+      minRatio = (tolDim*resLower) / ((tolDim*resLower)+(tolAug*nearUpper));
+      nomRatio = resLower / (resLower+nearUpper);
+      maxRatio = (tolAug*resLower) / ((tolAug*resLower)+(tolDim*nearUpper));
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
+          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, minRatio-settings.targetRatio));
+        }
+        break;
+      case ratioEnum.MAX:
+        if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
+          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, maxRatio-settings.targetRatio));
+        }
+        break;
+      default:
+        if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
+          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, nomRatio-settings.targetRatio));
+        }
+        break;
+      }
+    }
+
+    // Test this resVal as an upper resistor.
+    var resUpper = resArray[jRes];
+    var optLower = upToLowRatio * resUpper;
+
+    if ((resUpper+optLower) >= settings.minStringRes && 
+        (resUpper+optLower) <= settings.maxStringRes) {
+      var nearLower = resArray[findNearest(optLower)];
+      minRatio = (tolDim*nearLower) / ((tolDim*nearLower)+(tolAug*resUpper));
+      nomRatio = nearLower / (nearLower+resUpper);
+      maxRatio = (tolAug*nearLower) / ((tolAug*nearLower)+(tolDim*resUpper));
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
+          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, minRatio-settings.targetRatio));
+        }
+        break;
+      case ratioEnum.MAX:
+        if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
+          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, maxRatio-settings.targetRatio));
+        }
+        break;
+      default:
+        if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
+          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, nomRatio-settings.targetRatio));
+        }
+        break;
+      }
+    }
+  }
+
+  return;
+}
+
+// Diagnostic message that summarizes settings.
+// Displayed when no results are found.
+function displayDiagnostics(settings) {
+  
+  var ratioString;
+  switch (settings.ratioType) {
+  case ratioEnum.MIN:
+    ratioString = "minimum";
+    break;
+  case ratioEnum.MAX:
+    ratioString = "maximum";
+    break;
+  default:
+    ratioString = "nominal";
+    break;
+  }
+  
+  var seriesString;
+  switch (settings.resSeries) {
+  case seriesEnum.E24:
+    seriesString = "E24";
+    break;
+  case seriesEnum.E96:
+    seriesString = "E96";
+    break;
+  default:
+    seriesString = "E24 and E96";
+    break;
+  }
+  
+  var tableString = "<tr><td class=\"groupCol\" colspan=\"2\"><b>No Results Found</b></tr>" +
+    "<tr><td class=\"paramLabel\">Target " + ratioString + " divider ratio</td><td>" + settings.targetRatio.toPrecision(6) + "</td></tr>" +
+    "<tr class=\"shadedRow\"><td class=\"paramLabel\">Ratio search range</td><td>[&nbsp;" + settings.ratioThresholdLow.toPrecision(6) + ",&#x2000;" + settings.ratioThresholdHigh.toPrecision(6) + "&nbsp;]</td></tr>" +
+    "<tr><td class=\"paramLabel\">Resistor tolerance</td><td>&#x00B1;" + settings.resTolerance.toPrecision(4) + "%</td></tr>" +
+    "<tr><td class=\"paramLabel\">Minimum string resistance</td><td>" + resValToString(settings.minStringRes, 6) + "</td></tr>" +
+    "<tr class=\"shadedRow\"><td class=\"paramLabel\">Maximum string resistance</td><td>" + resValToString(settings.maxStringRes, 6) + "</td></tr>" +
+    "<tr><td class=\"groupCol\" colspan=\"2\">EIA " + seriesString + " series resistor values</td></tr>";
+                 
+  document.getElementById("resultsTable").innerHTML = tableString;
+  return;
+}
+
+// Takes the fully-populated candidates array, sorts by lowest 
+// difference from the target ratio, collects best matches into 
+// groups, and displays them.
+function sortAndDisplayResults(settings) {
+
+  var lastColHeader;
+  switch (settings.ratioType) {
+  case ratioEnum.MIN:
+    lastColHeader = "Min&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
+    break;
+  case ratioEnum.MAX:
+    lastColHeader = "Max&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
+    break;
+  default:
+    lastColHeader = "Nom&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
+    break;
+  }
+
+  var tableString = "<tr><th>Group</th><th>Upper</th><th>Lower</th>" +
+                    "<th>String</th><th>Min&nbsp;Ratio</th>" +
+                    "<th>Nom&nbsp;Ratio</th><th>Max&nbsp;Ratio</th><th>" +
+                    lastColHeader + "</th></tr>";
+
+  // Sort candidates by closeness to target divider ratio.
+  candidates.sort(function(a,b){return (a.absDiff - b.absDiff);});
+
+  // Group candidates with similar absolute difference from target divider ratio.
+  var shadeRow = false;
+  var groupNumber = 1;
+
+  while (candidates.length > 0 && groupNumber <= 20) {
+    var groupLength = 1;
+    while (groupLength < candidates.length &&
+           Math.abs(candidates[groupLength].diff-candidates[0].diff) < 1e-10) {
+      groupLength++;
+    }
+    var candidateGroup = candidates.splice(0, groupLength);
+
+    // Store unique elements of candidateGroup in resultsGroup
+    candidateGroup.sort(function(a,b){return (a.resLower - b.resLower);});
+    var resultsGroup = [];
+
+    while (candidateGroup.length > 0) {
+      // Find subgroup with same resLower value.
+      var subLength = 1;
+      while (subLength < candidateGroup.length &&
+             Math.abs(candidateGroup[0].resLower - candidateGroup[subLength].resLower) < 1e-8 * candidateGroup[subLength].resLower) {
+        subLength++;
+      }
+      var subGroup = candidateGroup.splice(0, subLength);
+
+      // Store non-duplicate entries of subGroup in resultsGroup
+      if (subGroup.length === 1) {
+        resultsGroup.push(subGroup[0]);
+      } else if (subGroup.length > 1) {
+        subGroup.sort(function(a,b){return (a.resUpper - b.resUpper);});
+        resultsGroup.push(subGroup[0]);
+
+        var testIndx;
+        for (testIndx = 1; testIndx < subGroup.length; testIndx++) {
+          if (Math.abs(subGroup[testIndx].resUpper - subGroup[testIndx-1].resUpper) > 1e-8 * subGroup[testIndx].resUpper) {
+            resultsGroup.push(subGroup[testIndx]);
+          }
+        }
+      }
+    }
+
+    if (groupNumber > 1) {
+      // Put a gray divider row between groups.
+      shadeRow = false;
+      tableString += "<tr class=\"grayRow\"><td colspan=\"8\"/></tr>";
+    }
+
+    // Display the results in this group.
+    var jMember;
+    for (jMember = 0; jMember < resultsGroup.length; jMember++) {
+      if (shadeRow) {
+        tableString += "<tr class=\"shadedRow\">";
+        shadeRow = false;
+      } else {
+        tableString += "<tr class=\"normalRow\">";
+        shadeRow = true;
+      }
+
+      tableString += "<td class=\"groupCol\">" + groupNumber +
+      "</td><td>" + resValToString(resultsGroup[jMember].resUpper, 3) +
+      "</td><td>" + resValToString(resultsGroup[jMember].resLower, 3) +
+      "</td><td>" + resValToString(resultsGroup[jMember].resString, 6) +
+      "</td><td>" + resultsGroup[jMember].minRatio.toPrecision(6) +
+      "</td><td>" + resultsGroup[jMember].nomRatio.toPrecision(6) +
+      "</td><td>" + resultsGroup[jMember].maxRatio.toPrecision(6) +
+      "</td><td class=\"diffCol\">" + resultsGroup[jMember].diff.toExponential(4) +
+      "</td></tr>";
+    }
+
+    groupNumber++;
+  }
+
+  document.getElementById("resultsTable").innerHTML = tableString;
+  return;
+}
+
+// Constructor for ParsedValue object, returned by all parsing functions
+function ParsedValue(value, isValid) {
+  this.value = value;
+  if (isValid === true) {
+    this.isValid = true;
+  } else {
+    this.isValid = false;
+  }
+}
+
+// Parser for resistance values. Accepts 'k' (kilo, 10^3) and
+// 'M' (mega, 10^6) suffixes.
+function parseResistance(inString) {
+  var output = new ParsedValue(0.0, false);
+  var inTrim = trimString(inString);
+  var lastChar = '';
+
+  if (inTrim.length > 0) {
+    lastChar = inTrim.charAt(inTrim.length-1);
+  }
+
+  if (lastChar === 'k' && inTrim.length > 1) {
+    output.value = 1.0e3 * Number(inTrim.substr(0, inTrim.length-1));
+  } else if (lastChar === 'M' && inTrim.length > 1) {
+    output.value = 1.0e6 * Number(inTrim.substr(0, inTrim.length-1));
+  } else {
+    output.value = Number(inTrim);
+  }
+
+  if (inTrim.length === 0 || isNaN(output.value) || output.value < 0.0) {
+    output.value = NaN;
+    output.isValid = false;
+  } else {
+    output.isValid = true;
+  }
+
+  return output;
+}
+
+// Parser for ratio values, which must be on the range (0.0, 1.0).
+function parseRatio(inString) {
+  var output = new ParsedValue(0.0, false);
+  var inTrim = trimString(inString);
+  
+  output.value = Number(inTrim);
+  if (inTrim.length === 0 || isNaN(output.value) || 
+      output.value < 1.0e-9 || output.value > (1.0 - 1.0e-9)) {
+    output.value = NaN;
+    output.isValid = false;
+  } else {
+    output.isValid = true;
+  }
+  
+  return output;
+}
+
+// Parser for tolerance values, which must be on the range [0.0, 100.0).
+function parseTolerance(inString) {
+  var output = new ParsedValue(0.0, false);
+  var inTrim = trimString(inString);
+  
+  output.value = Number(inTrim);
+  if (inTrim.length === 0 || isNaN(output.value) || 
+      output.value < 0.0 || output.value > (100.0 - 1.0e-7)) {
+    output.value = NaN;
+    output.isValid = false;
+  } else {
+    output.isValid = true;
+  }
+  
+  return output;
+}
+
 // Parses user input, solves for resistance values most closely
 // meeting user's divider specification, and outputs results
 // or error messages.
 function solveDivider() {
-  // Parse & validate desired divider ratio input.
-  var ratioString = trimString(document.getElementById("dividerRatio").value);
-  var targetRatio = Number(ratioString);
+  // Store all user settings in inputSettings
+  var inputSettings = new Settings(0.5, ratioEnum.NOM, 0.49, 0.51, 0.0, seriesEnum.E24E96, 0.0, 20.0e6);
+  // Reuse parserOutput for return value from parser functions
+  var parserOutput = new ParsedValue(0.0, false);
 
-  if (ratioString.length == 0 || isNaN(targetRatio) ||
-      targetRatio < 1.0e-9 || targetRatio > (1.0 - 1.0e-9)) {
+  // Figure out whether to use E24 values, E96 values, or both.
+  if (document.getElementById("resSeriesE24").checked) {
+    inputSettings.resSeries = seriesEnum.E24;
+  } else if (document.getElementById("resSeriesE96").checked) {
+    inputSettings.resSeries = seriesEnum.E96;
+  } else {
+    inputSettings.resSeries = seriesEnum.E24E96;
+  }
+
+  // Fill in resArray based on selected resistor series
+  initialize_resArray(inputSettings.resSeries);
+
+  // Parse & validate desired divider ratio input.
+  parserOutput = parseRatio(document.getElementById("dividerRatio").value);
+  if (parserOutput.isValid === true) {
+    inputSettings.targetRatio = parserOutput.value;
+    // Set a range on acceptable ratios to limit the number of candidate
+    // divider solutions.
+    inputSettings.ratioThresholdLow = Math.max(1.0e-9, inputSettings.targetRatio-0.01);
+    inputSettings.ratioThresholdHigh = Math.min(inputSettings.targetRatio+0.01, 1.0 - 1.0e-9);
+  } else {
     document.getElementById("resultsTable").innerHTML =
 	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Divider Ratio must be a number on the range (0.0, 1.0)." +
+    "Target Divider Ratio must be a number on the range (0.0, 1.0)." +
 	  "</td></tr>";
     return;
   }
 
-  // Only keep candidate solutions that are near the target ratio.
-  var ratioThresholdLow = Math.max(1.0e-9, targetRatio-0.01);
-  var ratioThresholdHigh = Math.min(targetRatio+0.01, 1.0 - 1.0e-9);
-
   // Figure out whether the target ratio is a minimum, maximum, or nominal ratio.
-  var ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
-  var ratioType = ratioEnum.NOM;
-
   if (document.getElementById("ratioTypeMin").checked) {
-    ratioType = ratioEnum.MIN;
+    inputSettings.ratioType = ratioEnum.MIN;
   } else if (document.getElementById("ratioTypeMax").checked) {
-    ratioType = ratioEnum.MAX;
+    inputSettings.ratioType = ratioEnum.MAX;
+  } else {
+    inputSettings.ratioType = ratioEnum.NOM;
   }
 
   // Parse & validate resistor tolerance input.
-  var tolString = trimString(document.getElementById("resTolerance").value);
-  var resTolerance = Number(tolString);
-
-  if (tolString.length == 0 ||  isNaN(resTolerance) ||
-      resTolerance < 0.0 || resTolerance > (100.0 - 1.0e-7)) {
+  parserOutput = parseTolerance(document.getElementById("resTolerance").value);
+  if (parserOutput.isValid === true) {
+    inputSettings.resTolerance = parserOutput.value;
+  } else {
     document.getElementById("resultsTable").innerHTML =
 	  "<tr><td><b>Input Error:</b>&#x2000;" +
     "Resistor tolerance must be a number on the range [0.0, 100.0)." +
 	  "</td></tr>";
     return;
   }
-
-  // Use resTolerance to create ratio conversion constants for Min and Max
-  // tolerance cases.
-  var tolAug = 1.0 + resTolerance/100.0;
-  var tolDim = 1.0 - resTolerance/100.0;
-
-  var lowToUpRatioNom = (1.0-targetRatio)/targetRatio;
-  var lowToUpRatioMin = tolDim * lowToUpRatioNom / tolAug;
-  var lowToUpRatioMax = tolAug * lowToUpRatioNom / tolDim;
-  var upToLowRatioNom = targetRatio/(1.0-targetRatio);
-  var upToLowRatioMin = tolAug * upToLowRatioNom / tolDim;
-  var upToLowRatioMax = tolDim * upToLowRatioNom / tolAug;
-
-  // Figure out whether to use E24 values, E96 values, or both.
-  var valEnum = Object.freeze({E24:1, E96:2, E24E96:3});
-  var valType = valEnum.E24E96;
-
-  if (document.getElementById("valTypeE24").checked) {
-    valType = valEnum.E24;
-  } else if (document.getElementById("valTypeE96").checked) {
-    valType = valEnum.E96;
-  }
-
-  // Create master array of all valid resistance values.
-  resArray = [];
-  var jMult;
-  var jVal;
-
-  switch (valType) {
-  case valEnum.E24:
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      for (jVal = 0; jVal < E24.length; jVal++) {
-        resArray.push(multipliers[jMult]*E24[jVal]);
-      }
-    }
-    break;
-  case valEnum.E96:
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      for (jVal = 0; jVal < E96.length; jVal++) {
-        resArray.push(multipliers[jMult]*E96[jVal]);
-      }
-    }
-    break;
-  default:
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      for (jVal = 0; jVal < E24E96.length; jVal++) {
-        resArray.push(multipliers[jMult]*E24E96[jVal]);
-      }
-    }
-    break;
-  }
-
+  
   // Parse & validate minimum divider string resistance input.
-  var minString = trimString(document.getElementById("minStringResistance").value);
-  var lastChar = '';
-  var minStringRes;
-
-  if (minString.length > 0) {
-    lastChar = minString.charAt(minString.length-1);
-  }
-
-  if (lastChar == 'k' && minString.length > 1) {
-    minStringRes = 1.0e3 * Number(minString.substr(0, minString.length-1));
-  } else if (lastChar == 'M' && minString.length > 1) {
-    minStringRes = 1.0e6 * Number(minString.substr(0, minString.length-1));
+  parserOutput = parseResistance(document.getElementById("minStringResistance").value);
+  if (parserOutput.isValid === true) {
+    inputSettings.minStringRes = parserOutput.value;
   } else {
-    minStringRes = Number(minString);
-  }
-
-  if (minString.length == 0 || isNaN(minStringRes) ||
-      minStringRes < 0.0) {
     document.getElementById("resultsTable").innerHTML =
 	  "<tr><td><b>Input Error:</b>&#x2000;" +
     "Min String Resistance must be a nonnegative number.<br/>" +
@@ -576,10 +915,10 @@ function solveDivider() {
     return;
   }
 
-  if (minStringRes > resArray[resArray.length-1]) {
+  if (inputSettings.minStringRes > resArray[resArray.length-1]) {
     document.getElementById("resultsTable").innerHTML =
     "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Min String Resistance was set to " + resValToString(minStringRes, 3) +
+    "Min String Resistance was set to " + resValToString(inputSettings.minStringRes, 3) +
     ",<br/> which will yield no results. The largest resistor value in this " +
     "program is " + resValToString(resArray[resArray.length-1], 3) + "." +
     "</td></tr>";
@@ -587,24 +926,10 @@ function solveDivider() {
   }
 
   // Parse & validate maximum divider string resistance input.
-  var maxString = trimString(document.getElementById("maxStringResistance").value);
-  lastChar = '';
-  var maxStringRes;
-
-  if (maxString.length > 0) {
-    lastChar = maxString.charAt(maxString.length-1);
-  }
-
-  if (lastChar == 'k' && maxString.length > 1) {
-    maxStringRes = 1.0e3 * Number(maxString.substr(0, maxString.length-1));
-  } else if (lastChar == 'M' && maxString.length > 1) {
-    maxStringRes = 1.0e6 * Number(maxString.substr(0, maxString.length-1));
+  parserOutput = parseResistance(document.getElementById("maxStringResistance").value);
+  if (parserOutput.isValid === true) {
+    inputSettings.maxStringRes = parserOutput.value;
   } else {
-    maxStringRes = Number(maxString);
-  }
-
-  if (maxString.length == 0 || isNaN(maxStringRes) ||
-      maxStringRes < 0.0) {
     document.getElementById("resultsTable").innerHTML =
 	  "<tr><td><b>Input Error:</b>&#x2000;" +
     "Max String Resistance must be a nonnegative number.<br/>" +
@@ -613,17 +938,17 @@ function solveDivider() {
     return;
   }
 
-  if (maxStringRes < resArray[0]) {
+  if (inputSettings.maxStringRes < resArray[0]) {
     document.getElementById("resultsTable").innerHTML =
     "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Max String Resistance was set to " + resValToString(maxStringRes, 3) +
+    "Max String Resistance was set to " + resValToString(inputSettings.maxStringRes, 3) +
     ",<br/> which will yield no results. The smallest resistor value in this " +
     "program is " + resValToString(resArray[0], 3) + "." +
     "</td></tr>";
     return;
   }
 
-  if (maxStringRes <= minStringRes) {
+  if (inputSettings.maxStringRes <= inputSettings.minStringRes) {
     document.getElementById("resultsTable").innerHTML =
 	  "<tr><td><b>Input Error:</b>&#x2000;" +
     "Max String Resistance must be larger than Min String Resistance." +
@@ -631,231 +956,32 @@ function solveDivider() {
     return;
   }
 
-  // Each candidate divider solution is stored as a Candidate object
-  // in the candidates array.
-  var candidates = [];
-  var minRatio;
-  var nomRatio;
-  var maxRatio;
-
-  for (var jRes = 0; jRes < resArray.length; jRes++) {
-    // Test this resVal as a lower resistor.
-    var resLower = resArray[jRes];
-    var optUpper;
-
-    switch (ratioType) {
-    case ratioEnum.MIN:
-      optUpper = lowToUpRatioMin * resLower;
-      break;
-    case ratioEnum.MAX:
-      optUpper = lowToUpRatioMax * resLower;
-      break;
-    default:
-      optUpper = lowToUpRatioNom * resLower;
-      break;
-    }
-
-    if ((resLower+optUpper) >= minStringRes && (resLower+optUpper) <= maxStringRes) {
-      var nearUpper = resArray[findNearest(optUpper)];
-      minRatio = (tolDim*resLower) / ((tolDim*resLower)+(tolAug*nearUpper));
-      nomRatio = resLower / (resLower+nearUpper);
-      maxRatio = (tolAug*resLower) / ((tolAug*resLower)+(tolDim*nearUpper));
-
-      switch (ratioType) {
-      case ratioEnum.MIN:
-        if (minRatio >= ratioThresholdLow && minRatio <= ratioThresholdHigh) {
-          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, minRatio-targetRatio));
-        }
-        break;
-      case ratioEnum.MAX:
-        if (maxRatio >= ratioThresholdLow && maxRatio <= ratioThresholdHigh) {
-          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, maxRatio-targetRatio));
-        }
-        break;
-      default:
-        if (nomRatio >= ratioThresholdLow && nomRatio <= ratioThresholdHigh) {
-          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, nomRatio-targetRatio));
-        }
-        break;
-      }
-    }
-
-    // Test this resVal as an upper resistor.
-    var resUpper = resArray[jRes];
-    var optLower;
-
-    switch (ratioType) {
-    case ratioEnum.MIN:
-      optLower = upToLowRatioMin * resUpper;
-      break;
-    case ratioEnum.MAX:
-      optLower = upToLowRatioMax * resUpper;
-      break;
-    default:
-      optLower = upToLowRatioNom * resUpper;
-      break;
-    }
-
-    if ((resUpper+optLower) >= minStringRes && (resUpper+optLower) <= maxStringRes) {
-      var nearLower = resArray[findNearest(optLower)];
-      minRatio = (tolDim*nearLower) / ((tolDim*nearLower)+(tolAug*resUpper));
-      nomRatio = nearLower / (nearLower+resUpper);
-      maxRatio = (tolAug*nearLower) / ((tolAug*nearLower)+(tolDim*resUpper));
-
-      switch (ratioType) {
-      case ratioEnum.MIN:
-        if (minRatio >= ratioThresholdLow && minRatio <= ratioThresholdHigh) {
-          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, minRatio-targetRatio));
-        }
-        break;
-      case ratioEnum.MAX:
-        if (maxRatio >= ratioThresholdLow && maxRatio <= ratioThresholdHigh) {
-          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, maxRatio-targetRatio));
-        }
-        break;
-      default:
-        if (nomRatio >= ratioThresholdLow && nomRatio <= ratioThresholdHigh) {
-          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, nomRatio-targetRatio));
-        }
-        break;
-      }
-    }
+  if (inputSettings.maxStringRes <= 0.5 * inputSettings.minUpperRes) {
+    document.getElementById("resultsTable").innerHTML =
+	  "<tr><td><b>Input Error:</b>&#x2000;" +
+    "Max String Resistance must be larger than 2 &#x2022; " +
+    "Min Upper1,2 Resistance.</td></tr>";
+    return;
   }
 
-  // Assemble the contents of resultsTable in this string.
-  // Multiple DOM accesses slow down the program.
-  var tableString = "";
-
-  if (candidates.length <= 0) {
-    // Show a message detailing all relevant settings if no results were found.
-    tableString = "<tr><td class=\"groupCol\" colspan=\"2\"><b>No Results Found</b></tr>" +
-                  "<tr><td class=\"paramLabel\">Target ";
-
-    switch (ratioType) {
-    case ratioEnum.MIN:
-      tableString += "minimum";
-      break;
-    case ratioEnum.MAX:
-      tableString += "maximum";
-      break;
-    default:
-      tableString += "nominal";
-      break;
-    }
-
-    tableString += " divider ratio</td><td>" + targetRatio.toPrecision(6) + "</td></tr>" +
-                   "<tr class=\"shadedRow\"><td class=\"paramLabel\">Ratio search range</td><td>[&nbsp;" + ratioThresholdLow.toPrecision(6) + ",&#x2000;" + ratioThresholdHigh.toPrecision(6) + "&nbsp;]</td></tr>" +
-                   "<tr><td class=\"paramLabel\">Resistor tolerance</td><td>&#x00B1;" + resTolerance.toPrecision(4) + "%</td></tr>" +
-                   "<tr class=\"shadedRow\"><td class=\"paramLabel\">Minimum string resistance</td><td>" + resValToString(minStringRes, 6) + "</td></tr>" +
-                   "<tr><td class=\"paramLabel\">Maximum string resistance</td><td>" + resValToString(maxStringRes, 6) + "</td></tr>" +
-                   "<tr class=\"shadedRow\"><td class=\"groupCol\" colspan=\"2\">EIA ";
-
-    switch (valType) {
-    case valEnum.E24:
-      tableString += "E24";
-      break;
-    case valEnum.E96:
-      tableString += "E96";
-      break;
-    default:
-      tableString += "E24 and E96";
-      break;
-    }
-
-    tableString += " series resistor values</td></tr>";
-  } else {
-    // Display the header of the results table.
-    var lastColHeader;
-
-    switch (ratioType) {
-    case ratioEnum.MIN:
-      lastColHeader = "Min&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
-      break;
-    case ratioEnum.MAX:
-      lastColHeader = "Max&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
-      break;
-    default:
-      lastColHeader = "Nom&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
-      break;
-    }
-
-    tableString = "<tr><th>Group</th><th>Upper</th><th>Lower</th><th>String</th><th>Min&nbsp;Ratio</th><th>Nom&nbsp;Ratio</th><th>Max&nbsp;Ratio</th><th>" +
-      lastColHeader + "</th></tr>";
-
-    // Sort candidates by closeness to target divider ratio.
-    candidates.sort(function(a,b){return (a.absDiff - b.absDiff);});
-
-    // Group candidates with similar absolute difference from target divider ratio.
-    var shadeRow = false;
-    var groupNumber = 1;
-
-    while (candidates.length > 0 && groupNumber <= 20) {
-      var groupLength = 1;
-      while (groupLength < candidates.length && Math.abs(candidates[groupLength].diff-candidates[0].diff) < 1e-10) {
-        groupLength++;
-      }
-      var candidateGroup = candidates.splice(0, groupLength);
-
-      // Store unique elements of candidateGroup in resultsGroup
-      candidateGroup.sort(function(a,b){return (a.resLower - b.resLower);});
-      var resultsGroup = [];
-
-      while (candidateGroup.length > 0) {
-        // Find subgroup with same resLower value.
-        var subLength = 1;
-        while (subLength < candidateGroup.length && Math.abs(candidateGroup[0].resLower - candidateGroup[subLength].resLower) < 1e-8 * candidateGroup[subLength].resLower) {
-          subLength++;
-        }
-        var subGroup = candidateGroup.splice(0, subLength);
-
-        // Store non-duplicate entries of subGroup in resultsGroup
-        if (subGroup.length == 1) {
-          resultsGroup.push(subGroup[0]);
-        } else if (subGroup.length > 1) {
-          subGroup.sort(function(a,b){return (a.resUpper - b.resUpper);});
-          resultsGroup.push(subGroup[0]);
-
-          for (var testIndx = 1; testIndx < subGroup.length; testIndx++) {
-            if (Math.abs(subGroup[testIndx].resUpper - subGroup[testIndx-1].resUpper) >= 1e-8 * subGroup[testIndx].resUpper) {
-              resultsGroup.push(subGroup[testIndx]);
-            }
-          }
-        }
-      }
-
-      if (groupNumber > 1) {
-        // Put a gray divider row between groups.
-        shadeRow = false;
-        tableString += "<tr class=\"grayRow\"><td colspan=\"8\"/></tr>";
-      }
-
-      // Display the results in this group.
-      for (var jMember = 0; jMember < resultsGroup.length; jMember++) {
-        if (shadeRow) {
-          tableString += "<tr class=\"shadedRow\">";
-          shadeRow = false;
-        } else {
-          tableString += "<tr class=\"normalRow\">";
-          shadeRow = true;
-        }
-
-        tableString += "<td class=\"groupCol\">" + groupNumber +
-        "</td><td>" + resValToString(resultsGroup[jMember].resUpper, 3) +
-        "</td><td>" + resValToString(resultsGroup[jMember].resLower, 3) +
-        "</td><td>" + resValToString(resultsGroup[jMember].resString, 6) +
-        "</td><td>" + resultsGroup[jMember].minRatio.toPrecision(6) +
-        "</td><td>" + resultsGroup[jMember].nomRatio.toPrecision(6) +
-        "</td><td>" + resultsGroup[jMember].maxRatio.toPrecision(6) +
-        "</td><td class=\"diffCol\">" + resultsGroup[jMember].diff.toExponential(4) +
-        "</td></tr>";
-      }
-
-      groupNumber++;
-    }
+  // Store potential voltage divider solutions in the candidates
+  // array.
+  populate_candidates(inputSettings);
+  
+  if (candidates.length < 1) {
+    // No results were found.
+    // Show a message in the results table that details all of
+    // the user input settings.
+    displayDiagnostics(inputSettings);
+    return;
   }
 
-  document.getElementById("resultsTable").innerHTML = tableString;
-}
+  // There are results. Sort them into groups with similar difference
+  // from target ratio and display the best ones.
+  sortAndDisplayResults(inputSettings) ;
+
+  return;
+} // solveDivider()
 </script>
 
 </body>
