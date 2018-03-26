@@ -491,7 +491,7 @@ function initialize_resArray(resSeries) {
 
 // Returns the index in resArray of the value nearest to resVal.
 function findNearest(resVal) {
-  // Performa a binary search; resArray must be sorted in ascending order.
+  // Perform a binary search; resArray must be sorted in ascending order.
   var upperBound = resArray.length-1;
   var lowerBound = 0;
   var intvlLen = upperBound-lowerBound+1;
@@ -624,6 +624,7 @@ function populate_candidates(settings) {
     }
   }
 
+  resArray = [];
   return;
 }
 
@@ -734,7 +735,10 @@ function sortAndDisplayResults(settings) {
           }
         }
       }
+      
+      subGroup = [];
     }
+    candidateGroup = [];
 
     if (groupNumber > 1) {
       // Put a gray divider row between groups.
@@ -764,8 +768,10 @@ function sortAndDisplayResults(settings) {
       "</td></tr>";
     }
 
+    resultsGroup = [];
     groupNumber++;
   }
+  candidates = [];
 
   document.getElementById("resultsTable").innerHTML = tableString;
   return;
@@ -871,8 +877,8 @@ function solveDivider() {
     inputSettings.targetRatio = parserOutput.value;
     // Set a range on acceptable ratios to limit the number of candidate
     // divider solutions.
-    inputSettings.ratioThresholdLow = Math.max(1.0e-9, inputSettings.targetRatio-0.01);
-    inputSettings.ratioThresholdHigh = Math.min(inputSettings.targetRatio+0.01, 1.0 - 1.0e-9);
+    inputSettings.ratioThresholdLow = Math.max(1.0e-9, inputSettings.targetRatio-0.005);
+    inputSettings.ratioThresholdHigh = Math.min(inputSettings.targetRatio+0.005, 1.0 - 1.0e-9);
   } else {
     document.getElementById("resultsTable").innerHTML =
 	  "<tr><td><b>Input Error:</b>&#x2000;" +
