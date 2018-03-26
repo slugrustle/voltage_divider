@@ -962,14 +962,6 @@ function solveDivider() {
     return;
   }
 
-  if (inputSettings.maxStringRes <= 0.5 * inputSettings.minUpperRes) {
-    document.getElementById("resultsTable").innerHTML =
-	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Max String Resistance must be larger than 2 &#x2022; " +
-    "Min Upper1,2 Resistance.</td></tr>";
-    return;
-  }
-
   // Store potential voltage divider solutions in the candidates
   // array.
   populate_candidates(inputSettings);
