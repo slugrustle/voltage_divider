@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en"> 
+<head>
+<meta charset="utf-8"/>
 <!--
 Voltage Divider Calculator v1.4 - Finds voltage dividers nearest a
 target ratio using real-world resistor values.
@@ -135,7 +137,6 @@ express Statement of Purpose.
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
 -->
-<head>
 <title>Voltage Divider Calculator</title>
 <style>
 #inputTable {
@@ -349,23 +350,14 @@ function trimString(inString) {
 }
 
 // Creates human-readable resistance value strings from
-// resistance values in Ohms. Values below 1 micro Ohm
-// display as 0Ω.
+// resistance values in Ohms.
 function resValToString(resVal, precision) {
-  if (resVal >= 1.0e9) {
-    return ((1.0e-9*resVal).toPrecision(precision) + "G\u03A9");
-  } else if (resVal >= 1.0e6) {
-    return ((1.0e-6*resVal).toPrecision(precision) + "M\u03A9");
+  if (resVal >= 1.0e6) {
+    return (1.0e-6*resVal).toPrecision(precision) + "M\u03A9";
   } else if (resVal >= 1.0e3) {
-    return ((1.0e-3*resVal).toPrecision(precision) + "k\u03A9");
-  } else if (resVal >= 1.0) {
-    return ((resVal).toPrecision(precision) + "\u03A9");
-  } else if (resVal >= 1.0e-3) {
-    return ((1.0e3*resVal).toPrecision(precision) + "m\u03A9");
-  } else if (resVal >= 1.0e-6) {
-    return ((1.0e6*resVal).toPrecision(precision) + "\u03BC\u03A9");
+    return (1.0e-3*resVal).toPrecision(precision) + "k\u03A9";
   } else {
-    return "0\u03A9";
+    return resVal.toPrecision(precision) + "\u03A9";
   }
 }
 
@@ -514,13 +506,9 @@ function findNearest(resVal) {
 }
 
 // Constructor for Candidate objects.
-function Candidate(resUpper, resLower, minRatio, nomRatio, maxRatio, diff) {
+function Candidate(resUpper, resLower, diff) {
   this.resUpper = resUpper;
   this.resLower = resLower;
-  this.resString = resUpper + resLower;
-  this.minRatio = minRatio;
-  this.nomRatio = nomRatio;
-  this.maxRatio = maxRatio;
   this.diff = diff;
   this.absDiff = Math.abs(diff);
 }
@@ -532,95 +520,211 @@ var candidates = [];
 // Find potential voltage divider solutions near the target ratio
 // that satisfy all constraints, and store them in candidates.
 function populate_candidates(settings) {
-  candidates = [];
-  var jRes;
-  var minRatio;
-  var nomRatio;
-  var maxRatio;
-
   // Use resTolerance to create ratio conversion constants from lower
   // to upper resistors and vice versa
   var tolAug = 1.0 + settings.resTolerance/100.0;
   var tolDim = 1.0 - settings.resTolerance/100.0;
 
   var lowToUpRatio;
+  var lowToUpRatioMin;
+  var lowToUpRatioMax;
   var upToLowRatio;
+  var upToLowRatioMin;
+  var upToLowRatioMax;
 
   switch (settings.ratioType) {
   case ratioEnum.MIN:
-    lowToUpRatio = tolDim * ((1.0-settings.targetRatio)/settings.targetRatio) / tolAug;
-    upToLowRatio = tolAug * (settings.targetRatio/(1.0-settings.targetRatio)) / tolDim;
+    lowToUpRatio = tolDim * (1.0-settings.targetRatio) / (settings.targetRatio * tolAug);
+    lowToUpRatioMin = tolDim * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * tolAug);
+    lowToUpRatioMax = tolDim * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * tolAug);
     break;
   case ratioEnum.MAX:
-    lowToUpRatio = tolAug * ((1.0-settings.targetRatio)/settings.targetRatio) / tolDim;
-    upToLowRatio = tolDim * (settings.targetRatio/(1.0-settings.targetRatio)) / tolAug;
+    lowToUpRatio = tolAug * (1.0-settings.targetRatio) / (settings.targetRatio * tolDim);
+    lowToUpRatioMin = tolAug * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * tolDim);
+    lowToUpRatioMax = tolAug * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * tolDim);
     break;
   default:
-    lowToUpRatio = ((1.0-settings.targetRatio)/settings.targetRatio);
-    upToLowRatio = (settings.targetRatio/(1.0-settings.targetRatio));
+    lowToUpRatio = (1.0-settings.targetRatio) / settings.targetRatio;
+    lowToUpRatioMin = (1.0-settings.ratioThresholdHigh) / settings.ratioThresholdHigh;
+    lowToUpRatioMax = (1.0-settings.ratioThresholdLow) / settings.ratioThresholdLow;
     break;
   }
 
-  for (jRes = 0; jRes < resArray.length; jRes++) {
-    // Test this resVal as a lower resistor.
-    var resLower = resArray[jRes];
-    var optUpper = lowToUpRatio * resLower;
+  upToLowRatio = 1.0 / lowToUpRatio;
+  upToLowRatioMin = 1.0 / lowToUpRatioMax;
+  upToLowRatioMax = 1.0 / lowToUpRatioMin;
 
-    if ((resLower+optUpper) >= settings.minStringRes &&
-        (resLower+optUpper) <= settings.maxStringRes) {
-      var nearUpper = resArray[findNearest(optUpper)];
-      minRatio = (tolDim*resLower) / ((tolDim*resLower)+(tolAug*nearUpper));
-      nomRatio = resLower / (resLower+nearUpper);
-      maxRatio = (tolAug*resLower) / ((tolAug*resLower)+(tolDim*nearUpper));
+  // Bound the candidate search range based on min and max
+  // string resistance.
+  var lowerStartRes = settings.minStringRes / (1.0 + lowToUpRatioMax);
+  var lowerStartIndex = findNearest(lowerStartRes);
+  while (lowerStartIndex > 0 && resArray[lowerStartIndex] > lowerStartRes) {
+    lowerStartIndex--;
+  }
 
-      switch (settings.ratioType) {
-      case ratioEnum.MIN:
-        if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
-          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, minRatio-settings.targetRatio));
+  var lowerEndRes = settings.maxStringRes / (1.0 + lowToUpRatioMin);
+  var lowerEndIndex = Math.max(1, findNearest(lowerEndRes));
+  while (lowerEndIndex < resArray.length && resArray[lowerEndIndex-1] < lowerEndRes) {
+    lowerEndIndex++;
+  }
+
+  var upperStartRes = settings.minStringRes / (1.0 + upToLowRatioMax);
+  var upperStartIndex = findNearest(upperStartRes);
+  while (upperStartIndex > 0 && 
+         resArray[upperStartIndex] > upperStartRes) {
+    upperStartIndex--;
+  }
+
+  var upperEndRes = settings.maxStringRes / (1.0 + upToLowRatioMin);
+  var upperEndIndex = Math.max(1, findNearest(upperEndRes));
+  while (upperEndIndex < resArray.length && 
+         resArray[upperEndIndex-1] < upperEndRes) {
+    upperEndIndex++;
+  }
+
+  candidates = [];
+  var jRes;
+  var minRatio;
+  var nomRatio;
+  var maxRatio;
+  var stringRes;
+  var dimLower;
+  var augLower;
+
+  var resLower;
+  var nearUpper;
+
+  switch (settings.ratioType) {
+  case ratioEnum.MIN:
+    for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
+      // Test this resVal as a lower resistor.
+      resLower = resArray[jRes];
+
+      if ((1.0 + lowToUpRatioMax) * resLower >= settings.minStringRes && 
+          (1.0 + lowToUpRatioMin) * resLower <= settings.maxStringRes) {
+        nearUpper = resArray[findNearest(lowToUpRatio * resLower)];
+        stringRes = resLower + nearUpper;
+
+        if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+          dimLower = tolDim * resLower;
+          minRatio = dimLower / (dimLower + tolAug * nearUpper);
+        
+          if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
+            candidates.push(new Candidate(nearUpper, resLower, minRatio-settings.targetRatio));
+          }
         }
-        break;
-      case ratioEnum.MAX:
-        if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
-          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, maxRatio-settings.targetRatio));
-        }
-        break;
-      default:
-        if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
-          candidates.push(new Candidate(nearUpper, resLower, minRatio, nomRatio, maxRatio, nomRatio-settings.targetRatio));
-        }
-        break;
       }
     }
+    break;
+  case ratioEnum.MAX:
+    for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
+      // Test this resVal as a lower resistor.
+      resLower = resArray[jRes];
 
-    // Test this resVal as an upper resistor.
-    var resUpper = resArray[jRes];
-    var optLower = upToLowRatio * resUpper;
+      if ((1.0 + lowToUpRatioMax) * resLower >= settings.minStringRes && 
+          (1.0 + lowToUpRatioMin) * resLower <= settings.maxStringRes) {
+        nearUpper = resArray[findNearest(lowToUpRatio * resLower)];
+        stringRes = resLower + nearUpper;
 
-    if ((resUpper+optLower) >= settings.minStringRes &&
-        (resUpper+optLower) <= settings.maxStringRes) {
-      var nearLower = resArray[findNearest(optLower)];
-      minRatio = (tolDim*nearLower) / ((tolDim*nearLower)+(tolAug*resUpper));
-      nomRatio = nearLower / (nearLower+resUpper);
-      maxRatio = (tolAug*nearLower) / ((tolAug*nearLower)+(tolDim*resUpper));
-
-      switch (settings.ratioType) {
-      case ratioEnum.MIN:
-        if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
-          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, minRatio-settings.targetRatio));
+        if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+          augLower = tolAug * resLower;
+          maxRatio = augLower / (augLower + tolDim * nearUpper);
+        
+          if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
+            candidates.push(new Candidate(nearUpper, resLower, maxRatio-settings.targetRatio));
+          }
         }
-        break;
-      case ratioEnum.MAX:
-        if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
-          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, maxRatio-settings.targetRatio));
-        }
-        break;
-      default:
-        if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
-          candidates.push(new Candidate(resUpper, nearLower, minRatio, nomRatio, maxRatio, nomRatio-settings.targetRatio));
-        }
-        break;
       }
     }
+    break;
+  default:
+    for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
+      // Test this resVal as a lower resistor.
+      resLower = resArray[jRes];
+
+      if ((1.0 + lowToUpRatioMax) * resLower >= settings.minStringRes && 
+          (1.0 + lowToUpRatioMin) * resLower <= settings.maxStringRes) {
+        nearUpper = resArray[findNearest(lowToUpRatio * resLower)];
+        stringRes = resLower + nearUpper;
+
+        if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+          nomRatio = resLower / stringRes;
+        
+          if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
+            candidates.push(new Candidate(nearUpper, resLower, nomRatio-settings.targetRatio));
+          }
+        }
+      }
+    }
+    break;
+  }
+
+  var resUpper;
+  var nearLower;
+
+  switch (settings.ratioType) {
+  case ratioEnum.MIN:
+    for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
+      // Test this resVal as an upper resistor.
+      resUpper = resArray[jRes];
+
+      if ((1.0 + upToLowRatioMax) * resUpper >= settings.minStringRes && 
+          (1.0 + upToLowRatioMin) * resUpper <= settings.maxStringRes) {
+        nearLower = resArray[findNearest(upToLowRatio * resUpper)];
+        stringRes = nearLower + resUpper;
+
+        if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+          dimLower = tolDim*nearLower;
+          minRatio = dimLower / (dimLower + tolAug * resUpper);
+
+          if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
+            candidates.push(new Candidate(resUpper, nearLower, minRatio-settings.targetRatio));
+          }
+        }
+      }
+    }
+    break;
+  case ratioEnum.MAX:
+    for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
+      // Test this resVal as an upper resistor.
+      resUpper = resArray[jRes];
+
+      if ((1.0 + upToLowRatioMax) * resUpper >= settings.minStringRes && 
+          (1.0 + upToLowRatioMin) * resUpper <= settings.maxStringRes) {
+        nearLower = resArray[findNearest(upToLowRatio * resUpper)];
+        stringRes = nearLower + resUpper;
+
+        if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+          augLower = tolAug * nearLower;
+          maxRatio = augLower / (augLower + tolDim * resUpper);
+
+          if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
+            candidates.push(new Candidate(resUpper, nearLower, maxRatio-settings.targetRatio));
+          }
+        }
+      }
+    }
+    break;
+  default:
+    for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
+      // Test this resVal as an upper resistor.
+      resUpper = resArray[jRes];
+
+      if ((1.0 + upToLowRatioMax) * resUpper >= settings.minStringRes && 
+          (1.0 + upToLowRatioMin) * resUpper <= settings.maxStringRes) {
+        nearLower = resArray[findNearest(upToLowRatio * resUpper)];
+        stringRes = nearLower + resUpper;
+
+        if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+          nomRatio = nearLower / stringRes;
+
+          if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
+            candidates.push(new Candidate(resUpper, nearLower, nomRatio-settings.targetRatio));
+          }
+        }
+      }
+    }
+    break;
   }
 
   resArray = [];
@@ -673,6 +777,9 @@ function displayDiagnostics(settings) {
 // difference from the target ratio, collects best matches into
 // groups, and displays them.
 function sortAndDisplayResults(settings) {
+
+  var tolAug = 1.0 + settings.resTolerance/100.0;
+  var tolDim = 1.0 - settings.resTolerance/100.0;
 
   var lastColHeader;
   switch (settings.ratioType) {
@@ -747,6 +854,12 @@ function sortAndDisplayResults(settings) {
 
     // Display the results in this group.
     var jMember;
+    var thisResult;
+    var stringRes;
+    var minRatio;
+    var nomRatio;
+    var maxRatio;
+
     for (jMember = 0; jMember < resultsGroup.length; jMember++) {
       if (shadeRow) {
         tableString += "<tr class=\"shadedRow\">";
@@ -756,14 +869,20 @@ function sortAndDisplayResults(settings) {
         shadeRow = true;
       }
 
+      thisResult = resultsGroup[jMember];
+      stringRes = thisResult.resUpper + thisResult.resLower;
+      minRatio = (tolDim*thisResult.resLower) / ((tolDim*thisResult.resLower)+(tolAug*thisResult.resUpper));
+      nomRatio = thisResult.resLower / stringRes;
+      maxRatio = (tolAug*thisResult.resLower) / ((tolAug*thisResult.resLower)+(tolDim*thisResult.resUpper));
+
       tableString += "<td class=\"groupCol\">" + groupNumber +
-      "</td><td>" + resValToString(resultsGroup[jMember].resUpper, 3) +
-      "</td><td>" + resValToString(resultsGroup[jMember].resLower, 3) +
-      "</td><td>" + resValToString(resultsGroup[jMember].resString, 6) +
-      "</td><td>" + resultsGroup[jMember].minRatio.toPrecision(6) +
-      "</td><td>" + resultsGroup[jMember].nomRatio.toPrecision(6) +
-      "</td><td>" + resultsGroup[jMember].maxRatio.toPrecision(6) +
-      "</td><td class=\"diffCol\">" + resultsGroup[jMember].diff.toExponential(4) +
+      "</td><td>" + resValToString(thisResult.resUpper, 3) +
+      "</td><td>" + resValToString(thisResult.resLower, 3) +
+      "</td><td>" + resValToString(stringRes, 6) +
+      "</td><td>" + minRatio.toPrecision(6) +
+      "</td><td>" + nomRatio.toPrecision(6) +
+      "</td><td>" + maxRatio.toPrecision(6) +
+      "</td><td class=\"diffCol\">" + thisResult.diff.toExponential(4) +
       "</td></tr>";
     }
 
