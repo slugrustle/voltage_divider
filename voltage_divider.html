@@ -530,7 +530,7 @@ function ShowE24() {
   for (jMult = 0; jMult < multipliers.length; jMult++) {
     tableString += '<tr class="shadedRow"><td style="text-align:center; font-weight: bold">';
     tableString += resistanceString(multipliers[jMult]) + ' decade</td></tr>';
-    tableString += '<tr><td><div style="line-height: 1.5">';
+    tableString += '<tr><td style="line-height: 1.5">';
   
     for (jVal = 0; jVal < E24.length-1; jVal++) {
       tableString += resValToString(multipliers[jMult]*E24[jVal], 3);
@@ -542,7 +542,7 @@ function ShowE24() {
     }
   
     tableString += resValToString(multipliers[jMult]*E24[E24.length-1], 3);
-    tableString += '</div></tr></td>';
+    tableString += '</td></tr>';
   }
 
   document.getElementById("resultsTable").innerHTML = tableString;
@@ -558,7 +558,7 @@ function ShowE96() {
   for (jMult = 0; jMult < multipliers.length; jMult++) {
     tableString += '<tr class="shadedRow"><td style="text-align:center; font-weight: bold">';
     tableString += resistanceString(multipliers[jMult]) + ' decade</td></tr>';
-    tableString += '<tr><td><div style="line-height: 1.5">';
+    tableString += '<tr><td style="line-height: 1.5">';
   
     for (jVal = 0; jVal < E96.length-1; jVal++) {
       tableString += resValToString(multipliers[jMult]*E96[jVal], 3);
@@ -570,7 +570,7 @@ function ShowE96() {
     }
   
     tableString += resValToString(multipliers[jMult]*E96[E96.length-1], 3);
-    tableString += '</div></tr></td>';
+    tableString += '</td></tr>';
   }
 
   document.getElementById("resultsTable").innerHTML = tableString;
