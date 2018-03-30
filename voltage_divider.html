@@ -152,6 +152,10 @@ td.labelCol {
   text-align: right;
 }
 
+td.buttonCol {
+  text-align: center;
+}
+
 #inputTable, #explainerDiv, #resultsTable {
   width: 100%;
 }
@@ -197,7 +201,6 @@ td.paramLabel {
   text-align: right;
   width: 50%;
 }
-
 </style>
 </head>
 
@@ -229,15 +232,16 @@ td.paramLabel {
     </tr>
     <tr>
       <td class="labelCol">Resistor Value Series</td>
-      <td>
+      <td class="buttonCol">
           E24 <input type="radio" name="resSeries" id="resSeriesE24" value="min"/>
           E96 <input type="radio" name="resSeries" id="resSeriesE96" value="nom"/>
           Both <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
       </td>
-      <td>&nbsp;</td>
+      <td><a href="javascript:;" onclick="ShowE24();">Show E24</a>&#x2000;
+          <a href="javascript:;" onclick="ShowE96();">Show E96</a></td>
     </tr>
     <tr>
-      <td colspan="3" style="text-align: center;"><button onclick="solveDivider();">Solve</button></td>
+      <td class="buttonCol" colspan="3"><button onclick="solveDivider();">Solve</button></td>
     </tr>
   </table>
 
@@ -358,6 +362,18 @@ function resValToString(resVal, precision) {
     return (1.0e-3*resVal).toPrecision(precision) + "k\u03A9";
   } else {
     return resVal.toPrecision(precision) + "\u03A9";
+  }
+}
+
+// Displays human-readable resistance values in ohms,
+// kilo ohms or megohms, rounded to the nearest digit.
+function resistanceString(resistance) {
+  if (resistance >= 1.0e6) {
+    return Math.round(1.0e-6*resistance) + "M\u03A9";
+  } else if (resistance >= 1.0e3) {
+    return Math.round(1.0e-3*resistance) + "k\u03A9";
+  } else {
+    return Math.round(resistance) + "\u03A9";
   }
 }
 
@@ -503,6 +519,62 @@ function findNearest(resVal) {
   } else {
     return upperBound;
   }
+}
+
+// Display E24 series resistor values
+function ShowE24() {
+  var tableString = ''
+  var jMult;
+  var jVal;
+
+  for (jMult = 0; jMult < multipliers.length; jMult++) {
+    tableString += '<tr class="shadedRow"><td style="text-align:center; font-weight: bold">';
+    tableString += resistanceString(multipliers[jMult]) + ' decade</td></tr>';
+    tableString += '<tr><td><div style="line-height: 1.5">';
+  
+    for (jVal = 0; jVal < E24.length-1; jVal++) {
+      tableString += resValToString(multipliers[jMult]*E24[jVal], 3);
+      if ((jVal + 1) % 6 == 0) {
+        tableString += "<br/>";
+      } else {
+        tableString += '&#x2000;';
+      }
+    }
+  
+    tableString += resValToString(multipliers[jMult]*E24[E24.length-1], 3);
+    tableString += '</div></tr></td>';
+  }
+
+  document.getElementById("resultsTable").innerHTML = tableString;
+  return;
+}
+
+// Display E96 series resistor values
+function ShowE96() {
+  var tableString = ''
+  var jMult;
+  var jVal;
+
+  for (jMult = 0; jMult < multipliers.length; jMult++) {
+    tableString += '<tr class="shadedRow"><td style="text-align:center; font-weight: bold">';
+    tableString += resistanceString(multipliers[jMult]) + ' decade</td></tr>';
+    tableString += '<tr><td><div style="line-height: 1.5">';
+  
+    for (jVal = 0; jVal < E96.length-1; jVal++) {
+      tableString += resValToString(multipliers[jMult]*E96[jVal], 3);
+      if ((jVal + 1) % 8 == 0) {
+        tableString += "<br/>";
+      } else {
+        tableString += '&#x2000;';
+      }
+    }
+  
+    tableString += resValToString(multipliers[jMult]*E96[E96.length-1], 3);
+    tableString += '</div></tr></td>';
+  }
+
+  document.getElementById("resultsTable").innerHTML = tableString;
+  return;
 }
 
 // Constructor for Candidate objects.
@@ -1094,7 +1166,7 @@ function solveDivider() {
 
   // There are results. Sort them into groups with similar difference
   // from target ratio and display the best ones.
-  sortAndDisplayResults(inputSettings) ;
+  sortAndDisplayResults(inputSettings);
 
   return;
 } // solveDivider()
