@@ -210,24 +210,24 @@ td.paramLabel {
   <table id="inputTable">
     <tr>
       <td class="labelCol">Target Divider Ratio</td>
-      <td><input id="dividerRatio"/></td>
+      <td class="buttonCol"><input id="dividerRatio"/></td>
       <td>Min <input type="radio" name="ratioType" id="ratioTypeMin"/>
           Nom <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
           Max <input type="radio" name="ratioType" id="ratioTypeMax"/></td>
     </tr>
     <tr>
       <td class="labelCol">Resistor Tolerance (%)</td>
-      <td><input id="resTolerance" value="0"/></td>
+      <td class="buttonCol"><input id="resTolerance" value="0"/></td>
       <td>&nbsp;</td>
     </tr>
     <tr>
       <td class="labelCol">Min String Resistance (&#x03A9;)</td>
-      <td><input id="minStringResistance" value="0"/></td>
+      <td class="buttonCol"><input id="minStringResistance" value="0"/></td>
       <td>Resistance value examples:</td>
     </tr>
     <tr>
       <td class="labelCol">Max String Resistance (&#x03A9;)</td>
-      <td><input id="maxStringResistance" value="20M"/></td>
+      <td class="buttonCol"><input id="maxStringResistance" value="20M"/></td>
       <td>0,&#x2000;10,&#x2000;2.4k,&#x2000;5.6e4,&#x2000;3.1M</td>
     </tr>
     <tr>
@@ -304,7 +304,7 @@ td.paramLabel {
     </tr>
   </table>
 
-  <p xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="max-width: 30em;">
+  <p xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="max-width: 34em;">
     <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none">
       <!-- Begin CC0 Button SVG Image -->
       <svg width="88px" height="31px" enable-background="new -0.5 -0.101 88 31" version="1.1" viewBox="-0.5 -0.101 88 31" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CC0 Button">
@@ -348,11 +348,6 @@ td.paramLabel {
 <script type="text/javascript">
 "use strict";
 
-// Returns a new string that is inString without leading/trailing whitespace.
-function trimString(inString) {
-  return inString.replace(/^\s*([^\s]*)\s*$/, '$1');
-}
-
 // Creates human-readable resistance value strings from
 // resistance values in Ohms.
 function resValToString(resVal, precision) {
@@ -378,49 +373,49 @@ function resistanceString(resistance) {
 }
 
 // E24 contains EIA E24 series resistor values in the 1s decade.
-var E24 = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0,
-           2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3,
-           4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1];
+var E24 = Object.freeze([1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0,
+                         2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3,
+                         4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]);
 
 // E96 contains EIA E96 series resistor values in the 1s decade.
-var E96 = [1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
-           1.18, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37,
-           1.40, 1.43, 1.47, 1.50, 1.54, 1.58, 1.62,
-           1.65, 1.69, 1.74, 1.78, 1.82, 1.87, 1.91,
-           1.96, 2.00, 2.05, 2.10, 2.15, 2.21, 2.26,
-           2.32, 2.37, 2.43, 2.49, 2.55, 2.61, 2.67,
-           2.74, 2.80, 2.87, 2.94, 3.01, 3.09, 3.16,
-           3.24, 3.32, 3.40, 3.48, 3.57, 3.65, 3.74,
-           3.83, 3.92, 4.02, 4.12, 4.22, 4.32, 4.42,
-           4.53, 4.64, 4.75, 4.87, 4.99, 5.11, 5.23,
-           5.36, 5.49, 5.62, 5.76, 5.90, 6.04, 6.19,
-           6.34, 6.49, 6.65, 6.81, 6.98, 7.15, 7.32,
-           7.50, 7.68, 7.87, 8.06, 8.25, 8.45, 8.66,
-           8.87, 9.09, 9.31, 9.53, 9.76];
+var E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
+                         1.18, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37,
+                         1.40, 1.43, 1.47, 1.50, 1.54, 1.58, 1.62,
+                         1.65, 1.69, 1.74, 1.78, 1.82, 1.87, 1.91,
+                         1.96, 2.00, 2.05, 2.10, 2.15, 2.21, 2.26,
+                         2.32, 2.37, 2.43, 2.49, 2.55, 2.61, 2.67,
+                         2.74, 2.80, 2.87, 2.94, 3.01, 3.09, 3.16,
+                         3.24, 3.32, 3.40, 3.48, 3.57, 3.65, 3.74,
+                         3.83, 3.92, 4.02, 4.12, 4.22, 4.32, 4.42,
+                         4.53, 4.64, 4.75, 4.87, 4.99, 5.11, 5.23,
+                         5.36, 5.49, 5.62, 5.76, 5.90, 6.04, 6.19,
+                         6.34, 6.49, 6.65, 6.81, 6.98, 7.15, 7.32,
+                         7.50, 7.68, 7.87, 8.06, 8.25, 8.45, 8.66,
+                         8.87, 9.09, 9.31, 9.53, 9.76]);
 
 // E24E96 contains the union of E24 and E96.
-var E24E96 = [1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
-              1.18, 1.20, 1.21, 1.24, 1.27, 1.30, 1.33,
-              1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 1.58,
-              1.60, 1.62, 1.65, 1.69, 1.74, 1.78, 1.80,
-              1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10,
-              2.15, 2.20, 2.21, 2.26, 2.32, 2.37, 2.40,
-              2.43, 2.49, 2.55, 2.61, 2.67, 2.70, 2.74,
-              2.80, 2.87, 2.94, 3.00, 3.01, 3.09, 3.16,
-              3.24, 3.30, 3.32, 3.40, 3.48, 3.57, 3.60,
-              3.65, 3.74, 3.83, 3.90, 3.92, 4.02, 4.12,
-              4.22, 4.30, 4.32, 4.42, 4.53, 4.64, 4.70,
-              4.75, 4.87, 4.99, 5.10, 5.11, 5.23, 5.36,
-              5.49, 5.60, 5.62, 5.76, 5.90, 6.04, 6.19,
-              6.20, 6.34, 6.49, 6.65, 6.80, 6.81, 6.98,
-              7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.20,
-              8.25, 8.45, 8.66, 8.87, 9.09, 9.10, 9.31,
-              9.53, 9.76];
+var E24E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
+                            1.18, 1.20, 1.21, 1.24, 1.27, 1.30, 1.33,
+                            1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 1.58,
+                            1.60, 1.62, 1.65, 1.69, 1.74, 1.78, 1.80,
+                            1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10,
+                            2.15, 2.20, 2.21, 2.26, 2.32, 2.37, 2.40,
+                            2.43, 2.49, 2.55, 2.61, 2.67, 2.70, 2.74,
+                            2.80, 2.87, 2.94, 3.00, 3.01, 3.09, 3.16,
+                            3.24, 3.30, 3.32, 3.40, 3.48, 3.57, 3.60,
+                            3.65, 3.74, 3.83, 3.90, 3.92, 4.02, 4.12,
+                            4.22, 4.30, 4.32, 4.42, 4.53, 4.64, 4.70,
+                            4.75, 4.87, 4.99, 5.10, 5.11, 5.23, 5.36,
+                            5.49, 5.60, 5.62, 5.76, 5.90, 6.04, 6.19,
+                            6.20, 6.34, 6.49, 6.65, 6.80, 6.81, 6.98,
+                            7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.20,
+                            8.25, 8.45, 8.66, 8.87, 9.09, 9.10, 9.31,
+                            9.53, 9.76]);
 
 // Each value in E24, E96, or E24E96 is multiplied by all
 // scalars in multipliers to create the full array of resistance
 // values.
-var multipliers = [1.0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6];
+var multipliers = Object.freeze([1.0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6]);
 
 // "enum" type containing possible resistor series
 var seriesEnum = Object.freeze({E24:1, E96:2, E24E96:3});
@@ -429,36 +424,17 @@ var seriesEnum = Object.freeze({E24:1, E96:2, E24E96:3});
 var ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
 
 // Constructor for Settings object that stores user input settings
-function Settings(targetRatio, ratioType, ratioThresholdLow, ratioThresholdHigh,
-                  resTolerance, resSeries, minStringRes, maxStringRes) {
-  this.targetRatio = targetRatio;
-  switch (ratioType) {
-  case ratioEnum.MIN:
-    this.ratioType = ratioEnum.MIN;
-    break;
-  case ratioEnum.MAX:
-    this.ratioType = ratioEnum.MAX;
-    break;
-  default:
-    this.ratioType = ratioEnum.NOM;
-    break;
-  }
-  this.ratioThresholdLow = ratioThresholdLow;
-  this.ratioThresholdHigh = ratioThresholdHigh;
-  this.resTolerance = resTolerance;
-  switch (resSeries) {
-  case seriesEnum.E24:
-    this.resSeries = seriesEnum.E24;
-    break;
-  case seriesEnum.E96:
-    this.resSeries = seriesEnum.E96;
-    break;
-  default:
-    this.resSeries = seriesEnum.E24E96;
-    break;
-  }
-  this.minStringRes = minStringRes;
-  this.maxStringRes = maxStringRes;
+function Settings() {
+  this.targetRatio = 0.5;
+  this.ratioType = ratioEnum.NOM;
+  this.ratioThresholdLow = 0.49;
+  this.ratioThresholdHigh = 0.51;
+  this.resTolerance = 0.0;
+  this.tolAug = 1.0;
+  this.tolDim = 1.0;
+  this.resSeries = seriesEnum.E24E96;
+  this.minStringRes = 0.0;
+  this.maxStringRes = 20.0e6;
 }
 
 // resArray stores the full array of resistance values.
@@ -469,31 +445,41 @@ var resArray = [];
 function initialize_resArray(resSeries) {
   resArray = [];
   var jMult;
+  var multiplier;
   var jVal;
 
   switch (resSeries) {
   case seriesEnum.E24:
     for (jMult = 0; jMult < multipliers.length; jMult++) {
+      multiplier = multipliers[jMult];
+
       for (jVal = 0; jVal < E24.length; jVal++) {
-        resArray.push(multipliers[jMult]*E24[jVal]);
+        resArray.push(multiplier*E24[jVal]);
       }
     }
     break;
   case seriesEnum.E96:
     for (jMult = 0; jMult < multipliers.length; jMult++) {
+      multiplier = multipliers[jMult];
+
       for (jVal = 0; jVal < E96.length; jVal++) {
-        resArray.push(multipliers[jMult]*E96[jVal]);
+        resArray.push(multiplier*E96[jVal]);
       }
     }
     break;
   default:
     for (jMult = 0; jMult < multipliers.length; jMult++) {
+      multiplier = multipliers[jMult];
+
       for (jVal = 0; jVal < E24E96.length; jVal++) {
-        resArray.push(multipliers[jMult]*E24E96[jVal]);
+        resArray.push(multiplier*E24E96[jVal]);
       }
     }
     break;
   }
+
+  Object.freeze(resArray);
+  return;
 }
 
 // Returns the index in resArray of the value nearest to resVal.
@@ -521,59 +507,96 @@ function findNearest(resVal) {
   }
 }
 
+
 // Display E24 series resistor values
 function ShowE24() {
-  var tableString = ''
+  var tableFragment = document.createDocumentFragment();
   var jMult;
+  var multiplier;
   var jVal;
 
   for (jMult = 0; jMult < multipliers.length; jMult++) {
-    tableString += '<tr class="shadedRow"><td style="text-align:center; font-weight: bold">';
-    tableString += resistanceString(multipliers[jMult]) + ' decade</td></tr>';
-    tableString += '<tr><td style="line-height: 1.5">';
-  
+    multiplier = multipliers[jMult];
+
+    var headerRow = document.createElement("tr");
+    headerRow.className = "shadedRow";
+    
+    var decade_td = document.createElement("td");
+    decade_td.setAttribute("style", "text-align:center; font-weight: bold");
+    decade_td.textContent = resistanceString(multiplier) + " decade";
+    headerRow.appendChild(decade_td);
+    tableFragment.appendChild(headerRow);
+    
+    var valuesRow = document.createElement("tr");
+
+    var values_td = document.createElement("td");
+    values_td.style.lineHeight = "1.5";
+
     for (jVal = 0; jVal < E24.length-1; jVal++) {
-      tableString += resValToString(multipliers[jMult]*E24[jVal], 3);
+      values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[jVal], 3));
       if ((jVal + 1) % 6 == 0) {
-        tableString += "<br/>";
+        values_td.insertAdjacentHTML('beforeend', '<br/>');
       } else {
-        tableString += '&#x2000;';
+        values_td.insertAdjacentText('beforeend', '\u2000');
       }
     }
   
-    tableString += resValToString(multipliers[jMult]*E24[E24.length-1], 3);
-    tableString += '</td></tr>';
+    values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[E24.length-1], 3));
+
+    valuesRow.appendChild(values_td);
+    tableFragment.appendChild(valuesRow);
   }
 
-  document.getElementById("resultsTable").innerHTML = tableString;
+  // Clear results table & display E24 series values
+  var resultsTable = document.getElementById("resultsTable");
+  resultsTable.innerHTML = "";
+  resultsTable.appendChild(tableFragment);
   return;
 }
 
 // Display E96 series resistor values
 function ShowE96() {
-  var tableString = ''
+  var tableFragment = document.createDocumentFragment();
   var jMult;
+  var multiplier;
   var jVal;
 
   for (jMult = 0; jMult < multipliers.length; jMult++) {
-    tableString += '<tr class="shadedRow"><td style="text-align:center; font-weight: bold">';
-    tableString += resistanceString(multipliers[jMult]) + ' decade</td></tr>';
-    tableString += '<tr><td style="line-height: 1.5">';
-  
+    multiplier = multipliers[jMult];
+
+    var headerRow = document.createElement("tr");
+    headerRow.className = "shadedRow";
+    
+    var decade_td = document.createElement("td");
+    decade_td.setAttribute("style", "text-align:center; font-weight: bold");
+    decade_td.textContent = resistanceString(multiplier) + " decade";
+    headerRow.appendChild(decade_td);
+    tableFragment.appendChild(headerRow);
+    
+    var valuesRow = document.createElement("tr");
+
+    var values_td = document.createElement("td");
+    values_td.style.lineHeight = "1.5";
+
     for (jVal = 0; jVal < E96.length-1; jVal++) {
-      tableString += resValToString(multipliers[jMult]*E96[jVal], 3);
+      values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[jVal], 3));
       if ((jVal + 1) % 8 == 0) {
-        tableString += "<br/>";
+        values_td.insertAdjacentHTML('beforeend', '<br/>');
       } else {
-        tableString += '&#x2000;';
+        values_td.insertAdjacentText('beforeend', '\u2000');
       }
     }
   
-    tableString += resValToString(multipliers[jMult]*E96[E96.length-1], 3);
-    tableString += '</td></tr>';
+    values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[E96.length-1], 3));
+
+    valuesRow.appendChild(values_td);
+    tableFragment.appendChild(valuesRow);
   }
 
-  document.getElementById("resultsTable").innerHTML = tableString;
+  // Clear results table & display E96 series values
+  var resultsTable = document.getElementById("resultsTable");
+  resultsTable.innerHTML = "";
+  resultsTable.appendChild(tableFragment);
   return;
 }
 
@@ -594,9 +617,6 @@ var candidates = [];
 function populate_candidates(settings) {
   // Use resTolerance to create ratio conversion constants from lower
   // to upper resistors and vice versa
-  var tolAug = 1.0 + settings.resTolerance/100.0;
-  var tolDim = 1.0 - settings.resTolerance/100.0;
-
   var lowToUpRatio;
   var lowToUpRatioMin;
   var lowToUpRatioMax;
@@ -606,14 +626,14 @@ function populate_candidates(settings) {
 
   switch (settings.ratioType) {
   case ratioEnum.MIN:
-    lowToUpRatio = tolDim * (1.0-settings.targetRatio) / (settings.targetRatio * tolAug);
-    lowToUpRatioMin = tolDim * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * tolAug);
-    lowToUpRatioMax = tolDim * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * tolAug);
+    lowToUpRatio = settings.tolDim * (1.0-settings.targetRatio) / (settings.targetRatio * settings.tolAug);
+    lowToUpRatioMin = settings.tolDim * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * settings.tolAug);
+    lowToUpRatioMax = settings.tolDim * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * settings.tolAug);
     break;
   case ratioEnum.MAX:
-    lowToUpRatio = tolAug * (1.0-settings.targetRatio) / (settings.targetRatio * tolDim);
-    lowToUpRatioMin = tolAug * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * tolDim);
-    lowToUpRatioMax = tolAug * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * tolDim);
+    lowToUpRatio = settings.tolAug * (1.0-settings.targetRatio) / (settings.targetRatio * settings.tolDim);
+    lowToUpRatioMin = settings.tolAug * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * settings.tolDim);
+    lowToUpRatioMax = settings.tolAug * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * settings.tolDim);
     break;
   default:
     lowToUpRatio = (1.0-settings.targetRatio) / settings.targetRatio;
@@ -626,31 +646,34 @@ function populate_candidates(settings) {
   upToLowRatioMin = 1.0 / lowToUpRatioMax;
   upToLowRatioMax = 1.0 / lowToUpRatioMin;
 
+  var onePlus_lowToUpRatioMax = 1.0 + lowToUpRatioMax;
+  var onePlus_lowToUpRatioMin = 1.0 + lowToUpRatioMin;
+  var onePlus_upToLowRatioMax = 1.0 + upToLowRatioMax;
+  var onePlus_upToLowRatioMin = 1.0 + upToLowRatioMin;
+
   // Bound the candidate search range based on min and max
   // string resistance.
-  var lowerStartRes = settings.minStringRes / (1.0 + lowToUpRatioMax);
+  var lowerStartRes = settings.minStringRes / onePlus_lowToUpRatioMax;
   var lowerStartIndex = findNearest(lowerStartRes);
   while (lowerStartIndex > 0 && resArray[lowerStartIndex] > lowerStartRes) {
     lowerStartIndex--;
   }
 
-  var lowerEndRes = settings.maxStringRes / (1.0 + lowToUpRatioMin);
+  var lowerEndRes = settings.maxStringRes / onePlus_lowToUpRatioMin;
   var lowerEndIndex = Math.max(1, findNearest(lowerEndRes));
   while (lowerEndIndex < resArray.length && resArray[lowerEndIndex-1] < lowerEndRes) {
     lowerEndIndex++;
   }
 
-  var upperStartRes = settings.minStringRes / (1.0 + upToLowRatioMax);
+  var upperStartRes = settings.minStringRes / onePlus_upToLowRatioMax;
   var upperStartIndex = findNearest(upperStartRes);
-  while (upperStartIndex > 0 && 
-         resArray[upperStartIndex] > upperStartRes) {
+  while (upperStartIndex > 0 && resArray[upperStartIndex] > upperStartRes) {
     upperStartIndex--;
   }
 
-  var upperEndRes = settings.maxStringRes / (1.0 + upToLowRatioMin);
+  var upperEndRes = settings.maxStringRes / onePlus_upToLowRatioMin;
   var upperEndIndex = Math.max(1, findNearest(upperEndRes));
-  while (upperEndIndex < resArray.length && 
-         resArray[upperEndIndex-1] < upperEndRes) {
+  while (upperEndIndex < resArray.length && resArray[upperEndIndex-1] < upperEndRes) {
     upperEndIndex++;
   }
 
@@ -672,14 +695,14 @@ function populate_candidates(settings) {
       // Test this resVal as a lower resistor.
       resLower = resArray[jRes];
 
-      if ((1.0 + lowToUpRatioMax) * resLower >= settings.minStringRes && 
-          (1.0 + lowToUpRatioMin) * resLower <= settings.maxStringRes) {
+      if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes && 
+          onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
         nearUpper = resArray[findNearest(lowToUpRatio * resLower)];
         stringRes = resLower + nearUpper;
 
         if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-          dimLower = tolDim * resLower;
-          minRatio = dimLower / (dimLower + tolAug * nearUpper);
+          dimLower = settings.tolDim * resLower;
+          minRatio = dimLower / (dimLower + settings.tolAug * nearUpper);
         
           if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
             candidates.push(new Candidate(nearUpper, resLower, minRatio-settings.targetRatio));
@@ -693,14 +716,14 @@ function populate_candidates(settings) {
       // Test this resVal as a lower resistor.
       resLower = resArray[jRes];
 
-      if ((1.0 + lowToUpRatioMax) * resLower >= settings.minStringRes && 
-          (1.0 + lowToUpRatioMin) * resLower <= settings.maxStringRes) {
+      if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes && 
+          onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
         nearUpper = resArray[findNearest(lowToUpRatio * resLower)];
         stringRes = resLower + nearUpper;
 
         if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-          augLower = tolAug * resLower;
-          maxRatio = augLower / (augLower + tolDim * nearUpper);
+          augLower = settings.tolAug * resLower;
+          maxRatio = augLower / (augLower + settings.tolDim * nearUpper);
         
           if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
             candidates.push(new Candidate(nearUpper, resLower, maxRatio-settings.targetRatio));
@@ -714,8 +737,8 @@ function populate_candidates(settings) {
       // Test this resVal as a lower resistor.
       resLower = resArray[jRes];
 
-      if ((1.0 + lowToUpRatioMax) * resLower >= settings.minStringRes && 
-          (1.0 + lowToUpRatioMin) * resLower <= settings.maxStringRes) {
+      if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes && 
+          onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
         nearUpper = resArray[findNearest(lowToUpRatio * resLower)];
         stringRes = resLower + nearUpper;
 
@@ -740,14 +763,14 @@ function populate_candidates(settings) {
       // Test this resVal as an upper resistor.
       resUpper = resArray[jRes];
 
-      if ((1.0 + upToLowRatioMax) * resUpper >= settings.minStringRes && 
-          (1.0 + upToLowRatioMin) * resUpper <= settings.maxStringRes) {
+      if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes && 
+          onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
         nearLower = resArray[findNearest(upToLowRatio * resUpper)];
         stringRes = nearLower + resUpper;
 
         if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-          dimLower = tolDim*nearLower;
-          minRatio = dimLower / (dimLower + tolAug * resUpper);
+          dimLower = settings.tolDim * nearLower;
+          minRatio = dimLower / (dimLower + settings.tolAug * resUpper);
 
           if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
             candidates.push(new Candidate(resUpper, nearLower, minRatio-settings.targetRatio));
@@ -761,14 +784,14 @@ function populate_candidates(settings) {
       // Test this resVal as an upper resistor.
       resUpper = resArray[jRes];
 
-      if ((1.0 + upToLowRatioMax) * resUpper >= settings.minStringRes && 
-          (1.0 + upToLowRatioMin) * resUpper <= settings.maxStringRes) {
+      if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes && 
+          onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
         nearLower = resArray[findNearest(upToLowRatio * resUpper)];
         stringRes = nearLower + resUpper;
 
         if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-          augLower = tolAug * nearLower;
-          maxRatio = augLower / (augLower + tolDim * resUpper);
+          augLower = settings.tolAug * nearLower;
+          maxRatio = augLower / (augLower + settings.tolDim * resUpper);
 
           if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
             candidates.push(new Candidate(resUpper, nearLower, maxRatio-settings.targetRatio));
@@ -782,8 +805,8 @@ function populate_candidates(settings) {
       // Test this resVal as an upper resistor.
       resUpper = resArray[jRes];
 
-      if ((1.0 + upToLowRatioMax) * resUpper >= settings.minStringRes && 
-          (1.0 + upToLowRatioMin) * resUpper <= settings.maxStringRes) {
+      if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes && 
+          onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
         nearLower = resArray[findNearest(upToLowRatio * resUpper)];
         stringRes = nearLower + resUpper;
 
@@ -806,42 +829,112 @@ function populate_candidates(settings) {
 // Diagnostic message that summarizes settings.
 // Displayed when no results are found.
 function displayDiagnostics(settings) {
+  var tableFragment = document.createDocumentFragment();
 
-  var ratioString;
+  var noResults_tr = document.createElement("tr");
+  var noResults_td = document.createElement("td");
+  noResults_td.className = "groupCol";
+  noResults_td.colSpan = "2";
+  noResults_td.style.fontWeight = "bold";
+  noResults_td.textContent = "No Results Found";
+  
+  noResults_tr.appendChild(noResults_td);
+  tableFragment.appendChild(noResults_tr);
+
+  var ratio_tr = document.createElement("tr");
+  var ratioLabel_td = document.createElement("td");
+  ratioLabel_td.className = "paramLabel";
+
   switch (settings.ratioType) {
   case ratioEnum.MIN:
-    ratioString = "minimum";
+    ratioLabel_td.textContent = "Target minimum divider ratio";
     break;
   case ratioEnum.MAX:
-    ratioString = "maximum";
+    ratioLabel_td.textContent = "Target maximum divider ratio";
     break;
   default:
-    ratioString = "nominal";
+    ratioLabel_td.textContent = "Target nominal divider ratio";
     break;
   }
 
-  var seriesString;
+  var ratioValue_td = document.createElement("td");
+  ratioValue_td.textContent = settings.targetRatio.toPrecision(6);
+
+  ratio_tr.appendChild(ratioLabel_td);
+  ratio_tr.appendChild(ratioValue_td);
+  tableFragment.appendChild(ratio_tr);
+
+  var ratioRange_tr = document.createElement("tr");
+  ratioRange_tr.className = "shadedRow";
+  var ratioRangeLabel_td = document.createElement("td");
+  ratioRangeLabel_td.className = "paramLabel";
+  ratioRangeLabel_td.textContent = "Ratio search range";
+  var ratioRangeValue_td = document.createElement("td");;
+  ratioRangeValue_td.textContent = "[\u00A0" + settings.ratioThresholdLow.toPrecision(6) + ",\u2000" + settings.ratioThresholdHigh.toPrecision(6) + "\u00A0]";
+
+  ratioRange_tr.appendChild(ratioRangeLabel_td);
+  ratioRange_tr.appendChild(ratioRangeValue_td);
+  tableFragment.appendChild(ratioRange_tr);
+
+  var tolerance_tr = document.createElement("tr");
+  var toleranceLabel_td = document.createElement("td");
+  toleranceLabel_td.className = "paramLabel";
+  toleranceLabel_td.textContent = "Resistor tolerance";
+  var toleranceValue_td = document.createElement("td");
+  toleranceValue_td.textContent = "\u00B1" + settings.resTolerance.toPrecision(4) + "%";
+
+  tolerance_tr.appendChild(toleranceLabel_td);
+  tolerance_tr.appendChild(toleranceValue_td);
+  tableFragment.appendChild(tolerance_tr);
+
+  var minString_tr = document.createElement("tr");
+  minString_tr.className = "shadedRow";
+  var minStringLabel_td = document.createElement("td");
+  minStringLabel_td.className = "paramLabel";
+  minStringLabel_td.textContent = "Minimum string resistance";
+  var minStringValue_td = document.createElement("td");
+  minStringValue_td.textContent = resValToString(settings.minStringRes, 6);
+
+  minString_tr.appendChild(minStringLabel_td);
+  minString_tr.appendChild(minStringValue_td);
+  tableFragment.appendChild(minString_tr);
+
+  var maxString_tr = document.createElement("tr");
+  var maxStringLabel_td = document.createElement("td");
+  maxStringLabel_td.className = "paramLabel";
+  maxStringLabel_td.textContent = "Maximum string resistance";
+  var maxStringValue_td = document.createElement("td");
+  maxStringValue_td.textContent = resValToString(settings.maxStringRes, 6);
+
+  maxString_tr.appendChild(maxStringLabel_td);
+  maxString_tr.appendChild(maxStringValue_td);
+  tableFragment.appendChild(maxString_tr);
+
+  var resSeries_tr = document.createElement("tr");
+  resSeries_tr.className = "shadedRow";
+  var resSeries_td = document.createElement("td");
+  resSeries_td.className = "groupCol";
+  resSeries_td.colSpan = "2";
+
   switch (settings.resSeries) {
   case seriesEnum.E24:
-    seriesString = "E24";
+    resSeries_td.textContent = "EIA E24 series resistor values";
     break;
   case seriesEnum.E96:
-    seriesString = "E96";
+    resSeries_td.textContent = "EIA E96 series resistor values";
     break;
   default:
-    seriesString = "E24 and E96";
+    resSeries_td.textContent = "EIA E24 and E96 series resistor values";
     break;
   }
 
-  var tableString = "<tr><td class=\"groupCol\" colspan=\"2\"><b>No Results Found</b></tr>" +
-    "<tr><td class=\"paramLabel\">Target " + ratioString + " divider ratio</td><td>" + settings.targetRatio.toPrecision(6) + "</td></tr>" +
-    "<tr class=\"shadedRow\"><td class=\"paramLabel\">Ratio search range</td><td>[&nbsp;" + settings.ratioThresholdLow.toPrecision(6) + ",&#x2000;" + settings.ratioThresholdHigh.toPrecision(6) + "&nbsp;]</td></tr>" +
-    "<tr><td class=\"paramLabel\">Resistor tolerance</td><td>&#x00B1;" + settings.resTolerance.toPrecision(4) + "%</td></tr>" +
-    "<tr><td class=\"paramLabel\">Minimum string resistance</td><td>" + resValToString(settings.minStringRes, 6) + "</td></tr>" +
-    "<tr class=\"shadedRow\"><td class=\"paramLabel\">Maximum string resistance</td><td>" + resValToString(settings.maxStringRes, 6) + "</td></tr>" +
-    "<tr><td class=\"groupCol\" colspan=\"2\">EIA " + seriesString + " series resistor values</td></tr>";
+  resSeries_tr.appendChild(resSeries_td);
+  tableFragment.appendChild(resSeries_tr);
 
-  document.getElementById("resultsTable").innerHTML = tableString;
+  // Clear results table & display diagnostic message
+  var resultsTable = document.getElementById("resultsTable");
+  resultsTable.innerHTML = "";
+  resultsTable.appendChild(tableFragment);
   return;
 }
 
@@ -849,27 +942,46 @@ function displayDiagnostics(settings) {
 // difference from the target ratio, collects best matches into
 // groups, and displays them.
 function sortAndDisplayResults(settings) {
+  var tableFragment = document.createDocumentFragment();
 
-  var tolAug = 1.0 + settings.resTolerance/100.0;
-  var tolDim = 1.0 - settings.resTolerance/100.0;
+  var header_tr = document.createElement("tr");
+  var group_th = document.createElement("th");
+  group_th.textContent = "Group";
+  var upper_th = document.createElement("th");
+  upper_th.textContent = "Upper";
+  var lower_th = document.createElement("th");
+  lower_th.textContent = "Lower";
+  var string_th = document.createElement("th");
+  string_th.textContent = "String";
+  var minRatio_th = document.createElement("th");
+  minRatio_th.textContent = "Min\u00A0Ratio";
+  var nomRatio_th = document.createElement("th");
+  nomRatio_th.textContent = "Nom\u00A0Ratio";
+  var maxRatio_th = document.createElement("th");
+  maxRatio_th.textContent = "Max\u00A0Ratio";
+  var diffRatio_th = document.createElement("th");
 
-  var lastColHeader;
   switch (settings.ratioType) {
   case ratioEnum.MIN:
-    lastColHeader = "Min&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
+    diffRatio_th.textContent = "Min\u00A0Ratio\u00A0\u2212\u00A0Target";
     break;
   case ratioEnum.MAX:
-    lastColHeader = "Max&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
+    diffRatio_th.textContent = "Max\u00A0Ratio\u00A0\u2212\u00A0Target";
     break;
   default:
-    lastColHeader = "Nom&nbsp;Ratio&nbsp;\u2212&nbsp;Target";
+    diffRatio_th.textContent = "Nom\u00A0Ratio\u00A0\u2212\u00A0Target";
     break;
   }
 
-  var tableString = "<tr><th>Group</th><th>Upper</th><th>Lower</th>" +
-                    "<th>String</th><th>Min&nbsp;Ratio</th>" +
-                    "<th>Nom&nbsp;Ratio</th><th>Max&nbsp;Ratio</th><th>" +
-                    lastColHeader + "</th></tr>";
+  header_tr.appendChild(group_th);
+  header_tr.appendChild(upper_th);
+  header_tr.appendChild(lower_th);
+  header_tr.appendChild(string_th);
+  header_tr.appendChild(minRatio_th);
+  header_tr.appendChild(nomRatio_th);
+  header_tr.appendChild(maxRatio_th);
+  header_tr.appendChild(diffRatio_th);
+  tableFragment.appendChild(header_tr);
 
   // Sort candidates by closeness to target divider ratio.
   candidates.sort(function(a,b){return (a.absDiff - b.absDiff);});
@@ -880,8 +992,10 @@ function sortAndDisplayResults(settings) {
 
   while (candidates.length > 0 && groupNumber <= 20) {
     var groupLength = 1;
+    var anchorDiff = candidates[0].diff;
+
     while (groupLength < candidates.length &&
-           Math.abs(candidates[groupLength].diff-candidates[0].diff) < 1e-10) {
+           Math.abs(candidates[groupLength].diff-anchorDiff) < 1e-10) {
       groupLength++;
     }
     var candidateGroup = candidates.splice(0, groupLength);
@@ -893,8 +1007,11 @@ function sortAndDisplayResults(settings) {
     while (candidateGroup.length > 0) {
       // Find subgroup with same resLower value.
       var subLength = 1;
+      var anchor_resLower = candidateGroup[0].resLower;
+      var matchTolerance = 1e-8 * anchor_resLower;
+
       while (subLength < candidateGroup.length &&
-             Math.abs(candidateGroup[0].resLower - candidateGroup[subLength].resLower) < 1e-8 * candidateGroup[subLength].resLower) {
+             Math.abs(anchor_resLower - candidateGroup[subLength].resLower) < matchTolerance) {
         subLength++;
       }
       var subGroup = candidateGroup.splice(0, subLength);
@@ -907,10 +1024,17 @@ function sortAndDisplayResults(settings) {
         resultsGroup.push(subGroup[0]);
 
         var testIndx;
+        var testUpperRes;
+        var prevUpperRes = subGroup[0].resUpper;
+
         for (testIndx = 1; testIndx < subGroup.length; testIndx++) {
-          if (Math.abs(subGroup[testIndx].resUpper - subGroup[testIndx-1].resUpper) > 1e-8 * subGroup[testIndx].resUpper) {
-            resultsGroup.push(subGroup[testIndx]);
+          testUpperRes = subGroup[testIndx].resUpper;
+
+          if (Math.abs(testUpperRes - prevUpperRes) > 1e-8 * testUpperRes) {
+            resultsGroup.push(testUpperRes);
           }
+
+          prevUpperRes = testUpperRes;
         }
       }
 
@@ -921,7 +1045,14 @@ function sortAndDisplayResults(settings) {
     if (groupNumber > 1) {
       // Put a gray divider row between groups.
       shadeRow = false;
-      tableString += "<tr class=\"grayRow\"><td colspan=\"8\"/></tr>";
+
+      var grayDiv_tr = document.createElement("tr");
+      grayDiv_tr.className = "grayRow";
+      var grayDiv_td = document.createElement("td");
+      grayDiv_td.colSpan = "8";
+
+      grayDiv_tr.appendChild(grayDiv_td);
+      tableFragment.appendChild(grayDiv_tr);
     }
 
     // Display the results in this group.
@@ -931,31 +1062,62 @@ function sortAndDisplayResults(settings) {
     var minRatio;
     var nomRatio;
     var maxRatio;
+    var dimLower;
+    var augLower;
+    var dimUpper;
+    var augUpper;
 
     for (jMember = 0; jMember < resultsGroup.length; jMember++) {
+      var result_tr = document.createElement("tr");
+
       if (shadeRow) {
-        tableString += "<tr class=\"shadedRow\">";
+        result_tr.className = "shadedRow";
         shadeRow = false;
       } else {
-        tableString += "<tr class=\"normalRow\">";
+        result_tr.className = "normalRow";
         shadeRow = true;
       }
 
       thisResult = resultsGroup[jMember];
       stringRes = thisResult.resUpper + thisResult.resLower;
-      minRatio = (tolDim*thisResult.resLower) / ((tolDim*thisResult.resLower)+(tolAug*thisResult.resUpper));
       nomRatio = thisResult.resLower / stringRes;
-      maxRatio = (tolAug*thisResult.resLower) / ((tolAug*thisResult.resLower)+(tolDim*thisResult.resUpper));
 
-      tableString += "<td class=\"groupCol\">" + groupNumber +
-      "</td><td>" + resValToString(thisResult.resUpper, 3) +
-      "</td><td>" + resValToString(thisResult.resLower, 3) +
-      "</td><td>" + resValToString(stringRes, 6) +
-      "</td><td>" + minRatio.toPrecision(6) +
-      "</td><td>" + nomRatio.toPrecision(6) +
-      "</td><td>" + maxRatio.toPrecision(6) +
-      "</td><td class=\"diffCol\">" + thisResult.diff.toExponential(4) +
-      "</td></tr>";
+      dimLower = settings.tolDim * thisResult.resLower;
+      augUpper = settings.tolAug * thisResult.resUpper;
+      minRatio = dimLower / (dimLower + augUpper);
+      
+      augLower = settings.tolAug * thisResult.resLower;
+      dimUpper = settings.tolDim * thisResult.resUpper;
+      maxRatio = augLower / (augLower + dimUpper);
+
+      var resultGroup_td = document.createElement("td");
+      resultGroup_td.className = "groupCol";
+      resultGroup_td.textContent = groupNumber.toString();
+      var resultUpper_td = document.createElement("td");
+      resultUpper_td.textContent = resValToString(thisResult.resUpper, 3);
+      var resultLower_td = document.createElement("td");
+      resultLower_td.textContent = resValToString(thisResult.resLower, 3);
+      var resultString_td = document.createElement("td");
+      resultString_td.textContent = resValToString(stringRes, 6);
+      var resultMinRatio_td = document.createElement("td");
+      resultMinRatio_td.textContent = minRatio.toPrecision(6);
+      var resultNomRatio_td = document.createElement("td");
+      resultNomRatio_td.textContent = nomRatio.toPrecision(6);
+      var resultMaxRatio_td = document.createElement("td");
+      resultMaxRatio_td.textContent = maxRatio.toPrecision(6);
+      var resultDiff_td = document.createElement("td");
+      resultDiff_td.className = "diffCol";
+      resultDiff_td.textContent = thisResult.diff.toExponential(4);
+
+      result_tr.appendChild(resultGroup_td);
+      result_tr.appendChild(resultUpper_td);
+      result_tr.appendChild(resultLower_td);
+      result_tr.appendChild(resultString_td);
+      result_tr.appendChild(resultMinRatio_td);
+      result_tr.appendChild(resultNomRatio_td);
+      result_tr.appendChild(resultMaxRatio_td);
+      result_tr.appendChild(resultDiff_td);
+      tableFragment.appendChild(result_tr);
     }
 
     resultsGroup = [];
@@ -963,7 +1125,10 @@ function sortAndDisplayResults(settings) {
   }
   candidates = [];
 
-  document.getElementById("resultsTable").innerHTML = tableString;
+  // Clear results table & display results
+  var resultsTable = document.getElementById("resultsTable");
+  resultsTable.innerHTML = "";
+  resultsTable.appendChild(tableFragment);
   return;
 }
 
@@ -975,6 +1140,11 @@ function ParsedValue(value, isValid) {
   } else {
     this.isValid = false;
   }
+}
+
+// Returns a new string that is inString without leading/trailing whitespace.
+function trimString(inString) {
+  return inString.replace(/^\s*([^\s]*)\s*$/, '$1');
 }
 
 // Parser for resistance values. Accepts 'k' (kilo, 10^3) and
@@ -1045,7 +1215,7 @@ function parseTolerance(inString) {
 // or error messages.
 function solveDivider() {
   // Store all user settings in inputSettings
-  var inputSettings = new Settings(0.5, ratioEnum.NOM, 0.49, 0.51, 0.0, seriesEnum.E24E96, 0.0, 20.0e6);
+  var inputSettings = new Settings();
   // Reuse parserOutput for return value from parser functions
   var parserOutput = new ParsedValue(0.0, false);
 
@@ -1070,10 +1240,19 @@ function solveDivider() {
     inputSettings.ratioThresholdLow = Math.max(1.0e-9, inputSettings.targetRatio-0.005);
     inputSettings.ratioThresholdHigh = Math.min(inputSettings.targetRatio+0.005, 1.0 - 1.0e-9);
   } else {
-    document.getElementById("resultsTable").innerHTML =
-	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Target Divider Ratio must be a number on the range (0.0, 1.0)." +
-	  "</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Target Divider Ratio must be a number on the range (0.0, 1.0).');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
 
@@ -1090,11 +1269,23 @@ function solveDivider() {
   parserOutput = parseTolerance(document.getElementById("resTolerance").value);
   if (parserOutput.isValid === true) {
     inputSettings.resTolerance = parserOutput.value;
+    // These multiplication factors are used in min and
+    // max ratio calculations.
+    inputSettings.tolAug = 1.0 + inputSettings.resTolerance/100.0;
+    inputSettings.tolDim = 1.0 - inputSettings.resTolerance/100.0;
   } else {
-    document.getElementById("resultsTable").innerHTML =
-	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Resistor tolerance must be a number on the range [0.0, 100.0)." +
-	  "</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Resistor tolerance must be a number on the range [0.0, 100.0).');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
 
@@ -1103,21 +1294,40 @@ function solveDivider() {
   if (parserOutput.isValid === true) {
     inputSettings.minStringRes = parserOutput.value;
   } else {
-    document.getElementById("resultsTable").innerHTML =
-	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Min String Resistance must be a nonnegative number.<br/>" +
-	  "Only the suffixes k (kilo = 10<sup>3</sup>) and " +
-    "M (mega = 10<sup>6</sup>) are recognized.</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentHTML('beforeend', 'Min String Resistance must be a nonnegative number.<br/>');
+    error_td.insertAdjacentHTML('beforeend', 'Only the suffixes k (kilo = 10<sup>3</sup>) and ');
+    error_td.insertAdjacentHTML('beforeend', 'M (mega = 10<sup>6</sup>) are recognized.');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
 
   if (inputSettings.minStringRes > resArray[resArray.length-1]) {
-    document.getElementById("resultsTable").innerHTML =
-    "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Min String Resistance was set to " + resValToString(inputSettings.minStringRes, 3) +
-    ",<br/> which will yield no results. The largest resistor value in this " +
-    "program is " + resValToString(resArray[resArray.length-1], 3) + "." +
-    "</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Min String Resistance was set to ' + resValToString(inputSettings.minStringRes, 3));
+    error_td.insertAdjacentHTML('beforeend', ', which will yield no results.<br/>The largest resistor value in this ');
+    error_td.insertAdjacentText('beforeend', 'program is ' + resValToString(resArray[resArray.length-1], 3) + '.');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
 
@@ -1126,31 +1336,60 @@ function solveDivider() {
   if (parserOutput.isValid === true) {
     inputSettings.maxStringRes = parserOutput.value;
   } else {
-    document.getElementById("resultsTable").innerHTML =
-	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Max String Resistance must be a nonnegative number.<br/>" +
-    "Only the suffixes k (kilo = 10<sup>3</sup>) and " +
-    "M (mega = 10<sup>6</sup>) are recognized.</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentHTML('beforeend', 'Max String Resistance must be a nonnegative number.<br/>');
+    error_td.insertAdjacentHTML('beforeend', 'Only the suffixes k (kilo = 10<sup>3</sup>) and ');
+    error_td.insertAdjacentHTML('beforeend', 'M (mega = 10<sup>6</sup>) are recognized.');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
 
   if (inputSettings.maxStringRes < resArray[0]) {
-    document.getElementById("resultsTable").innerHTML =
-    "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Max String Resistance was set to " + resValToString(inputSettings.maxStringRes, 3) +
-    ",<br/> which will yield no results. The smallest resistor value in this " +
-    "program is " + resValToString(resArray[0], 3) + "." +
-    "</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Max String Resistance was set to ' + resValToString(inputSettings.maxStringRes, 3));
+    error_td.insertAdjacentHTML('beforeend', ', which will yield no results.<br/>The smallest resistor value in this ');
+    error_td.insertAdjacentText('beforeend', 'program is ' + resValToString(resArray[0], 3) + '.');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
 
   if (inputSettings.maxStringRes <= inputSettings.minStringRes) {
-    document.getElementById("resultsTable").innerHTML =
-	  "<tr><td><b>Input Error:</b>&#x2000;" +
-    "Max String Resistance must be larger than Min String Resistance." +
-    "</td></tr>";
+    var error_tr = document.createElement("tr");
+    var error_td = document.createElement("td");
+    var error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Max String Resistance must be larger than Min String Resistance.');
+    error_tr.appendChild(error_td);
+
+    var resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
     return;
   }
+
+  Object.freeze(inputSettings);
 
   // Store potential voltage divider solutions in the candidates
   // array.
