@@ -25,10 +25,14 @@ Ben Tesch - [slugrustle](https://github.com/slugrustle)
 
 ## License
 
-This project is released under Creative Commons
-[CC0](https://creativecommons.org/publicdomain/zero/1.0/)
-1.0 Universal Public Domain Dedication. See LICENSE.txt or
-the first comment in voltage_divider.html.
+voltage\_divider.html contains the function download_csv()
+which comes from [this Stack Overflow post](https://stackoverflow.com/a/33542499)
+and is therefore distributed under the 
+[CC BY-SA 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/).
+
+The remainder of the voltage\_divider project is distributed under the
+[CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/).
+See also LICENSE.txt or the first comment in voltage\_divider.html.
 
 ## Acknowledgment
 
