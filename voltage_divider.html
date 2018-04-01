@@ -1038,8 +1038,8 @@ function sortAndDisplayResults(settings) {
   }
 
   csvString += settings.resTolerance.toString() + "%,";
-  csvString += settings.minStringRes.toPrecision(7) + ",";
-  csvString += settings.maxStringRes.toPrecision(7) + ",";
+  csvString += settings.minStringRes.toPrecision(9) + ",";
+  csvString += settings.maxStringRes.toPrecision(9) + ",";
 
   switch (settings.resSeries) {
   case seriesEnum.E24:

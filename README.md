@@ -26,7 +26,7 @@ Ben Tesch - [slugrustle](https://github.com/slugrustle)
 ## License
 
 voltage\_divider.html contains the function download_csv()
-which comes from [this Stack Overflow post](https://stackoverflow.com/a/33542499)
+which is modified from [this Stack Overflow post](https://stackoverflow.com/a/33542499)
 and is therefore distributed under the 
 [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/).
 
