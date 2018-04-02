@@ -10,7 +10,7 @@ a single .html file with inline Javascript.
 ## Getting Started
 
 Download the [latest release](https://github.com/slugrustle/voltage_divider/releases)
-of voltage_divider.html and run it in any browser that supports modern
+of voltage\_divider.html and run it in any browser that supports modern
 Javascript and HTML/CSS.
 
 ## Contributing
