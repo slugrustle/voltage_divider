@@ -1490,7 +1490,7 @@ function solveDivider() {
     return;
   }
 
-  if (inputSettings.maxStringRes < resArray[0]) {
+  if (inputSettings.maxStringRes < 2.0 * resArray[0]) {
     error_tr = document.createElement("tr");
     error_td = document.createElement("td");
     error_td.style.lineHeight = "1.5";
