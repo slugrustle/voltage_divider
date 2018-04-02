@@ -1448,7 +1448,7 @@ function solveDivider() {
     return;
   }
 
-  if (inputSettings.minStringRes > resArray[resArray.length-1]) {
+  if (inputSettings.minStringRes > 2.0 * resArray[resArray.length-1]) {
     error_tr = document.createElement("tr");
     error_td = document.createElement("td");
     error_td.style.lineHeight = "1.5";
