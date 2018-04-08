@@ -1,13 +1,13 @@
 
-voltage_divider.html contains the function download_csv(),
-which comes from a Stack Overflow post
+voltage_divider.html contains the functions download_csv() and download_xlsx(),
+both of which come from a Stack Overflow post
 https://stackoverflow.com/a/33542499
 by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
 I retrieved this code on 2018-03-31 and changed it slightly.
 Stack Overflow code is distributed under the CC BY-SA 3.0 license:
 https://creativecommons.org/licenses/by-sa/3.0/
 The remainder of voltage_divider.html is under the CC0 1.0 Universal
-Public Domain Dedication (reproduced below), as is the entirety of 
+Public Domain Dedication (reproduced below), as is the entirety of
 voltage_divider.svg.
 
 Creative Commons Legal Code
