@@ -528,10 +528,9 @@ function findNearest(resVal, resArray) {
 
 // Display E24 series resistor values
 function ShowE24() {
-  // remove spreadsheet download link from previous results
+  // remove spreadsheet download links from previous results
   var downloadSpan = document.getElementById("downloadSpan");
   downloadSpan.innerHTML = "";
-  csvString = "";
 
   var tableFragment = document.createDocumentFragment();
   var jMult;
@@ -557,7 +556,7 @@ function ShowE24() {
 
     for (jVal = 0; jVal < E24.length-1; jVal++) {
       values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[jVal], 3));
-      if ((jVal + 1) % 6 == 0) {
+      if ((jVal + 1) % 6 === 0) {
         values_td.insertAdjacentHTML('beforeend', '<br/>');
       } else {
         values_td.insertAdjacentText('beforeend', '\u2000');
@@ -579,10 +578,9 @@ function ShowE24() {
 
 // Display E96 series resistor values
 function ShowE96() {
-  // remove spreadsheet download link from previous results
+  // remove spreadsheet download links from previous results
   var downloadSpan = document.getElementById("downloadSpan");
   downloadSpan.innerHTML = "";
-  csvString = "";
 
   var tableFragment = document.createDocumentFragment();
   var jMult;
@@ -608,7 +606,7 @@ function ShowE96() {
 
     for (jVal = 0; jVal < E96.length-1; jVal++) {
       values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[jVal], 3));
-      if ((jVal + 1) % 8 == 0) {
+      if ((jVal + 1) % 8 === 0) {
         values_td.insertAdjacentHTML('beforeend', '<br/>');
       } else {
         values_td.insertAdjacentText('beforeend', '\u2000');
@@ -993,7 +991,7 @@ function Result(groupNum, resUpper, resLower, stringRes, minRatio, nomRatio, max
   this.groupNum = groupNum;
   this.resUpper = resUpper;
   this.resLower = resLower;
-  this.stringRes = stringRes
+  this.stringRes = stringRes;
   this.minRatio = minRatio;
   this.nomRatio = nomRatio;
   this.maxRatio = maxRatio;
@@ -1393,11 +1391,8 @@ function crc32(uint8ar) {
   return crcreg[0];
 }
 
-/**
- * Returns length in bytes of equivalent utf8 string
- * given a utf16  string input.
- * Does not handle surrogate pairs.
- */
+// Returns length in bytes of equivalent utf8 string given a utf16 string input.
+// Does not handle surrogate pairs.
 function utf8len(utf16str) {
   var len = 0;
   var j;
@@ -1417,10 +1412,8 @@ function utf8len(utf16str) {
   return len;
 }
 
-/**
- * Converts a utf16 javascript string to a utf8 Unit8Array.
- * Does not handle surrogate pairs.
- */
+// Converts a utf16 javascript string to a utf8 Unit8Array.
+// Does not handle surrogate pairs.
 function utf16_to_utf8(utf16str) {
   var outArray = new Uint8Array(utf8len(utf16str));
   var k = 0;
