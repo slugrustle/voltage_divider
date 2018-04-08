@@ -851,7 +851,7 @@ function populate_candidates(resArray) {
 
 // Diagnostic message that summarizes settings.
 // Displayed when no results are found.
-function displayDiagnostics(settings) {
+function displayDiagnostics() {
   var tableFragment = document.createDocumentFragment();
 
   var noResults_tr = document.createElement("tr");
@@ -969,6 +969,7 @@ function displayDiagnostics(settings) {
 // https://creativecommons.org/licenses/by-sa/3.0/
 function download_csv() {
   var csvBlob = generate_csv();
+
   // Filename hard-coded for now. Base on settings or date?
   var filename = "results.csv";
 
@@ -998,12 +999,15 @@ function Result(groupNum, resUpper, resLower, stringRes, minRatio, nomRatio, max
   this.ratioDiff = ratioDiff;
 }
 
+// Final results for display are stored here after sorting.
 var sortedResults = [];
 
 // Takes the fully-populated candidates array, sorts by lowest
 // difference from the target ratio, collects best matches into
 // groups, and stores them in sortedResults.
 function sortResults(candidates) {
+  sortedResults = [];
+  
   // Sort candidates by closeness to target divider ratio.
   candidates.sort(function(a,b){return (a.absDiff - b.absDiff);});
 
@@ -1094,7 +1098,8 @@ function sortResults(candidates) {
     resultsGroup = [];
     groupNumber++;
   }
-  candidates = [];
+
+  return;
 }
 
 // Displays the results in a table on the .html page,
@@ -1766,7 +1771,6 @@ function generate_xlsx() {
       '<c r="E' + rowNum + '"><v>' + thisResult.minRatio.toPrecision(17) + '</v></c>' +
       '<c r="F' + rowNum + '"><v>' + thisResult.nomRatio.toPrecision(17) + '</v></c>' +
       '<c r="G' + rowNum + '"><v>' + thisResult.maxRatio.toPrecision(17) + '</v></c>';
-
 
       if (Math.abs(thisResult.ratioDiff) < 3e-308) {
         expString = '0.00';
