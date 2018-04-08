@@ -1280,7 +1280,7 @@ function generate_csv() {
   }
 
   var thisMoment = new Date();
-  csvString += thisMoment.getFullYear() + "-" + zeroPad(thisMoment.getMonth() + 1) + "-" + zeroPad(thisMoment.getDate()) + ",";
+  csvString += thisMoment.getFullYear().toString() + "-" + zeroPad(thisMoment.getMonth() + 1) + "-" + zeroPad(thisMoment.getDate()) + ",";
   csvString += zeroPad(thisMoment.getHours()) + ":" + zeroPad(thisMoment.getMinutes()) + ":" + zeroPad(thisMoment.getSeconds()) + "\n";
 
   // The third csv row is blank to put space between
@@ -1633,7 +1633,7 @@ function generate_xlsx() {
     '<left/><right/><top/><bottom/><diagonal/></border></borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' +
     '</cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
-    '<xf numFmtId="9" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+    '<xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
     '<xf numFmtId="11" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
     '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
     '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
@@ -1675,13 +1675,7 @@ function generate_xlsx() {
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
     '<dimension ref="A1:H' + numRows + '"/><sheetViews><sheetView tabSelected="1" workbookViewId="0"/></sheetViews>' +
     '<sheetFormatPr defaultRowHeight="17"/><cols>' +
-    '<col min="1" max="1" width="15" customWidth="1"/>' +
-    '<col min="2" max="2" width="15" customWidth="1"/>' +
-    '<col min="3" max="3" width="15" customWidth="1"/>' +
-    '<col min="4" max="4" width="15" customWidth="1"/>' +
-    '<col min="5" max="5" width="15" customWidth="1"/>' +
-    '<col min="6" max="6" width="15" customWidth="1"/>' +
-    '<col min="7" max="7" width="15" customWidth="1"/>' +
+    '<col min="1" max="7" width="15" customWidth="1"/>' +
     '<col min="8" max="8" width="18" customWidth="1"/></cols>' +
     '<sheetData><row r="1" spans="1:8">' +
     '<c r="A1" t="inlineStr"><is><t>Target Ratio</t></is></c>' +
@@ -1709,7 +1703,7 @@ function generate_xlsx() {
   }
 
   sheet1 += '</t></is></c>' +
-    '<c r="C2" s="1"><v>' + settings.resTolerance.toString() + '</v></c>' +
+    '<c r="C2" s="1"><v>' + (0.01 * settings.resTolerance).toString() + '</v></c>' +
     '<c r="D2"><v>' + settings.minStringRes.toPrecision(9) + '</v></c>' +
     '<c r="E2"><v>' + settings.maxStringRes.toPrecision(9) + '</v></c>' +
     '<c r="F2" t="inlineStr"><is><t>';
@@ -1727,7 +1721,7 @@ function generate_xlsx() {
   }
 
   sheet1 += '</t></is></c><c r="G2" t="inlineStr"><is><t>';
-  sheet1 += thisMoment.getFullYear() + "-" + zeroPad(thisMoment.getMonth() + 1) + "-" + zeroPad(thisMoment.getDate());
+  sheet1 += thisMoment.getFullYear().toString() + "-" + zeroPad(thisMoment.getMonth() + 1) + "-" + zeroPad(thisMoment.getDate());
   sheet1 += '</t></is></c><c r="H2" t="inlineStr"><is><t>';
   sheet1 += zeroPad(thisMoment.getHours()) + ":" + zeroPad(thisMoment.getMinutes()) + ":" + zeroPad(thisMoment.getSeconds());
   sheet1 += '</t></is></c></row>' +
