@@ -227,7 +227,7 @@ td.paramLabel {
 
 <body>
 <div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2001;v1.7&#x2001;2018-04-08</span></div>
-<div style="display: inline-block;">
+<div style="display: inline-block;" id="alignDiv">
   <table id="inputTable">
     <tr>
       <td class="labelCol">Target Divider Ratio</td>
@@ -447,6 +447,8 @@ var ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
 // Constructor for Settings object that stores user input settings
 function Settings() {
   this.targetRatio = 0.5;
+  this.isExpr = false;
+  this.ratioExpr = '';
   this.ratioType = ratioEnum.NOM;
   this.ratioThresholdLow = 0.49;
   this.ratioThresholdHigh = 0.51;
@@ -532,6 +534,13 @@ function ShowE24() {
   var downloadSpan = document.getElementById("downloadSpan");
   downloadSpan.innerHTML = "";
 
+  // Remove target ratio value display if present
+  var ratioDiv = document.getElementById("ratioDiv");
+  if (ratioDiv !== null) {
+    var alignDiv = document.getElementById("alignDiv");
+    alignDiv.removeChild(ratioDiv);
+  }
+
   var tableFragment = document.createDocumentFragment();
   var jMult;
   var multiplier;
@@ -581,6 +590,13 @@ function ShowE96() {
   // remove spreadsheet download links from previous results
   var downloadSpan = document.getElementById("downloadSpan");
   downloadSpan.innerHTML = "";
+
+  // Remove target ratio value display if present
+  var ratioDiv = document.getElementById("ratioDiv");
+  if (ratioDiv !== null) {
+    var alignDiv = document.getElementById("alignDiv");
+    alignDiv.removeChild(ratioDiv);
+  }
 
   var tableFragment = document.createDocumentFragment();
   var jMult;
@@ -1218,6 +1234,18 @@ function displayResults() {
   resultsTable.innerHTML = "";
   resultsTable.appendChild(tableFragment);
 
+  // Show target divider ratio value if input is an expression
+  if (settings.isExpr) {
+    var alignDiv = document.getElementById("alignDiv");
+    var ratio_div = document.createElement("div");
+    ratio_div.id = "ratioDiv";
+    ratio_div.style.fontSize = "13pt";
+    ratio_div.style.marginLeft = "4pt";
+    ratio_div.style.marginBottom = "10pt";
+    ratio_div.textContent = "Target Divider Ratio = " + settings.targetRatio;
+    alignDiv.insertBefore(ratio_div, resultsTable);
+  }
+
   // Display spreadsheet download links
   var downloadSpan = document.getElementById("downloadSpan");
   downloadSpan.style.paddingLeft = "1.2em";
@@ -1252,8 +1280,17 @@ function zeroPad(num) {
 // Constructs a .csv spreadsheet of the settings and results.
 // Returns an appropriate Blob.
 function generate_csv() {
+  var csvString = "";
+
+  if (settings.isExpr) {
+    // If present, store the original target ratio expression first
+    csvString += "Target Ratio Expression: ," + settings.ratioExpr + ",,,,,,\n";
+    // Followed by a blank row
+    csvString += ",,,,,,,\n";
+  }
+
   // First two csv rows store the settings
-  var csvString = "Target Ratio,Target Type,Res Tolerance,Min String Res,Max String Res,Res Series,Date,Time\n";
+  csvString += "Target Ratio,Target Type,Res Tolerance,Min String Res,Max String Res,Res Series,Date,Time\n";
   csvString += settings.targetRatio.toPrecision(17) + ",";
 
   switch (settings.ratioType) {
@@ -1639,8 +1676,13 @@ function generate_xlsx() {
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' +
     '</cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
     '<xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
-    '<xf numFmtId="11" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
-    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
+    '<xf numFmtId="11" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>';
+
+  if (settings.isExpr) {
+    styles += '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="right"/></xf>';
+  }
+
+  styles += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
     '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
 
   var styles_ar = utf16_to_utf8(styles);
@@ -1676,24 +1718,43 @@ function generate_xlsx() {
   var wb_rels_dir_header = dir_header(wb_rels_name, wb_rels_ar.length, wb_rels_crc, dosDateTime, wb_rels_offset);
 
   var numRows = 4 + sortedResults.length;
+  var settingsRow = 1;
+  var headerRow = 4;
+
+  if (settings.isExpr) {
+    numRows += 2;
+    settingsRow += 2;
+    headerRow += 2;
+  }
+
   var sheet1 = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
     '<dimension ref="A1:H' + numRows + '"/><sheetViews><sheetView tabSelected="1" workbookViewId="0"/></sheetViews>' +
     '<sheetFormatPr defaultRowHeight="17"/><cols>' +
     '<col min="1" max="7" width="15" customWidth="1"/>' +
     '<col min="8" max="8" width="18" customWidth="1"/></cols>' +
-    '<sheetData><row r="1" spans="1:8">' +
-    '<c r="A1" t="inlineStr"><is><t>Target Ratio</t></is></c>' +
-    '<c r="B1" t="inlineStr"><is><t>Target Type</t></is></c>' +
-    '<c r="C1" t="inlineStr"><is><t>Res Tolerance</t></is></c>' +
-    '<c r="D1" t="inlineStr"><is><t>Min String Res</t></is></c>' +
-    '<c r="E1" t="inlineStr"><is><t>Max String Res</t></is></c>' +
-    '<c r="F1" t="inlineStr"><is><t>Res Series</t></is></c>' +
-    '<c r="G1" t="inlineStr"><is><t>Date</t></is></c>' +
-    '<c r="H1" t="inlineStr"><is><t>Time</t></is></c></row>' +
-    '<row r="2" spans="1:8">' +
-    '<c r="A2"><v>' + settings.targetRatio.toPrecision(17) + '</v></c>' +
-    '<c r="B2" t="inlineStr"><is><t>';
+    '<sheetData>';
+      
+  if (settings.isExpr) {
+    sheet1 += '<row r="1" spans="1:8">' +
+      '<c r="A1" s="3" t="inlineStr"><is><t>Target Ratio Expression:\u2000</t></is></c>' +
+      '<c r="B1" s="3"/>' + 
+      '<c r="C1" t="inlineStr"><is><t>' + settings.ratioExpr + '</t></is></c>' +
+      '<c r="D1"/><c r="E1"/><c r="F1"/><c r="G1"/><c r="H1"/></row>';
+  }
+
+  sheet1 += '<row r="' + settingsRow + '" spans="1:8">' +
+    '<c r="A' + settingsRow + '" t="inlineStr"><is><t>Target Ratio</t></is></c>' +
+    '<c r="B' + settingsRow + '" t="inlineStr"><is><t>Target Type</t></is></c>' +
+    '<c r="C' + settingsRow + '" t="inlineStr"><is><t>Res Tolerance</t></is></c>' +
+    '<c r="D' + settingsRow + '" t="inlineStr"><is><t>Min String Res</t></is></c>' +
+    '<c r="E' + settingsRow + '" t="inlineStr"><is><t>Max String Res</t></is></c>' +
+    '<c r="F' + settingsRow + '" t="inlineStr"><is><t>Res Series</t></is></c>' +
+    '<c r="G' + settingsRow + '" t="inlineStr"><is><t>Date</t></is></c>' +
+    '<c r="H' + settingsRow + '" t="inlineStr"><is><t>Time</t></is></c></row>' +
+    '<row r="' + (settingsRow + 1) + '" spans="1:8">' +
+    '<c r="A' + (settingsRow + 1) + '"><v>' + settings.targetRatio.toPrecision(17) + '</v></c>' +
+    '<c r="B' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
 
   switch (settings.ratioType) {
   case ratioEnum.MIN:
@@ -1708,10 +1769,10 @@ function generate_xlsx() {
   }
 
   sheet1 += '</t></is></c>' +
-    '<c r="C2" s="1"><v>' + (0.01 * settings.resTolerance).toString() + '</v></c>' +
-    '<c r="D2"><v>' + settings.minStringRes.toPrecision(9) + '</v></c>' +
-    '<c r="E2"><v>' + settings.maxStringRes.toPrecision(9) + '</v></c>' +
-    '<c r="F2" t="inlineStr"><is><t>';
+    '<c r="C' + (settingsRow + 1) + '" s="1"><v>' + (0.01 * settings.resTolerance).toString() + '</v></c>' +
+    '<c r="D' + (settingsRow + 1) + '"><v>' + settings.minStringRes.toPrecision(9) + '</v></c>' +
+    '<c r="E' + (settingsRow + 1) + '"><v>' + settings.maxStringRes.toPrecision(9) + '</v></c>' +
+    '<c r="F' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
 
   switch (settings.resSeries) {
   case seriesEnum.E24:
@@ -1725,20 +1786,20 @@ function generate_xlsx() {
     break;
   }
 
-  sheet1 += '</t></is></c><c r="G2" t="inlineStr"><is><t>';
+  sheet1 += '</t></is></c><c r="G' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
   sheet1 += thisMoment.getFullYear().toString() + "-" + zeroPad(thisMoment.getMonth() + 1) + "-" + zeroPad(thisMoment.getDate());
-  sheet1 += '</t></is></c><c r="H2" t="inlineStr"><is><t>';
+  sheet1 += '</t></is></c><c r="H' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
   sheet1 += zeroPad(thisMoment.getHours()) + ":" + zeroPad(thisMoment.getMinutes()) + ":" + zeroPad(thisMoment.getSeconds());
   sheet1 += '</t></is></c></row>' +
-    '<row r="4" spans="1:8">' +
-    '<c r="A4" t="inlineStr"><is><t>Group</t></is></c>' +
-    '<c r="B4" t="inlineStr"><is><t>Upper</t></is></c>' +
-    '<c r="C4" t="inlineStr"><is><t>Lower</t></is></c>' +
-    '<c r="D4" t="inlineStr"><is><t>String</t></is></c>' +
-    '<c r="E4" t="inlineStr"><is><t>Min Ratio</t></is></c>' +
-    '<c r="F4" t="inlineStr"><is><t>Nom Ratio</t></is></c>' +
-    '<c r="G4" t="inlineStr"><is><t>Max Ratio</t></is></c>' +
-    '<c r="H4" t="inlineStr"><is><t>';
+    '<row r="' + headerRow + '" spans="1:8">' +
+    '<c r="A' + headerRow + '" t="inlineStr"><is><t>Group</t></is></c>' +
+    '<c r="B' + headerRow + '" t="inlineStr"><is><t>Upper</t></is></c>' +
+    '<c r="C' + headerRow + '" t="inlineStr"><is><t>Lower</t></is></c>' +
+    '<c r="D' + headerRow + '" t="inlineStr"><is><t>String</t></is></c>' +
+    '<c r="E' + headerRow + '" t="inlineStr"><is><t>Min Ratio</t></is></c>' +
+    '<c r="F' + headerRow + '" t="inlineStr"><is><t>Nom Ratio</t></is></c>' +
+    '<c r="G' + headerRow + '" t="inlineStr"><is><t>Max Ratio</t></is></c>' +
+    '<c r="H' + headerRow + '" t="inlineStr"><is><t>';
 
   switch (settings.ratioType) {
   case ratioEnum.MIN:
@@ -1761,7 +1822,7 @@ function generate_xlsx() {
 
   for (jResult = 0; jResult < sortedResults.length; jResult++) {
     thisResult = sortedResults[jResult];
-    rowNum = jResult + 5;
+    rowNum = jResult + headerRow + 1;
 
     sheet1 += '<row r="' + rowNum + '" spans="1:8">' +
       '<c r="A' + rowNum + '"><v>' + thisResult.groupNum.toString() + '</v></c>' +
@@ -1782,7 +1843,13 @@ function generate_xlsx() {
       '</row>';
   }
 
-  sheet1 += '</sheetData></worksheet>';
+  sheet1 += '</sheetData>';
+  
+  if (settings.isExpr) {
+    sheet1 += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
+  }
+
+  sheet1 += '</worksheet>';
 
   var sheet1_ar = utf16_to_utf8(sheet1);
   var sheet1_name = utf16_to_utf8("xl/worksheets/sheet1.xml");
@@ -1889,23 +1956,6 @@ function parseResistance(inString) {
   return output;
 }
 
-// Parser for ratio values, which must be on the range (0.0, 1.0).
-function parseRatio(inString) {
-  var output = new ParsedValue(0.0, false);
-  var inTrim = trimString(inString);
-
-  output.value = Number(inTrim);
-  if (inTrim.length === 0 || isNaN(output.value) ||
-      output.value < 1.0e-9 || output.value > (1.0 - 1.0e-9)) {
-    output.value = NaN;
-    output.isValid = false;
-  } else {
-    output.isValid = true;
-  }
-
-  return output;
-}
-
 // Parser for tolerance values, which must be on the range [0.0, 100.0).
 function parseTolerance(inString) {
   var output = new ParsedValue(0.0, false);
@@ -1934,6 +1984,13 @@ function solveDivider() {
   var downloadSpan = document.getElementById("downloadSpan");
   downloadSpan.innerHTML = "";
 
+  // Remove target ratio value display if present
+  var ratioDiv = document.getElementById("ratioDiv");
+  if (ratioDiv !== null) {
+    var alignDiv = document.getElementById("alignDiv");
+    alignDiv.removeChild(ratioDiv);
+  }
+
   // These are used for error messages
   var error_tr;
   var error_td;
@@ -1956,22 +2013,47 @@ function solveDivider() {
   var resArray = initialize_resArray(settings.resSeries);
 
   // Parse & validate desired divider ratio input.
-  parserOutput = parseRatio(document.getElementById("dividerRatio").value);
-  if (parserOutput.isValid === true) {
-    settings.targetRatio = parserOutput.value;
-    // Set a range on acceptable ratios to limit the number of candidate
-    // divider solutions.
-    settings.ratioThresholdLow = Math.max(1.0e-9, settings.targetRatio-0.005);
-    settings.ratioThresholdHigh = Math.min(settings.targetRatio+0.005, 1.0 - 1.0e-9);
-  } else {
+  var ratioEval = evalExpression(document.getElementById("dividerRatio").value);
+  var ratioOK = ratioEval.isValid;
+
+  if (ratioOK === true) {
+    settings.targetRatio = ratioEval.value;
+
+    if (isNaN(settings.targetRatio) || 
+        settings.targetRatio < 1.0e-9 || 
+        settings.targetRatio > (1.0 - 1.0e-9)) {
+      ratioOK = false;
+    } else {
+      settings.isExpr = ratioEval.isExpr;
+      settings.ratioExpr = ratioEval.expr;
+
+      // Set a range on acceptable ratios to limit the number of candidate
+      // divider solutions.
+      settings.ratioThresholdLow = Math.max(1.0e-9, settings.targetRatio-0.005);
+      settings.ratioThresholdHigh = Math.min(settings.targetRatio+0.005, 1.0 - 1.0e-9);
+    }
+  } 
+  
+  if (ratioOK !== true) {
     error_tr = document.createElement("tr");
     error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
     error_span = document.createElement("span");
     error_span.style.fontWeight = "bold";
     error_span.textContent = "Input Error:\u2000";
 
     error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Target Divider Ratio must be a number on the range (0.0, 1.0).');
+    error_td.insertAdjacentHTML('beforeend', 'Target Divider Ratio must be a number on the range (0.0, 1.0),<br/>');
+    error_td.insertAdjacentText('beforeend', 'or a valid four-function expression evaluating to such a number.');
+
+    if (ratioEval.isExpr) {
+      if (ratioEval.errMesg.length > 0) {
+        error_td.insertAdjacentHTML('beforeend', '<br/>Parser error: ' + ratioEval.errMesg);
+      } else if (ratioEval.isValid === true) {
+        error_td.insertAdjacentHTML('beforeend', '<br/>The input Target Divider Ratio evaluates to ' + ratioEval.value);
+      }
+    }
+
     error_tr.appendChild(error_td);
 
     resultsTable = document.getElementById("resultsTable");
@@ -2000,6 +2082,7 @@ function solveDivider() {
   } else {
     error_tr = document.createElement("tr");
     error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
     error_span = document.createElement("span");
     error_span.style.fontWeight = "bold";
     error_span.textContent = "Input Error:\u2000";
@@ -2100,6 +2183,7 @@ function solveDivider() {
   if (settings.maxStringRes <= settings.minStringRes) {
     error_tr = document.createElement("tr");
     error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
     error_span = document.createElement("span");
     error_span.style.fontWeight = "bold";
     error_span.textContent = "Input Error:\u2000";
@@ -2133,7 +2217,287 @@ function solveDivider() {
   displayResults();
 
   return;
-} // solveDivider()
+}
+
+// "enum" variable storing operand / operator type
+// NEG is unary minus
+var typeEnum = Object.freeze({OPERAND:1, ADD:2, SUB:3, NEG:4, MUL:5, DIV:6, L_PAREN:7, R_PAREN:8});
+var precedence = Object.freeze([0, 0, 1, 1, 3, 2, 2, 4, 4]);
+
+// Used to store operators and operands (tokens)
+// parsed inside evalExpression
+function ParsedVal(opType, value) {
+  this.opType = opType;
+  this.value = value;
+}
+
+// Used for return of ShuntingYard
+function YardOut(value, nSkip) {
+  this.value = value;
+  this.nSkip = nSkip;
+}
+
+// Used for return of evalExpression
+function EvalOut(isExpr, expr, isValid, errMesg, value) {
+  this.isExpr = isExpr;
+  this.expr = expr;
+  this.isValid = isValid;
+  this.errMesg = errMesg;
+  this.value = value;
+}
+
+// Evaluates any valid four-function calculator expression
+// to a single value. Accepts parentheses and unary minus.
+function evalExpression(inputStr) {
+  var input = inputStr.replace(/\s/g, "");
+  var tokens = [];
+  var jChar;
+  var lastAnchor = 0;
+  var unbalancedLparen = 0;
+  var isExpr = false;
+  var out;
+  var errMesg;
+
+  // First, parse the input into operators and operands (tokens)
+  for (jChar = 0; jChar < input.length; jChar++) {
+    var thisChar = input.charAt(jChar);
+
+    if (thisChar === "+" || thisChar === "-" || thisChar === "*" || thisChar === "/" || thisChar === "(" || thisChar === ")") {
+      if (jChar-1 >= lastAnchor) {
+        var numString = input.substring(lastAnchor, jChar);
+        var aNumber = Number(numString);
+        if (isNaN(aNumber) || aNumber === Infinity) {
+          errMesg = "Found non-operator non-number \"" + numString + "\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else if (tokens.length > 0 && tokens[tokens.length-1].opType === typeEnum.R_PAREN) {
+          errMesg = "Found a number directly after a \")\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else {
+          tokens.push(new ParsedVal(typeEnum.OPERAND, aNumber));
+        }
+      } 
+      
+      if (thisChar === "+") {
+        if (tokens.length === 0) {
+          errMesg = "Found a \"+\" before any number.";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else if (tokens[tokens.length-1].opType !== typeEnum.OPERAND && tokens[tokens.length-1].opType !== typeEnum.R_PAREN) {
+          errMesg = "Found a \"+\" directly after another operator or a \"(\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else {
+          tokens.push(new ParsedVal(typeEnum.ADD, NaN));
+          isExpr = true;
+        }
+      } else if (thisChar === "-") {
+        if (tokens.length === 0 || (tokens[tokens.length-1].opType !== typeEnum.OPERAND && tokens[tokens.length-1].opType !== typeEnum.R_PAREN)) {
+          tokens.push(new ParsedVal(typeEnum.NEG, NaN));
+        } else {
+          tokens.push(new ParsedVal(typeEnum.SUB, NaN));
+          isExpr = true;
+        }
+      } else if (thisChar === "*") {
+        if (tokens.length === 0) {
+          errMesg = "Found a \"*\" before any number.";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else if (tokens[tokens.length-1].opType !== typeEnum.OPERAND && tokens[tokens.length-1].opType !== typeEnum.R_PAREN) {
+          errMesg = "Found a \"*\" directly after another operator or a \"(\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else {
+          tokens.push(new ParsedVal(typeEnum.MUL, NaN));
+          isExpr = true;
+        }
+      } else if (thisChar === "/") {
+        if (tokens.length === 0) {
+          errMesg = "Found a \"/\" before any number.";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else if (tokens[tokens.length-1].opType !== typeEnum.OPERAND && tokens[tokens.length-1].opType !== typeEnum.R_PAREN) {
+          errMesg = "Found a \"/\" directly after another operator or a \"(\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else {
+          tokens.push(new ParsedVal(typeEnum.DIV, NaN));
+          isExpr = true;
+        }
+      } else if (thisChar === "(") {
+        if (tokens.length > 0 && (tokens[tokens.length-1].opType === typeEnum.R_PAREN || tokens[tokens.length-1].opType === typeEnum.OPERAND)) {
+          errMesg = "Found a \"(\" directly after a number or a \")\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else {
+          tokens.push(new ParsedVal(typeEnum.L_PAREN, NaN));
+          unbalancedLparen++;
+          isExpr = true;
+        }
+      } else if (thisChar === ")") {
+        if (unbalancedLparen <= 0) {
+          errMesg = "Found an unbalanced \")\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else if (tokens[tokens.length-1].opType !== typeEnum.OPERAND && tokens[tokens.length-1].opType !== typeEnum.R_PAREN) {
+          errMesg = "Found a \")\" directly after an operator or a \"(\".";
+          out = new EvalOut(true, '', false, errMesg, NaN);
+          return out;
+        } else {
+          tokens.push(new ParsedVal(typeEnum.R_PAREN, NaN));
+          unbalancedLparen--;
+          isExpr = true;
+        }
+      }
+
+      lastAnchor = jChar + 1;
+    }
+  }
+
+  if (input.length > lastAnchor) {
+    var numString2 = input.substring(lastAnchor, input.length);
+    var aNumber2 = Number(numString2);
+
+    if (isNaN(aNumber2) || aNumber2 === Infinity) {
+      errMesg = "Found non-operator non-number \"" + numString2 + "\".";
+      out = new EvalOut(true, '', false, errMesg, NaN);
+      return out;
+    } else if (tokens.length > 0 && tokens[tokens.length-1].opType === typeEnum.R_PAREN) {
+      errMesg = "Found a number directly after a \")\".";
+      out = new EvalOut(true, '', false, errMesg, NaN);
+      return out;
+    } else {
+      tokens.push(new ParsedVal(typeEnum.OPERAND, aNumber2));
+    }
+  } else if (tokens.length > 0) {
+    var lastOp = tokens[tokens.length-1];
+
+    if (lastOp.opType !== typeEnum.OPERAND && lastOp.opType !== typeEnum.R_PAREN) {
+      errMesg = "Input ended on an operator or a \")\".";
+      out = new EvalOut(true, '', false, errMesg, NaN);
+      return out;
+    }
+  }
+
+  if (unbalancedLparen > 0) {
+    errMesg = "Found at least one unbalanced \"(\".";
+    out = new EvalOut(true, '', false, errMesg, NaN);
+    return out;
+  }
+
+  if (tokens.length < 1) {
+    errMesg = "Nothing to evaluate.";
+    out = new EvalOut(true, '', false, errMesg, NaN);
+    return out;
+  }
+
+  // Evaluate the parsed expression
+  var yardRet = shuntingYard(tokens, 0);
+  var expr = "";
+  if (isExpr) {
+    expr = inputStr;
+  }
+
+  out = new EvalOut(isExpr, expr, true, '',  yardRet.value);
+  return out;
+}
+
+// An implementation of the classic shunting yard algorithm.
+// Calls itself recursively on an L_PAREN.
+function shuntingYard(tokens, startToken) {
+  var opStack = [];
+  var outStack = [];
+  var firstOperator = true;
+  var jToken = startToken;
+  var nTokens = 0;
+  var thisToken;
+  var operand1;
+  var operand2;
+
+  while (jToken < tokens.length) {
+    nTokens++;
+    thisToken = tokens[jToken];
+
+    if (thisToken.opType === typeEnum.OPERAND) {
+      outStack.push(thisToken);
+    } else if (thisToken.opType === typeEnum.L_PAREN) {
+      var yardRet = shuntingYard(tokens, jToken+1);
+      jToken += yardRet.nSkip;
+      nTokens += yardRet.nSkip;
+      outStack.push(new ParsedVal(typeEnum.OPERAND, yardRet.value));
+    } else if (thisToken.opType === typeEnum.R_PAREN) {
+      break;
+    } else if (firstOperator) {
+      opStack.push(thisToken);
+      firstOperator = false;
+    } else {
+      while (opStack.length > 0 && precedence[thisToken.opType] <= precedence[opStack[opStack.length-1].opType]) {
+        switch (opStack.pop().opType) {
+        case typeEnum.ADD:
+          operand2 = outStack.pop();
+          operand1 = outStack.pop();
+          outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value + operand2.value));
+          break;
+        case typeEnum.SUB:
+          operand2 = outStack.pop();
+          operand1 = outStack.pop();
+          outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value - operand2.value));
+          break;
+        case typeEnum.NEG:
+          operand1 = outStack.pop();
+          outStack.push(new ParsedVal(typeEnum.OPERAND, -1.0 * operand1.value));
+          break;
+        case typeEnum.MUL:
+          operand2 = outStack.pop();
+          operand1 = outStack.pop();
+          outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value * operand2.value));
+          break;
+        case typeEnum.DIV:
+          operand2 = outStack.pop();
+          operand1 = outStack.pop();
+          outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value / operand2.value));
+          break;
+        }
+      }
+      opStack.push(thisToken);
+    }
+
+    jToken++;
+  }
+
+  while (opStack.length > 0) {
+    switch (opStack.pop().opType) {
+    case typeEnum.ADD:
+      operand2 = outStack.pop();
+      operand1 = outStack.pop();
+      outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value + operand2.value));
+      break;
+    case typeEnum.SUB:
+      operand2 = outStack.pop();
+      operand1 = outStack.pop();
+      outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value - operand2.value));
+      break;
+    case typeEnum.NEG:
+      operand1 = outStack.pop();
+      outStack.push(new ParsedVal(typeEnum.OPERAND, -1.0 * operand1.value));
+      break;
+    case typeEnum.MUL:
+      operand2 = outStack.pop();
+      operand1 = outStack.pop();
+      outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value * operand2.value));
+      break;
+    case typeEnum.DIV:
+      operand2 = outStack.pop();
+      operand1 = outStack.pop();
+      outStack.push(new ParsedVal(typeEnum.OPERAND, operand1.value / operand2.value));
+      break;
+    }
+  }
+
+  var retVal = new YardOut(outStack[0].value, nTokens);
+  return retVal;
+}
 </script>
 
 </body>
