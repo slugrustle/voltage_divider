@@ -231,24 +231,24 @@ td.paramLabel {
   <table id="inputTable">
     <tr>
       <td class="labelCol">Target Divider Ratio</td>
-      <td class="buttonCol"><input id="dividerRatio"/></td>
+      <td class="buttonCol"><input id="dividerRatio" maxlength="200"/></td>
       <td>Min <input type="radio" name="ratioType" id="ratioTypeMin"/>
           Nom <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
           Max <input type="radio" name="ratioType" id="ratioTypeMax"/></td>
     </tr>
     <tr>
       <td class="labelCol">Resistor Tolerance (%)</td>
-      <td class="buttonCol"><input id="resTolerance" value="0"/></td>
+      <td class="buttonCol"><input id="resTolerance" value="0" maxlength="30"/></td>
       <td>&nbsp;</td>
     </tr>
     <tr>
       <td class="labelCol">Min String Resistance (&#x03A9;)</td>
-      <td class="buttonCol"><input id="minStringResistance" value="0"/></td>
+      <td class="buttonCol"><input id="minStringResistance" value="0" maxlength="30"/></td>
       <td>Resistance value examples:</td>
     </tr>
     <tr>
       <td class="labelCol">Max String Resistance (&#x03A9;)</td>
-      <td class="buttonCol"><input id="maxStringResistance" value="20M"/></td>
+      <td class="buttonCol"><input id="maxStringResistance" value="20M" maxlength="30"/></td>
       <td>0,&#x2000;10,&#x2000;2.4k,&#x2000;5.6e4,&#x2000;3.1M</td>
     </tr>
     <tr>
@@ -2013,7 +2013,25 @@ function solveDivider() {
   var resArray = initialize_resArray(settings.resSeries);
 
   // Parse & validate desired divider ratio input.
-  var ratioEval = evalExpression(document.getElementById("dividerRatio").value);
+  var ratioElem = document.getElementById("dividerRatio");
+  if (ratioElem.value.length > 200) {
+    error_tr = document.createElement("tr");
+    error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Target Divider Ratio must be at most 200 characters long.');
+    error_tr.appendChild(error_td);
+
+    resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
+    return;
+  }
+
+  var ratioEval = evalExpression(ratioElem.value);
   var ratioOK = ratioEval.isValid;
 
   if (ratioOK === true) {
@@ -2072,7 +2090,25 @@ function solveDivider() {
   }
 
   // Parse & validate resistor tolerance input.
-  parserOutput = parseTolerance(document.getElementById("resTolerance").value);
+  var resTolElem = document.getElementById("resTolerance");
+  if (resTolElem.value.length > 30) {
+    error_tr = document.createElement("tr");
+    error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Resistor Tolerance must be at most 30 characters long.');
+    error_tr.appendChild(error_td);
+
+    resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
+    return;
+  }
+
+  parserOutput = parseTolerance(resTolElem.value);
   if (parserOutput.isValid === true) {
     settings.resTolerance = parserOutput.value;
     // These multiplication factors are used in min and
@@ -2097,7 +2133,25 @@ function solveDivider() {
   }
 
   // Parse & validate minimum divider string resistance input.
-  parserOutput = parseResistance(document.getElementById("minStringResistance").value);
+  var minStringElem = document.getElementById("minStringResistance");
+  if (minStringElem.value.length > 30) {
+    error_tr = document.createElement("tr");
+    error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Min String Resistance must be at most 30 characters long.');
+    error_tr.appendChild(error_td);
+
+    resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
+    return;
+  }
+
+  parserOutput = parseResistance(minStringElem.value);
   if (parserOutput.isValid === true) {
     settings.minStringRes = parserOutput.value;
   } else {
@@ -2139,7 +2193,25 @@ function solveDivider() {
   }
 
   // Parse & validate maximum divider string resistance input.
-  parserOutput = parseResistance(document.getElementById("maxStringResistance").value);
+  var maxStringElem = document.getElementById("maxStringResistance");
+  if (maxStringElem.value.length > 30) {
+    error_tr = document.createElement("tr");
+    error_td = document.createElement("td");
+    error_td.style.lineHeight = "1.5";
+    error_span = document.createElement("span");
+    error_span.style.fontWeight = "bold";
+    error_span.textContent = "Input Error:\u2000";
+    error_td.appendChild(error_span);
+    error_td.insertAdjacentText('beforeend', 'Max String Resistance must be at most 30 characters long.');
+    error_tr.appendChild(error_td);
+
+    resultsTable = document.getElementById("resultsTable");
+    resultsTable.innerHTML = "";
+    resultsTable.appendChild(error_tr);
+    return;
+  }
+
+  parserOutput = parseResistance(maxStringElem.value);
   if (parserOutput.isValid === true) {
     settings.maxStringRes = parserOutput.value;
   } else {
