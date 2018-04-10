@@ -2257,12 +2257,17 @@ function evalExpression(inputStr) {
   var isExpr = false;
   var out;
   var errMesg;
+  var prevChar = '';
 
   // First, parse the input into operators and operands (tokens)
   for (jChar = 0; jChar < input.length; jChar++) {
     var thisChar = input.charAt(jChar);
 
-    if (thisChar === "+" || thisChar === "-" || thisChar === "*" || thisChar === "/" || thisChar === "(" || thisChar === ")") {
+    if (jChar >= 2 && (thisChar === "+" || thisChar === "-") && (prevChar === "e" || prevChar === "E")) {
+      // Treat this case as part of a floating point number
+      // with exponent notation: 3.0e-2, 1.9E+6, or similar.
+      // No executable lines here.
+    } else if (thisChar === "+" || thisChar === "-" || thisChar === "*" || thisChar === "/" || thisChar === "(" || thisChar === ")") {
       if (jChar-1 >= lastAnchor) {
         var numString = input.substring(lastAnchor, jChar);
         var aNumber = Number(numString);
@@ -2353,6 +2358,8 @@ function evalExpression(inputStr) {
 
       lastAnchor = jChar + 1;
     }
+
+    prevChar = thisChar;
   }
 
   if (input.length > lastAnchor) {
