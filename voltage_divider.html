@@ -151,7 +151,7 @@ express Statement of Purpose.
 <style>
 div.titleDiv {
   margin-left: 4pt;
-  margin-top: 14pt;
+  margin-top: 16pt;
   margin-bottom: 10pt;
 }
 
@@ -162,6 +162,7 @@ span.titleSpan {
 
 #inputTable {
   border: 1px solid black;
+  font-size: 12pt;
 }
 
 #inputTable th, #inputTable td {
@@ -177,12 +178,12 @@ td.buttonCol {
   text-align: center;
 }
 
-#inputTable, #explainerDiv, #resultsTable {
-  width: 100%;
-}
-
-#resultsTable {
-  margin-bottom: 30pt;
+#explainerDiv {
+  border: 1px solid black; 
+  display: inline-block; 
+  padding-top: 8pt; 
+  padding-bottom: 8pt; 
+  padding-right: 8pt;
 }
 
 #resultsTable, #resultsTable th, #resultsTable td {
@@ -227,106 +228,104 @@ td.paramLabel {
 
 <body>
 <div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2001;v1.8&#x2001;2018-04-09</span></div>
-<div style="display: inline-block;" id="alignDiv">
-  <table id="inputTable">
-    <tr>
-      <td class="labelCol">Target Divider Ratio</td>
-      <td class="buttonCol"><input id="dividerRatio" maxlength="200"/></td>
-      <td>Min <input type="radio" name="ratioType" id="ratioTypeMin"/>
-          Nom <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
-          Max <input type="radio" name="ratioType" id="ratioTypeMax"/></td>
-    </tr>
-    <tr>
-      <td class="labelCol">Resistor Tolerance (%)</td>
-      <td class="buttonCol"><input id="resTolerance" value="0" maxlength="30"/></td>
-      <td>&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="labelCol">Min String Resistance (&#x03A9;)</td>
-      <td class="buttonCol"><input id="minStringResistance" value="0" maxlength="30"/></td>
-      <td>Resistance value examples:</td>
-    </tr>
-    <tr>
-      <td class="labelCol">Max String Resistance (&#x03A9;)</td>
-      <td class="buttonCol"><input id="maxStringResistance" value="20M" maxlength="30"/></td>
-      <td>0,&#x2000;10,&#x2000;2.4k,&#x2000;5.6e4,&#x2000;3.1M</td>
-    </tr>
-    <tr>
-      <td class="labelCol">Resistor Value Series</td>
-      <td class="buttonCol">
-          E24 <input type="radio" name="resSeries" id="resSeriesE24" value="min"/>
-          E96 <input type="radio" name="resSeries" id="resSeriesE96" value="nom"/>
-          Both <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
-      </td>
-      <td><a href="javascript:;" onclick="ShowE24();">Show E24</a>&#x2000;
-          <a href="javascript:;" onclick="ShowE96();">Show E96</a></td>
-    </tr>
-    <tr>
-      <td class="buttonCol" colspan="3"><button onclick="solveDivider();">Solve</button></td>
-    </tr>
-  </table>
+<table id="inputTable">
+  <tr>
+    <td class="labelCol">Target Divider Ratio</td>
+    <td class="buttonCol"><input id="dividerRatio" maxlength="200"/></td>
+    <td>Min <input type="radio" name="ratioType" id="ratioTypeMin"/>
+        Nom <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
+        Max <input type="radio" name="ratioType" id="ratioTypeMax"/></td>
+  </tr>
+  <tr>
+    <td class="labelCol">Resistor Tolerance (%)</td>
+    <td class="buttonCol"><input id="resTolerance" value="0" maxlength="30"/></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="labelCol">Min String Resistance (&#x03A9;)</td>
+    <td class="buttonCol"><input id="minStringResistance" value="0" maxlength="30"/></td>
+    <td>Resistance value examples:</td>
+  </tr>
+  <tr>
+    <td class="labelCol">Max String Resistance (&#x03A9;)</td>
+    <td class="buttonCol"><input id="maxStringResistance" value="20M" maxlength="30"/></td>
+    <td>0,&#x2000;10,&#x2000;2.4k,&#x2000;5.6e4,&#x2000;3.1M</td>
+  </tr>
+  <tr>
+    <td class="labelCol">Resistor Value Series</td>
+    <td class="buttonCol">
+        E24 <input type="radio" name="resSeries" id="resSeriesE24" value="min"/>
+        E96 <input type="radio" name="resSeries" id="resSeriesE96" value="nom"/>
+        Both <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
+    </td>
+    <td><a href="javascript:;" onclick="ShowE24();">Show E24</a>&#x2000;
+        <a href="javascript:;" onclick="ShowE96();">Show E96</a></td>
+  </tr>
+  <tr>
+    <td class="buttonCol" colspan="3"><button onclick="solveDivider();">Solve</button></td>
+  </tr>
+</table>
 
-  <div class="titleDiv"><span class="titleSpan">Equations</span></div>
-  <div id="explainerDiv" style="border: 1px solid black; display: inline-block;">
-    <div style="float: left; margin-right: 8pt;">
-      <!-- Begin Voltage Divider SVG Image -->
-      <svg width="163.32pt" height="197.92pt" version="1.1" viewBox="0 0 326.64146 395.84126" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" role="img" aria-label="Voltage Divider Circuit Diagram">
-      <title>Voltage Divider Circuit Diagram</title>
-      <desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
-      <g transform="translate(-169.57 -197.47)">
-      <g transform="translate(59.372 125.46)">
-      <circle cx="185.09" cy="137.36" r="5" fill="none" stroke="#000" stroke-width="1px"/>
-      <text x="126.95769" y="222.08461" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="126.95769" y="222.08461" font-size="37.333px">Upper</tspan></text>
-      <text x="127.39714" y="353.69226" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="127.39714" y="353.69226" font-size="37.333px">Lower</tspan></text>
-      <path d="m280 276.1h74.875" fill="none" stroke="#000" stroke-width=".8653px"/>
-      <circle cx="360.11" cy="276.1" r="5" fill="none" stroke="#000" stroke-width="1px"/>
-      <circle cx="280" cy="276.39" r="2" stroke="#000"/>
-      <text x="165.63867" y="120.36686" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="165.63867" y="120.36686" font-size="37.333px">Vi</tspan></text>
-      <text x="373.44031" y="289.27319" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="373.44031" y="289.27319" font-size="37.333px">Vo</tspan></text>
-      <path d="m280 412.36 5e-3 -17.009m-5e-3 32.013v-15.003m-20.004 15.003h39.996m-23.997 19.982h8m-16-10h24m-11.99-152v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m-3.2e-4 -127.99v18m2.3e-4 -128v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m-55-130h-35m90 20v-20h-55" fill="none" stroke="#000"/>
-      </g></g></svg>
-      <!-- End Voltage Divider SVG Image -->
+<div class="titleDiv"><span class="titleSpan">Equations</span></div>
+<div id="explainerDiv">
+  <div style="float:left; margin-right: 10pt;">
+    <!-- Begin Voltage Divider SVG Image -->
+    <svg width="163.32pt" height="197.92pt" version="1.1" viewBox="0 0 326.64146 395.84126" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" role="img" aria-label="Voltage Divider Circuit Diagram">
+    <title>Voltage Divider Circuit Diagram</title>
+    <desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
+    <g transform="translate(-169.57 -197.47)">
+    <g transform="translate(59.372 125.46)">
+    <circle cx="185.09" cy="137.36" r="5" fill="none" stroke="#000" stroke-width="1px"/>
+    <text x="126.95769" y="222.08461" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="126.95769" y="222.08461" font-size="37.333px">Upper</tspan></text>
+    <text x="127.39714" y="353.69226" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="127.39714" y="353.69226" font-size="37.333px">Lower</tspan></text>
+    <path d="m280 276.1h74.875" fill="none" stroke="#000" stroke-width=".8653px"/>
+    <circle cx="360.11" cy="276.1" r="5" fill="none" stroke="#000" stroke-width="1px"/>
+    <circle cx="280" cy="276.39" r="2" stroke="#000"/>
+    <text x="165.63867" y="120.36686" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="165.63867" y="120.36686" font-size="37.333px">Vi</tspan></text>
+    <text x="373.44031" y="289.27319" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="373.44031" y="289.27319" font-size="37.333px">Vo</tspan></text>
+    <path d="m280 412.36 5e-3 -17.009m-5e-3 32.013v-15.003m-20.004 15.003h39.996m-23.997 19.982h8m-16-10h24m-11.99-152v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m-3.2e-4 -127.99v18m2.3e-4 -128v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m-55-130h-35m90 20v-20h-55" fill="none" stroke="#000"/>
+    </g></g></svg>
+    <!-- End Voltage Divider SVG Image -->
+  </div>
+  <div style="display: inline-block; font-size: 12pt;">
+    <div style="margin-bottom: 14pt;">
+      <b>String Resistance</b>&#x2000;=&#x2000;Lower + Upper
     </div>
-    <div style="display: inline-block;">
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-top: 10pt; margin-bottom: 14pt;">
-        <b>String Resistance</b>&#x2000;=&#x2000;Lower + Upper
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 14pt;">
-        <b>Divider Ratio</b>&#x2000;=&#x2000;Vo <b>/</b> Vi
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 4pt;">
-        <b>Min Ratio</b>&#x2000;=&#x2000;LowerDim <b>/</b> (LowerDim + UpperAug)
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 4pt;">
-        <i>LowerDim</i>&#x2000;=&#x2000;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Lower
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 14pt;">
-        <i>UpperAug</i>&#x2000;=&#x2000;(1 + Tolerance<b>/</b>100) &#x2022; Upper
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 14pt;">
-        <b>Nom Ratio</b>&#x2000;=&#x2000;Lower <b>/</b> (Lower + Upper)
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 4pt;">
-        <b>Max Ratio</b>&#x2000;=&#x2000;LowerAug <b>/</b> (LowerAug + UpperDim)
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 4pt;">
-        <i>LowerAug</i>&#x2000;=&#x2000;(1 + Tolerance<b>/</b>100) &#x2022; Lower
-      </div>
-      <div style="padding-left: 4pt; padding-right: 6pt; margin-bottom: 10pt;">
-        <i>UpperDim</i>&#x2000;=&#x2000;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Upper<br/>
-      </div>
+    <div style="margin-bottom: 14pt;">
+      <b>Divider Ratio</b>&#x2000;=&#x2000;Vo <b>/</b> Vi
+    </div>
+    <div style="margin-bottom: 4pt;">
+      <b>Min Ratio</b>&#x2000;=&#x2000;LowerDim <b>/</b> (LowerDim + UpperAug)
+    </div>
+    <div style="margin-bottom: 4pt;">
+      <i>LowerDim</i>&#x2000;=&#x2000;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Lower
+    </div>
+    <div style="margin-bottom: 14pt;">
+      <i>UpperAug</i>&#x2000;=&#x2000;(1 + Tolerance<b>/</b>100) &#x2022; Upper
+    </div>
+    <div style="margin-bottom: 14pt;">
+      <b>Nom Ratio</b>&#x2000;=&#x2000;Lower <b>/</b> (Lower + Upper)
+    </div>
+    <div style="margin-bottom: 4pt;">
+      <b>Max Ratio</b>&#x2000;=&#x2000;LowerAug <b>/</b> (LowerAug + UpperDim)
+    </div>
+    <div style="margin-bottom: 4pt;">
+      <i>LowerAug</i>&#x2000;=&#x2000;(1 + Tolerance<b>/</b>100) &#x2022; Lower
+    </div>
+    <div>
+      <i>UpperDim</i>&#x2000;=&#x2000;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Upper<br/>
     </div>
   </div>
+</div>
 
-  <div class="titleDiv"><span class="titleSpan">Results</span><span id="downloadSpan"></span></div>
-  <table id="resultsTable">
-    <tr>
-      <td>&nbsp;</td>
-    </tr>
-  </table>
+<div class="titleDiv"><span class="titleSpan">Results</span><span id="downloadSpan"></span></div>
+<table id="resultsTable" style="font-size: 12pt;">
+  <tr style="height: 5em;"><td style="width: 35em;">&#x2000;</td></tr>
+</table>
 
-  <p xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="max-width: 34em;">
-    <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none">
+<div xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="display: inline-block; margin-top: 40pt; margin-left: 4pt;">
+  <div style="float: left; margin-right: 1em;">
+    <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none;">
       <!-- Begin CC0 Button SVG Image -->
       <svg width="88px" height="31px" enable-background="new -0.5 -0.101 88 31" version="1.1" viewBox="-0.5 -0.101 88 31" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CC0 Button">
       <title>CC0</title>
@@ -355,7 +354,8 @@ td.paramLabel {
       </svg>
       <!-- End CC0 Button SVG Image -->
     </a>
-    <br/>
+  </div>
+  <div style="max-width: 30em; display: inline-block; font-size: 11pt;">
     To the extent possible under law,
     <span resource="[_:publisher]" rel="dct:publisher">
     <span property="dct:title">Ben Tesch</span></span>
@@ -363,7 +363,7 @@ td.paramLabel {
     <span property="dct:title">Voltage Divider Calculator</span>.
     This work is published from:
     <span property="vcard:Country" datatype="dct:ISO3166" content="US" about="[_:publisher]">United States</span>.
-  </p>
+  </div>
 </div>
 
 <script type="text/javascript">
@@ -537,8 +537,7 @@ function ShowE24() {
   // Remove target ratio value display if present
   var ratioDiv = document.getElementById("ratioDiv");
   if (ratioDiv !== null) {
-    var alignDiv = document.getElementById("alignDiv");
-    alignDiv.removeChild(ratioDiv);
+    document.body.removeChild(ratioDiv);
   }
 
   var tableFragment = document.createDocumentFragment();
@@ -594,8 +593,7 @@ function ShowE96() {
   // Remove target ratio value display if present
   var ratioDiv = document.getElementById("ratioDiv");
   if (ratioDiv !== null) {
-    var alignDiv = document.getElementById("alignDiv");
-    alignDiv.removeChild(ratioDiv);
+    document.body.removeChild(ratioDiv);
   }
 
   var tableFragment = document.createDocumentFragment();
@@ -1236,14 +1234,13 @@ function displayResults() {
 
   // Show target divider ratio value if input is an expression
   if (settings.isExpr) {
-    var alignDiv = document.getElementById("alignDiv");
     var ratio_div = document.createElement("div");
     ratio_div.id = "ratioDiv";
     ratio_div.style.fontSize = "13pt";
     ratio_div.style.marginLeft = "4pt";
     ratio_div.style.marginBottom = "10pt";
     ratio_div.textContent = "Target Divider Ratio = " + settings.targetRatio;
-    alignDiv.insertBefore(ratio_div, resultsTable);
+    document.body.insertBefore(ratio_div, resultsTable);
   }
 
   // Display spreadsheet download links
@@ -1987,8 +1984,7 @@ function solveDivider() {
   // Remove target ratio value display if present
   var ratioDiv = document.getElementById("ratioDiv");
   if (ratioDiv !== null) {
-    var alignDiv = document.getElementById("alignDiv");
-    alignDiv.removeChild(ratioDiv);
+    document.body.removeChild(ratioDiv);
   }
 
   // These are used for error messages
