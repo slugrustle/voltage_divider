@@ -198,9 +198,22 @@ td.buttonCol {
   text-align: center;
 }
 
+input[type="radio"] {
+  display: none;
+}
+
+input[type="radio"]:checked+label {
+  background-color: #DDDDDD;
+}
+
+.buttonLabel {
+  user-select: none;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
 #eqsDiv {
   border: 1px solid black; 
-  display: none; 
   padding: 8pt;
 }
 
@@ -254,9 +267,14 @@ td.paramLabel {
   </tr>
   <tr>
     <td class="labelCol">Ratio Type</td>
-    <td>Min <input type="radio" name="ratioType" id="ratioTypeMin"/>
-        Nom <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
-        Max <input type="radio" name="ratioType" id="ratioTypeMax"/></td>
+    <td class="buttonCol">
+      <input type="radio" name="ratioType" id="ratioTypeMin"/>
+      <label for="ratioTypeMin" class="buttonLabel">MIN</label> &#x2000;
+      <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
+      <label for="ratioTypeNom" class="buttonLabel">NOM</label> &#x2000;
+      <input type="radio" name="ratioType" id="ratioTypeMax"/>
+      <label for="ratioTypeMax" class="buttonLabel">MAX</label>
+    </td>
     <td>Over Tolerance</td>
   </tr>
   <tr>
@@ -277,12 +295,14 @@ td.paramLabel {
   <tr>
     <td class="labelCol">Resistor Value Series</td>
     <td class="buttonCol">
-        E24 <input type="radio" name="resSeries" id="resSeriesE24" value="min"/>
-        E96 <input type="radio" name="resSeries" id="resSeriesE96" value="nom"/>
-        Both <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
+        <input type="radio" name="resSeries" id="resSeriesE24"/>
+        <label for="resSeriesE24" class="buttonLabel">E24</label> &#x2000;
+        <input type="radio" name="resSeries" id="resSeriesE96"/>
+        <label for="resSeriesE96" class="buttonLabel">E96</label> &#x2000;
+        <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
+        <label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
     </td>
-    <td><a href="javascript:;" onclick="ShowE24();">Show E24</a>&#x2000;
-        <a href="javascript:;" onclick="ShowE96();">Show E96</a></td>
+    <td>View&#x2000;<a href="javascript:;" onclick="ShowE24();">E24</a>,&#x2000;<a href="javascript:;" onclick="ShowE96();">E96</a></td>
   </tr>
   <tr>
     <td class="buttonCol" colspan="3"><button onclick="solveDivider();">Solve</button></td>
@@ -294,7 +314,7 @@ td.paramLabel {
   <span style="font-size: 14pt; margin-left: 1em;">
     (&#x2009;<a href="javascript:;" id="toggleMath" onclick="toggleMath();">show</a>&#x2009;)
   </span></div>
-<div id="eqsDiv">
+<div id="eqsDiv" style="display: none;">
   <div style="float:left; margin-right: 14pt;">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 221.41 360.341" height="240.228" width="147.606" role="img" aria-label="Voltage Divider Circuit Diagram">
       <title>Voltage Divider Circuit Diagram</title><desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
