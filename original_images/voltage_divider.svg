@@ -9,9 +9,9 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    id="svg4421"
-   viewBox="0 0 286.64146 355.84126"
-   height="177.92064pt"
-   width="143.32074pt"
+   viewBox="0 0 221.40965 360.34126"
+   height="180.17064pt"
+   width="110.70483pt"
    sodipodi:docname="voltage_divider.svg"
    inkscape:version="0.92.1 r15371">
   <sodipodi:namedview
@@ -32,11 +32,11 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      units="pt"
-     inkscape:zoom="2"
-     inkscape:cx="119.25315"
-     inkscape:cy="102.4879"
-     inkscape:window-x="-8"
-     inkscape:window-y="0"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="144.20604"
+     inkscape:cy="135.01743"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:current-layer="g4366"
      inkscape:document-units="pt"
@@ -70,7 +70,7 @@
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(-189.57421,-217.46642)"
+     transform="translate(-203.43036,-212.96642)"
      id="layer1">
     <g
        id="g4366"
@@ -78,38 +78,39 @@
       <circle
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="path3406-5"
-         cx="185.09164"
-         cy="137.3622"
+         cx="279.98257"
+         cy="132.32245"
          r="5" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:37.33333206px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="126.95769"
-         y="222.08461"
+         x="140.81384"
+         y="222.06082"
          id="text4227"><tspan
            id="tspan4229"
-           x="126.95769"
-           y="222.08461"
+           x="140.81384"
+           y="222.06082"
            style="font-size:37.33333206px">Upper</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:37.33333206px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="127.39714"
-         y="353.69226"
+         x="142.05342"
+         y="353.66287"
          id="text4231"><tspan
            id="tspan4233"
-           x="127.39714"
-           y="353.69226"
+           x="142.05342"
+           y="353.66287"
            style="font-size:37.33333206px">Lower</tspan></text>
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.8653034px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 280,276.10342 h 74.875"
+         d="m 280,276.10342 h 58.77344"
          id="path4301"
-         inkscape:connector-curvature="0" />
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cc" />
       <circle
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="path3406-9"
-         cx="360.1076"
+         cx="343.91229"
          cy="276.10342"
          r="5" />
       <circle
@@ -121,22 +122,22 @@
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:37.33333206px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="165.63867"
-         y="120.36686"
+         x="264.04117"
+         y="115.86686"
          id="text4354"><tspan
            id="tspan4356"
-           x="165.63867"
-           y="120.36686"
+           x="264.04117"
+           y="115.86686"
            style="font-size:37.33333206px">Vi</tspan></text>
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:37.33333206px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="373.44031"
-         y="289.27319"
+         x="322.06464"
+         y="257.98373"
          id="text4362"><tspan
            id="tspan4364"
-           x="373.44031"
-           y="289.27319"
+           x="322.06464"
+           y="257.98373"
            style="font-size:37.33333206px">Vo</tspan></text>
       <g
          id="g4526"
@@ -144,8 +145,9 @@
       <path
          id="path4528"
          style="fill:none;stroke:#000000;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         d="m 279.99543,412.35772 0.005,-17.00922 m -0.005,32.01258 v -15.00336 m -20.00391,15.00336 h 39.99609 m -23.99738,19.98245 h 8 m -16,-10 h 24 M 280.00032,285.34851 v 25 l 15,5 -30,10 30,10 -30,10 30,10 -30,10 15,5 v 25 0 M 280,267.35829 v 18 m 2.3e-4,-127.99894 v 25 l 15,5 -30,10 30,10 -30,10 30,10 -30,10 15,5 v 25 0 M 225,137.3622 h -35 m 90,20 v -20 h -55"
-         inkscape:connector-curvature="0" />
+         d="m 279.99543,412.35772 0.005,-17.00922 m -0.005,32.01258 v -15.00336 m -20.00391,15.00336 h 39.99609 m -23.99738,19.98245 h 8 m -16,-10 h 24 M 280.00032,285.34851 v 25 l 15,5 -30,10 30,10 -30,10 30,10 -30,10 15,5 v 25 0 M 280,267.35829 v 18 m 2.3e-4,-127.99894 v 25 l 15,5 -30,10 30,10 -30,10 30,10 -30,10 15,5 v 25 0 M 280,157.3622 v -20"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccc" />
     </g>
   </g>
 </svg>

@@ -149,6 +149,26 @@ express Statement of Purpose.
 -->
 <title>Voltage Divider Calculator</title>
 <style>
+a:link {
+  text-decoration: none;
+  color: blue;
+}
+
+a:visited {
+  text-decoration: none;
+  color: blue;
+}
+
+a:hover {
+  text-decoration: none;
+  color: blue;
+}
+
+a:active {
+  text-decoration: none;
+  color: blue;
+}
+
 div.titleDiv {
   margin-left: 4pt;
   margin-top: 16pt;
@@ -178,9 +198,9 @@ td.buttonCol {
   text-align: center;
 }
 
-#explainerDiv {
+#eqsDiv {
   border: 1px solid black; 
-  display: inline-block; 
+  display: none; 
   padding: 8pt;
 }
 
@@ -230,24 +250,29 @@ td.paramLabel {
   <tr>
     <td class="labelCol">Target Divider Ratio</td>
     <td class="buttonCol"><input id="dividerRatio" maxlength="200"/></td>
+    <td>&gt;0 and &lt;1</td>
+  </tr>
+  <tr>
+    <td class="labelCol">Ratio Type</td>
     <td>Min <input type="radio" name="ratioType" id="ratioTypeMin"/>
         Nom <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
         Max <input type="radio" name="ratioType" id="ratioTypeMax"/></td>
+    <td>Over Tolerance</td>
   </tr>
   <tr>
-    <td class="labelCol">Resistor Tolerance (%)</td>
+    <td class="labelCol">Resistor Tolerance</td>
     <td class="buttonCol"><input id="resTolerance" value="0" maxlength="30"/></td>
-    <td>&nbsp;</td>
+    <td>%</td>
   </tr>
   <tr>
-    <td class="labelCol">Min String Resistance (&#x03A9;)</td>
+    <td class="labelCol">Min String Resistance</td>
     <td class="buttonCol"><input id="minStringResistance" value="0" maxlength="30"/></td>
-    <td>Resistance value examples:</td>
+    <td>&#x03A9;</td>
   </tr>
   <tr>
-    <td class="labelCol">Max String Resistance (&#x03A9;)</td>
+    <td class="labelCol">Max String Resistance</td>
     <td class="buttonCol"><input id="maxStringResistance" value="20M" maxlength="30"/></td>
-    <td>0,&#x2000;10,&#x2000;2.4k,&#x2000;5.6e4,&#x2000;3.1M</td>
+    <td>&#x03A9;</td>
   </tr>
   <tr>
     <td class="labelCol">Resistor Value Series</td>
@@ -264,26 +289,22 @@ td.paramLabel {
   </tr>
 </table>
 
-<div class="titleDiv"><span class="titleSpan">Equations</span></div>
-<div id="explainerDiv">
-  <div style="float:left; margin-right: 10pt;">
-    <!-- Begin Voltage Divider SVG Image -->
-    <svg width="143.32pt" height="177.92pt" version="1.1" viewBox="0 0 286.64146 355.84126" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" role="img" aria-label="Voltage Divider Circuit Diagram">
-    <title>Voltage Divider Circuit Diagram</title>
-    <desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
-    <g transform="translate(-189.57 -217.47)">
-    <g transform="translate(59.372 125.46)">
-    <circle cx="185.09" cy="137.36" r="5" fill="none" stroke="#000" stroke-width="1px"/>
-    <text x="126.95769" y="222.08461" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="126.95769" y="222.08461" font-size="37.333px">Upper</tspan></text>
-    <text x="127.39714" y="353.69226" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="127.39714" y="353.69226" font-size="37.333px">Lower</tspan></text>
-    <path d="m280 276.1h74.875" fill="none" stroke="#000" stroke-width=".8653px"/>
-    <circle cx="360.11" cy="276.1" r="5" fill="none" stroke="#000" stroke-width="1px"/>
-    <circle cx="280" cy="276.39" r="2" stroke="#000"/>
-    <text x="165.63867" y="120.36686" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="165.63867" y="120.36686" font-size="37.333px">Vi</tspan></text>
-    <text x="373.44031" y="289.27319" fill="#000000" font-family="sans-serif" font-size="37.333px" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:125%" xml:space="preserve"><tspan x="373.44031" y="289.27319" font-size="37.333px">Vo</tspan></text>
-    <path d="m280 412.36 5e-3 -17.009m-5e-3 32.013v-15.003m-20.004 15.003h39.996m-23.997 19.982h8m-16-10h24m-11.99-152v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m-3.2e-4 -127.99v18m2.3e-4 -128v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m-55-130h-35m90 20v-20h-55" fill="none" stroke="#000"/>
-    </g></g></svg>
-    <!-- End Voltage Divider SVG Image -->
+<div class="titleDiv" id="eqsTitle">
+  <span class="titleSpan">Equations</span>
+  <span style="font-size: 14pt; margin-left: 1em;">
+    (&#x2009;<a href="javascript:;" id="toggleMath" onclick="toggleMath();">show</a>&#x2009;)
+  </span></div>
+<div id="eqsDiv">
+  <div style="float:left; margin-right: 14pt;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 221.41 360.341" height="240.228" width="147.606" role="img" aria-label="Voltage Divider Circuit Diagram">
+      <title>Voltage Divider Circuit Diagram</title><desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
+      <g transform="translate(-144.059 -87.502)"><circle cx="279.983" cy="132.322" r="5" fill="none" stroke="#000"/><text style="line-height:125%" x="140.814" y="222.061" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
+      <tspan x="140.814" y="222.061">Upper</tspan></text><text style="line-height:125%" x="142.053" y="353.663" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
+      <tspan x="142.053" y="353.663">Lower</tspan></text><path d="M280 276.103h58.773" fill="none" stroke="#000" stroke-width=".865"/><circle cx="343.912" cy="276.103" r="5" fill="none" stroke="#000"/>
+      <circle cx="280" cy="276.393" r="2" stroke="#000"/><text style="line-height:125%" x="264.041" y="115.867" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
+      <tspan x="264.041" y="115.867">Vi</tspan></text><text style="line-height:125%" x="322.065" y="257.984" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0"><tspan x="322.065" y="257.984">Vo</tspan></text>
+      <path d="M279.995 412.358l.005-17.01m-.005 32.013v-15.003m-20.003 15.003h39.996m-23.998 19.983h8m-16-10h24M280 285.349v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m0-127.99v18m0-128v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m0-109.997v-20" fill="none" stroke="#000"/></g>
+    </svg>
   </div>
   <div style="display: inline-block; font-size: 12pt;">
     <div style="margin-bottom: 14pt;">
@@ -316,44 +337,20 @@ td.paramLabel {
   </div>
 </div>
 
-<div class="titleDiv"><span class="titleSpan">Results</span><span id="downloadSpan"></span></div>
-<table id="resultsTable" style="font-size: 12pt;">
-  <tr style="height: 5em;"><td style="width: 35em;">&#x2000;</td></tr>
-</table>
-
-<div xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="display: inline-block; margin-top: 40pt; margin-left: 4pt;">
+<div xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="display: inline-block; margin-top: 40pt; margin-left: 4pt;" id="licenseBlock">
   <div style="float: left; margin-right: 1em;">
     <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none;">
-      <!-- Begin CC0 Button SVG Image -->
-      <svg width="88px" height="31px" enable-background="new -0.5 -0.101 88 31" version="1.1" viewBox="-0.5 -0.101 88 31" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CC0 Button">
-      <title>CC0</title>
-      <desc>Creative Commons CC0 1.0 Universal Button Image</desc>
-      <path d="m1.803 0.482l83.127 0.149c1.161 0 2.198-0.173 2.198 2.333l-0.103 27.556h-87.32v-27.658c0-1.236 0.118-2.38 2.098-2.38z" fill="#fff"/>
-      <ellipse cx="13.887" cy="15.502" rx="11.101" ry="11.174" fill="#fff"/>
-      <path d="M23.271,4.061c3.484,2.592,5.754,6.744,5.755,11.44c-0.001,4.272-1.88,8.095-4.842,10.705h62.853V4.061H23.271z"/>
-      <g fill="#fff">
-      <path d="m35.739 7.559c0.392 0 0.728 0.059 1.002 0.173 0.276 0.116 0.5 0.268 0.674 0.456 0.173 0.189 0.299 0.405 0.379 0.647 0.079 0.242 0.118 0.494 0.118 0.753 0 0.253-0.039 0.503-0.118 0.749-0.08 0.244-0.206 0.462-0.379 0.65-0.174 0.189-0.397 0.341-0.674 0.456-0.274 0.114-0.61 0.173-1.002 0.173h-1.452v2.267h-1.382v-6.324h2.834zm-0.379 2.976c0.158 0 0.312-0.012 0.457-0.035 0.147-0.023 0.276-0.069 0.388-0.137s0.201-0.164 0.269-0.288 0.101-0.287 0.101-0.487-0.033-0.362-0.101-0.487c-0.067-0.124-0.157-0.221-0.269-0.287-0.111-0.068-0.24-0.114-0.388-0.138-0.146-0.024-0.299-0.036-0.457-0.036h-1.073v1.896l1.073-1e-3z"/>
-      <path d="m43.751 13.4c-0.476 0.417-1.133 0.625-1.972 0.625-0.851 0-1.509-0.207-1.976-0.62-0.466-0.412-0.699-1.052-0.699-1.913v-3.933h1.381v3.934c0 0.171 0.016 0.338 0.045 0.505 0.029 0.165 0.091 0.311 0.185 0.439 0.094 0.126 0.225 0.229 0.392 0.309 0.167 0.081 0.392 0.12 0.673 0.12 0.493 0 0.833-0.11 1.021-0.332s0.282-0.568 0.282-1.04v-3.935h1.382v3.934c-1e-3 0.855-0.238 1.49-0.714 1.907z"/>
-      <path d="m49.07 7.559c0.3 0 0.572 0.027 0.818 0.081 0.244 0.054 0.457 0.14 0.633 0.261 0.177 0.121 0.312 0.282 0.41 0.482 0.096 0.201 0.146 0.45 0.146 0.745 0 0.318-0.072 0.584-0.216 0.796-0.146 0.212-0.357 0.388-0.639 0.523 0.387 0.112 0.676 0.31 0.865 0.589 0.189 0.281 0.286 0.62 0.286 1.015 0 0.319-0.062 0.595-0.187 0.828-0.123 0.232-0.289 0.423-0.496 0.571-0.209 0.148-0.445 0.257-0.713 0.327-0.269 0.07-0.541 0.105-0.822 0.105h-3.047v-6.323h2.962zm-0.175 2.56c0.246 0 0.448-0.059 0.607-0.178 0.158-0.118 0.236-0.309 0.236-0.576 0-0.147-0.025-0.269-0.078-0.363-0.053-0.093-0.123-0.168-0.211-0.221-0.09-0.053-0.189-0.091-0.305-0.109-0.115-0.022-0.232-0.032-0.355-0.032h-1.294v1.48l1.4-1e-3zm0.08 2.685c0.135 0 0.264-0.014 0.387-0.04s0.23-0.072 0.326-0.133c0.092-0.062 0.168-0.147 0.226-0.254 0.056-0.104 0.083-0.241 0.083-0.406 0-0.324-0.092-0.557-0.271-0.695-0.182-0.138-0.424-0.208-0.723-0.208h-1.505v1.738h1.479v-2e-3h-2e-3z"/>
-      <path d="M54.143,7.559v5.156h3.062v1.168H52.76V7.559H54.143z"/>
-      <path d="m59.748 7.559v6.324h-1.382v-6.324h1.382z"/>
-      <path d="m65.451 9.247c-0.082-0.132-0.186-0.249-0.309-0.349-0.123-0.102-0.263-0.18-0.418-0.236-0.156-0.057-0.316-0.084-0.488-0.084-0.312 0-0.574 0.062-0.793 0.183-0.217 0.12-0.394 0.283-0.525 0.486-0.136 0.204-0.232 0.436-0.296 0.695-0.062 0.259-0.093 0.528-0.093 0.806 0 0.267 0.031 0.524 0.093 0.776 0.062 0.251 0.16 0.477 0.296 0.678 0.134 0.201 0.312 0.361 0.525 0.483 0.219 0.12 0.481 0.181 0.793 0.181 0.424 0 0.752-0.13 0.99-0.389 0.236-0.26 0.383-0.602 0.437-1.028h1.337c-0.034 0.396-0.126 0.753-0.271 1.072-0.146 0.318-0.342 0.591-0.582 0.815-0.238 0.225-0.521 0.396-0.845 0.513-0.323 0.119-0.678 0.178-1.065 0.178-0.479 0-0.914-0.084-1.297-0.252-0.385-0.169-0.709-0.398-0.973-0.695-0.265-0.295-0.468-0.642-0.607-1.04-0.142-0.399-0.211-0.829-0.211-1.289 0-0.473 0.069-0.911 0.211-1.316 0.141-0.404 0.344-0.758 0.607-1.059 0.264-0.302 0.588-0.536 0.973-0.708 0.384-0.172 0.815-0.258 1.297-0.258 0.348 0 0.676 0.051 0.981 0.15 0.308 0.102 0.583 0.248 0.827 0.44 0.243 0.191 0.443 0.43 0.604 0.712 0.158 0.283 0.259 0.608 0.301 0.975h-1.34c-0.024-0.163-0.077-0.31-0.159-0.44z"/>
-      <path d="m35.615 16.418c0.405 0 0.782 0.062 1.131 0.192 0.35 0.13 0.651 0.324 0.906 0.585 0.255 0.26 0.455 0.586 0.599 0.975 0.144 0.391 0.216 0.849 0.216 1.371 0 0.463-0.059 0.888-0.176 1.277-0.118 0.391-0.295 0.727-0.532 1.012-0.238 0.281-0.534 0.504-0.89 0.668-0.354 0.16-0.772 0.242-1.254 0.242h-2.71v-6.322h2.71zm-0.096 5.154c0.199 0 0.393-0.031 0.581-0.098 0.188-0.062 0.354-0.173 0.502-0.323 0.146-0.151 0.264-0.347 0.352-0.59 0.088-0.241 0.132-0.536 0.132-0.886 0-0.317-0.031-0.606-0.093-0.863-0.062-0.256-0.162-0.479-0.304-0.659-0.141-0.183-0.326-0.323-0.559-0.421-0.231-0.098-0.517-0.146-0.858-0.146h-0.984v3.986h1.231z"/>
-      <path d="m39.8 18.289c0.141-0.403 0.344-0.756 0.606-1.059 0.265-0.303 0.589-0.538 0.973-0.709 0.385-0.171 0.816-0.257 1.298-0.257 0.487 0 0.921 0.086 1.303 0.257 0.381 0.171 0.704 0.406 0.969 0.709 0.264 0.303 0.466 0.652 0.605 1.059 0.143 0.404 0.213 0.845 0.213 1.316 0 0.46-0.07 0.891-0.213 1.288-0.142 0.397-0.344 0.744-0.605 1.04-0.266 0.295-0.588 0.525-0.969 0.695-0.382 0.166-0.815 0.252-1.303 0.252-0.481 0-0.913-0.086-1.298-0.252-0.384-0.17-0.708-0.4-0.973-0.695-0.263-0.296-0.466-0.645-0.606-1.04-0.14-0.397-0.211-0.828-0.211-1.288 0-0.471 0.07-0.911 0.211-1.316zm1.262 2.09c0.062 0.252 0.16 0.479 0.295 0.68 0.135 0.2 0.312 0.359 0.527 0.482 0.218 0.121 0.481 0.183 0.792 0.183 0.312 0 0.576-0.062 0.792-0.183 0.218-0.121 0.394-0.281 0.529-0.482 0.134-0.2 0.231-0.428 0.295-0.68 0.062-0.25 0.092-0.508 0.092-0.774 0-0.276-0.03-0.547-0.092-0.806-0.062-0.262-0.161-0.492-0.295-0.696-0.136-0.201-0.312-0.365-0.529-0.485-0.216-0.121-0.48-0.184-0.792-0.184-0.311 0-0.574 0.062-0.792 0.184-0.216 0.12-0.393 0.284-0.527 0.485-0.135 0.204-0.233 0.437-0.295 0.696s-0.093 0.527-0.093 0.806c1e-3 0.266 0.032 0.524 0.093 0.774z"/>
-      <path d="m49.092 16.418l1.471 4.348h0.02l1.393-4.348h1.942v6.322h-1.294v-4.48h-0.02l-1.539 4.48h-1.065l-1.54-4.437h-0.019v4.437h-1.293v-6.322h1.944z"/>
-      <path d="m58.764 16.418l2.35 6.322h-1.434l-0.476-1.408h-2.351l-0.492 1.408h-1.391l2.377-6.322h1.417zm0.08 3.879l-0.793-2.322h-0.018l-0.817 2.322h1.628z"/>
-      <path d="m63.547 16.418v6.322h-1.382v-6.322h1.382z"/>
-      <path d="m66.604 16.418l2.623 4.242h0.018v-4.242h1.294v6.322h-1.384l-2.611-4.234h-0.02v4.234h-1.294v-6.322h1.374z"/>
-      </g>
-      <path d="m85.852 0h-84.705c-0.908 0-1.647 0.744-1.647 1.658v28.969c0 0.207 0.167 0.373 0.372 0.373h87.256c0.205 0 0.372-0.166 0.372-0.373v-28.969c0-0.914-0.738-1.658-1.648-1.658zm-84.705 0.75h84.705c0.498 0 0.902 0.406 0.902 0.908v28.557h-86.509v-8.426-20.131c0-0.501 0.405-0.908 0.902-0.908z"/>
-      <ellipse cx="14.156" cy="15.661" rx="11.004" ry="11.076" fill="#fff"/>
-      <path d="m14.22 8.746c-3.862 0-4.834 3.669-4.834 6.779 0 3.111 0.971 6.779 4.834 6.779s4.834-3.67 4.834-6.779c0-3.111-0.971-6.779-4.834-6.779zm0 2.555c0.157 0 0.3 0.024 0.435 0.06 0.278 0.24 0.414 0.573 0.147 1.038l-2.572 4.76c-0.079-0.603-0.091-1.195-0.091-1.634 0-1.37 0.094-4.224 2.081-4.224zm1.926 2.193c0.137 0.731 0.155 1.493 0.155 2.03 0 1.37-0.094 4.223-2.08 4.223-0.156 0-0.301-0.017-0.435-0.049-0.025-0.01-0.049-0.019-0.074-0.025-0.04-0.012-0.084-0.024-0.122-0.041-0.442-0.188-0.721-0.531-0.319-1.139l2.875-4.999z"/>
-      <path d="m14.195 3.748c-3.245 0-5.98 1.137-8.21 3.422-1.128 1.135-1.99 2.431-2.589 3.876-0.585 1.43-0.876 2.921-0.876 4.478 0 1.57 0.291 3.062 0.876 4.479s1.434 2.69 2.548 3.826c1.128 1.121 2.395 1.985 3.802 2.588 1.421 0.59 2.903 0.884 4.449 0.884 1.547 0 3.05-0.304 4.499-0.907 1.448-0.604 2.74-1.471 3.883-2.605 1.101-1.078 1.934-2.317 2.49-3.719 0.571-1.415 0.853-2.932 0.853-4.544 0-1.598-0.281-3.112-0.852-4.528-0.571-1.429-1.407-2.693-2.507-3.801-2.298-2.302-5.092-3.449-8.366-3.449zm0.049 2.119c2.646 0 4.904 0.944 6.784 2.836 0.906 0.912 1.6 1.954 2.073 3.119 0.473 1.164 0.713 2.398 0.713 3.703 0 2.707-0.92 4.952-2.744 6.746-0.948 0.927-2.012 1.638-3.196 2.128-1.17 0.489-2.375 0.732-3.63 0.732-1.268 0-2.481-0.239-3.638-0.717-1.156-0.489-2.193-1.191-3.113-2.104-0.92-0.925-1.629-1.97-2.13-3.135-0.487-1.178-0.738-2.391-0.738-3.653 0-1.276 0.251-2.497 0.738-3.662 0.501-1.178 1.211-2.235 2.13-3.175 1.824-1.876 4.077-2.818 6.751-2.818z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="-0.5 -0.101 88 31" role="img" aria-label="CC0 Button">
+        <title>CC0</title><desc>Creative Commons CC0 1.0 Universal Button Image</desc>
+        <path fill="#FFF" d="M1.803.482L84.93.631c1.161 0 2.198-.173 2.198 2.333l-.103 27.556H-.295V2.862c0-1.236.118-2.38 2.098-2.38z"/><ellipse fill="#FFF" cx="13.887" cy="15.502" rx="11.101" ry="11.174"/><path d="M23.271 4.061a14.23 14.23 0 0 1 5.755 11.44 14.232 14.232 0 0 1-4.842 10.705h62.853V4.061H23.271z"/>
+        <path d="M35.739 7.559c.392 0 .728.059 1.002.173.276.116.5.268.674.456.173.189.299.405.379.647a2.437 2.437 0 0 1 0 1.502c-.08.244-.206.462-.379.65a1.874 1.874 0 0 1-.674.456c-.274.114-.61.173-1.002.173h-1.452v2.267h-1.382V7.559h2.834zm-.379 2.976c.158 0 .312-.012.457-.035.147-.023.276-.069.388-.137.112-.068.201-.164.269-.288s.101-.287.101-.487-.033-.362-.101-.487a.725.725 0 0 0-.269-.287 1.058 1.058 0 0 0-.388-.138 2.82 2.82 0 0 0-.457-.036h-1.073v1.896l1.073-.001zm8.391 2.865c-.476.417-1.133.625-1.972.625-.851 0-1.509-.207-1.976-.62-.466-.412-.699-1.052-.699-1.913V7.559h1.381v3.934c0 .171.016.338.045.505.029.165.091.311.185.439.094.126.225.229.392.309.167.081.392.12.673.12.493 0 .833-.11 1.021-.332.188-.222.282-.568.282-1.04V7.559h1.382v3.934c-.001.855-.238 1.49-.714 1.907zm5.319-5.841c.3 0 .572.027.818.081.244.054.457.14.633.261.177.121.312.282.41.482.096.201.146.45.146.745 0 .318-.072.584-.216.796a1.583 1.583 0 0 1-.639.523c.387.112.676.31.865.589.189.281.286.62.286 1.015 0 .319-.062.595-.187.828a1.631 1.631 0 0 1-.496.571 2.165 2.165 0 0 1-.713.327 3.24 3.24 0 0 1-.822.105h-3.047V7.559h2.962zm-.175 2.56c.246 0 .448-.059.607-.178.158-.118.236-.309.236-.576a.737.737 0 0 0-.078-.363.598.598 0 0 0-.211-.221.846.846 0 0 0-.305-.109 1.875 1.875 0 0 0-.355-.032h-1.294v1.48l1.4-.001zm.08 2.685c.135 0 .264-.014.387-.04a.977.977 0 0 0 .326-.133.707.707 0 0 0 .226-.254.86.86 0 0 0 .083-.406c0-.324-.092-.557-.271-.695-.182-.138-.424-.208-.723-.208h-1.505v1.738h1.479v-.002h-.002zm5.168-5.245v5.156h3.062v1.168H52.76V7.559h1.383zm5.605 0v6.324h-1.382V7.559h1.382zm5.703 1.688a1.405 1.405 0 0 0-.309-.349 1.387 1.387 0 0 0-.418-.236 1.399 1.399 0 0 0-.488-.084c-.312 0-.574.062-.793.183-.217.12-.394.283-.525.486a2.182 2.182 0 0 0-.296.695 3.453 3.453 0 0 0 0 1.582c.062.251.16.477.296.678.134.201.312.361.525.483.219.12.481.181.793.181.424 0 .752-.13.99-.389.236-.26.383-.602.437-1.028H67a3.242 3.242 0 0 1-.271 1.072 2.574 2.574 0 0 1-.582.815 2.404 2.404 0 0 1-.845.513 3.06 3.06 0 0 1-1.065.178c-.479 0-.914-.084-1.297-.252a2.763 2.763 0 0 1-.973-.695 3.036 3.036 0 0 1-.607-1.04 3.818 3.818 0 0 1-.211-1.289c0-.473.069-.911.211-1.316a3.19 3.19 0 0 1 .607-1.059 2.77 2.77 0 0 1 .973-.708 3.135 3.135 0 0 1 1.297-.258c.348 0 .676.051.981.15.308.102.583.248.827.44.243.191.443.43.604.712.158.283.259.608.301.975h-1.34a1.121 1.121 0 0 0-.159-.44zm-29.836 7.171c.405 0 .782.062 1.131.192.35.13.651.324.906.585.255.26.455.586.599.975.144.391.216.849.216 1.371 0 .463-.059.888-.176 1.277a2.845 2.845 0 0 1-.532 1.012 2.54 2.54 0 0 1-.89.668c-.354.16-.772.242-1.254.242h-2.71v-6.322h2.71zm-.096 5.154c.199 0 .393-.031.581-.098a1.26 1.26 0 0 0 .502-.323c.146-.151.264-.347.352-.59.088-.241.132-.536.132-.886 0-.317-.031-.606-.093-.863a1.698 1.698 0 0 0-.304-.659 1.347 1.347 0 0 0-.559-.421c-.231-.098-.517-.146-.858-.146h-.984v3.986h1.231zm4.281-3.283c.141-.403.344-.756.606-1.059.265-.303.589-.538.973-.709a3.16 3.16 0 0 1 1.298-.257c.487 0 .921.086 1.303.257.381.171.704.406.969.709.264.303.466.652.605 1.059.143.404.213.845.213 1.316 0 .46-.07.891-.213 1.288a3.168 3.168 0 0 1-.605 1.04 2.843 2.843 0 0 1-.969.695 3.235 3.235 0 0 1-1.303.252c-.481 0-.913-.086-1.298-.252a2.82 2.82 0 0 1-.973-.695 3.122 3.122 0 0 1-.606-1.04 3.854 3.854 0 0 1-.211-1.288c0-.471.07-.911.211-1.316zm1.262 2.09c.062.252.16.479.295.68.135.2.312.359.527.482.218.121.481.183.792.183a1.6 1.6 0 0 0 .792-.183c.218-.121.394-.281.529-.482.134-.2.231-.428.295-.68a3.465 3.465 0 0 0 0-1.58 2.157 2.157 0 0 0-.295-.696 1.522 1.522 0 0 0-.529-.485 1.6 1.6 0 0 0-.792-.184c-.311 0-.574.062-.792.184-.216.12-.393.284-.527.485a2.164 2.164 0 0 0-.295.696 3.446 3.446 0 0 0 0 1.58zm8.03-3.961l1.471 4.348h.02l1.393-4.348h1.942v6.322h-1.294v-4.48h-.02l-1.539 4.48H50l-1.54-4.437h-.019v4.437h-1.293v-6.322h1.944zm9.672 0l2.35 6.322H59.68l-.476-1.408h-2.351l-.492 1.408H54.97l2.377-6.322h1.417zm.08 3.879l-.793-2.322h-.018l-.817 2.322h1.628zm4.703-3.879v6.322h-1.382v-6.322h1.382zm3.057 0l2.623 4.242h.018v-4.242h1.294v6.322h-1.384l-2.611-4.234h-.02v4.234H65.23v-6.322h1.374z" fill="#FFF"/>
+        <path d="M85.852 0H1.147C.239 0-.5.744-.5 1.658v28.969c0 .207.167.373.372.373h87.256a.372.372 0 0 0 .372-.373V1.658C87.5.744 86.762 0 85.852 0zM1.147.75h84.705c.498 0 .902.406.902.908v28.557H.245V1.658c0-.501.405-.908.902-.908z"/><ellipse fill="#FFF" cx="14.156" cy="15.661" rx="11.004" ry="11.076"/>
+        <path d="M14.22 8.746c-3.862 0-4.834 3.669-4.834 6.779 0 3.111.971 6.779 4.834 6.779 3.863 0 4.834-3.67 4.834-6.779 0-3.111-.971-6.779-4.834-6.779zm0 2.555c.157 0 .3.024.435.06.278.24.414.573.147 1.038l-2.572 4.76a12.735 12.735 0 0 1-.091-1.634c0-1.37.094-4.224 2.081-4.224zm1.926 2.193c.137.731.155 1.493.155 2.03 0 1.37-.094 4.223-2.08 4.223-.156 0-.301-.017-.435-.049a.537.537 0 0 0-.074-.025c-.04-.012-.084-.024-.122-.041-.442-.188-.721-.531-.319-1.139l2.875-4.999z"/>
+        <path d="M14.195 3.748c-3.245 0-5.98 1.137-8.21 3.422a11.946 11.946 0 0 0-2.589 3.876 11.708 11.708 0 0 0-.876 4.478c0 1.57.291 3.062.876 4.479s1.434 2.69 2.548 3.826a12.157 12.157 0 0 0 3.802 2.588c1.421.59 2.903.884 4.449.884 1.547 0 3.05-.304 4.499-.907a12.06 12.06 0 0 0 3.883-2.605 10.665 10.665 0 0 0 2.49-3.719c.571-1.415.853-2.932.853-4.544 0-1.598-.281-3.112-.852-4.528a11.292 11.292 0 0 0-2.507-3.801c-2.298-2.302-5.092-3.449-8.366-3.449zm.049 2.119c2.646 0 4.904.944 6.784 2.836a9.432 9.432 0 0 1 2.073 3.119 9.743 9.743 0 0 1 .713 3.703c0 2.707-.92 4.952-2.744 6.746a10.029 10.029 0 0 1-3.196 2.128 9.306 9.306 0 0 1-3.63.732 9.437 9.437 0 0 1-3.638-.717 9.824 9.824 0 0 1-3.113-2.104 10.035 10.035 0 0 1-2.13-3.135 9.465 9.465 0 0 1-.738-3.653 9.41 9.41 0 0 1 .738-3.662 10.247 10.247 0 0 1 2.13-3.175c1.824-1.876 4.077-2.818 6.751-2.818z"/>
       </svg>
-      <!-- End CC0 Button SVG Image -->
     </a>
   </div>
-  <div style="max-width: 30em; display: inline-block; font-size: 11pt;">
+  <div style="max-width: 29em; display: inline-block; font-size: 11pt;">
     To the extent possible under law,
     <span resource="[_:publisher]" rel="dct:publisher">
     <span property="dct:title">Ben Tesch</span></span>
@@ -366,6 +363,43 @@ td.paramLabel {
 
 <script type="text/javascript">
 "use strict";
+
+// Toggles display of equations and schematic
+function toggleMath() {
+  var eqsDiv = document.getElementById("eqsDiv");
+  var toggleAnchor = document.getElementById("toggleMath");
+
+  if (eqsDiv.style.display === "none")
+  {
+    toggleAnchor.innerHTML = "hide";
+    eqsDiv.style.display = "inline-block";
+  }
+  else
+  {
+    toggleAnchor.innerHTML = "show";
+    eqsDiv.style.display = "none";
+  }
+}
+
+// Clears results from previous run of program,
+// including E24/E96 display, diagnostic message,
+// download links, etc.
+function clearResults() { 
+  var outputTitle = document.getElementById("outputTitle");
+  if (outputTitle !== null) {
+    document.body.removeChild(outputTitle);
+  }
+
+  var ratioDiv = document.getElementById("ratioDiv");
+  if (ratioDiv !== null) {
+    document.body.removeChild(ratioDiv);
+  }
+
+  var resultsTable = document.getElementById("resultsTable");
+  if (resultsTable !== null) {
+    document.body.removeChild(resultsTable);
+  }
+}
 
 // Creates human-readable resistance value strings from
 // resistance values in Ohms.
@@ -393,43 +427,43 @@ function resistanceString(resistance) {
 
 // E24 contains EIA E24 series resistor values in the 1s decade.
 var E24 = Object.freeze([1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0,
-                         2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3,
-                         4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]);
+  2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3,
+  4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]);
 
 // E96 contains EIA E96 series resistor values in the 1s decade.
 var E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
-                         1.18, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37,
-                         1.40, 1.43, 1.47, 1.50, 1.54, 1.58, 1.62,
-                         1.65, 1.69, 1.74, 1.78, 1.82, 1.87, 1.91,
-                         1.96, 2.00, 2.05, 2.10, 2.15, 2.21, 2.26,
-                         2.32, 2.37, 2.43, 2.49, 2.55, 2.61, 2.67,
-                         2.74, 2.80, 2.87, 2.94, 3.01, 3.09, 3.16,
-                         3.24, 3.32, 3.40, 3.48, 3.57, 3.65, 3.74,
-                         3.83, 3.92, 4.02, 4.12, 4.22, 4.32, 4.42,
-                         4.53, 4.64, 4.75, 4.87, 4.99, 5.11, 5.23,
-                         5.36, 5.49, 5.62, 5.76, 5.90, 6.04, 6.19,
-                         6.34, 6.49, 6.65, 6.81, 6.98, 7.15, 7.32,
-                         7.50, 7.68, 7.87, 8.06, 8.25, 8.45, 8.66,
-                         8.87, 9.09, 9.31, 9.53, 9.76]);
+  1.18, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37,
+  1.40, 1.43, 1.47, 1.50, 1.54, 1.58, 1.62,
+  1.65, 1.69, 1.74, 1.78, 1.82, 1.87, 1.91,
+  1.96, 2.00, 2.05, 2.10, 2.15, 2.21, 2.26,
+  2.32, 2.37, 2.43, 2.49, 2.55, 2.61, 2.67,
+  2.74, 2.80, 2.87, 2.94, 3.01, 3.09, 3.16,
+  3.24, 3.32, 3.40, 3.48, 3.57, 3.65, 3.74,
+  3.83, 3.92, 4.02, 4.12, 4.22, 4.32, 4.42,
+  4.53, 4.64, 4.75, 4.87, 4.99, 5.11, 5.23,
+  5.36, 5.49, 5.62, 5.76, 5.90, 6.04, 6.19,
+  6.34, 6.49, 6.65, 6.81, 6.98, 7.15, 7.32,
+  7.50, 7.68, 7.87, 8.06, 8.25, 8.45, 8.66,
+  8.87, 9.09, 9.31, 9.53, 9.76]);
 
 // E24E96 contains the union of E24 and E96.
 var E24E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15,
-                            1.18, 1.20, 1.21, 1.24, 1.27, 1.30, 1.33,
-                            1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 1.58,
-                            1.60, 1.62, 1.65, 1.69, 1.74, 1.78, 1.80,
-                            1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10,
-                            2.15, 2.20, 2.21, 2.26, 2.32, 2.37, 2.40,
-                            2.43, 2.49, 2.55, 2.61, 2.67, 2.70, 2.74,
-                            2.80, 2.87, 2.94, 3.00, 3.01, 3.09, 3.16,
-                            3.24, 3.30, 3.32, 3.40, 3.48, 3.57, 3.60,
-                            3.65, 3.74, 3.83, 3.90, 3.92, 4.02, 4.12,
-                            4.22, 4.30, 4.32, 4.42, 4.53, 4.64, 4.70,
-                            4.75, 4.87, 4.99, 5.10, 5.11, 5.23, 5.36,
-                            5.49, 5.60, 5.62, 5.76, 5.90, 6.04, 6.19,
-                            6.20, 6.34, 6.49, 6.65, 6.80, 6.81, 6.98,
-                            7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.20,
-                            8.25, 8.45, 8.66, 8.87, 9.09, 9.10, 9.31,
-                            9.53, 9.76]);
+  1.18, 1.20, 1.21, 1.24, 1.27, 1.30, 1.33,
+  1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 1.58,
+  1.60, 1.62, 1.65, 1.69, 1.74, 1.78, 1.80,
+  1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10,
+  2.15, 2.20, 2.21, 2.26, 2.32, 2.37, 2.40,
+  2.43, 2.49, 2.55, 2.61, 2.67, 2.70, 2.74,
+  2.80, 2.87, 2.94, 3.00, 3.01, 3.09, 3.16,
+  3.24, 3.30, 3.32, 3.40, 3.48, 3.57, 3.60,
+  3.65, 3.74, 3.83, 3.90, 3.92, 4.02, 4.12,
+  4.22, 4.30, 4.32, 4.42, 4.53, 4.64, 4.70,
+  4.75, 4.87, 4.99, 5.10, 5.11, 5.23, 5.36,
+  5.49, 5.60, 5.62, 5.76, 5.90, 6.04, 6.19,
+  6.20, 6.34, 6.49, 6.65, 6.80, 6.81, 6.98,
+  7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.20,
+  8.25, 8.45, 8.66, 8.87, 9.09, 9.10, 9.31,
+  9.53, 9.76]);
 
 // Each value in E24, E96, or E24E96 is multiplied by all
 // scalars in multipliers to create the full array of resistance
@@ -528,15 +562,7 @@ function findNearest(resVal, resArray) {
 
 // Display E24 series resistor values
 function ShowE24() {
-  // remove spreadsheet download links from previous results
-  var downloadSpan = document.getElementById("downloadSpan");
-  downloadSpan.innerHTML = "";
-
-  // Remove target ratio value display if present
-  var ratioDiv = document.getElementById("ratioDiv");
-  if (ratioDiv !== null) {
-    document.body.removeChild(ratioDiv);
-  }
+  clearResults();
 
   var tableFragment = document.createDocumentFragment();
   var jMult;
@@ -575,24 +601,30 @@ function ShowE24() {
     tableFragment.appendChild(valuesRow);
   }
 
-  // Clear results table & display E24 series values
-  var resultsTable = document.getElementById("resultsTable");
-  resultsTable.innerHTML = "";
-  resultsTable.appendChild(tableFragment);
+  // Create title
+  var title_div = document.createElement("div");
+  title_div.className = "titleDiv";
+  title_div.id = "outputTitle";
+  var title_span = document.createElement("span");
+  title_span.className = "titleSpan";
+  title_span.textContent = "EIA E24 Series Resistor Values";
+  title_div.appendChild(title_span);
+
+  var licenseBlock = document.getElementById("licenseBlock");
+  document.body.insertBefore(title_div, licenseBlock);
+
+  // Create table for resistor values
+  var results_table = document.createElement("table");
+  results_table.id = "resultsTable";
+  results_table.style.fontSize = "12pt";
+  results_table.appendChild(tableFragment);
+  document.body.insertBefore(results_table, licenseBlock);
   return;
 }
 
 // Display E96 series resistor values
 function ShowE96() {
-  // remove spreadsheet download links from previous results
-  var downloadSpan = document.getElementById("downloadSpan");
-  downloadSpan.innerHTML = "";
-
-  // Remove target ratio value display if present
-  var ratioDiv = document.getElementById("ratioDiv");
-  if (ratioDiv !== null) {
-    document.body.removeChild(ratioDiv);
-  }
+  clearResults();
 
   var tableFragment = document.createDocumentFragment();
   var jMult;
@@ -631,10 +663,24 @@ function ShowE96() {
     tableFragment.appendChild(valuesRow);
   }
 
-  // Clear results table & display E96 series values
-  var resultsTable = document.getElementById("resultsTable");
-  resultsTable.innerHTML = "";
-  resultsTable.appendChild(tableFragment);
+  // Create title
+  var title_div = document.createElement("div");
+  title_div.className = "titleDiv";
+  title_div.id = "outputTitle";
+  var title_span = document.createElement("span");
+  title_span.className = "titleSpan";
+  title_span.textContent = "EIA E96 Series Resistor Values";
+  title_div.appendChild(title_span);
+
+  var licenseBlock = document.getElementById("licenseBlock");
+  document.body.insertBefore(title_div, licenseBlock);
+
+  // Create table for resistor values
+  var results_table = document.createElement("table");
+  results_table.id = "resultsTable";
+  results_table.style.fontSize = "12pt";
+  results_table.appendChild(tableFragment);
+  document.body.insertBefore(results_table, licenseBlock);
   return;
 }
 
@@ -866,16 +912,6 @@ function populate_candidates(resArray) {
 function displayDiagnostics() {
   var tableFragment = document.createDocumentFragment();
 
-  var noResults_tr = document.createElement("tr");
-  var noResults_td = document.createElement("td");
-  noResults_td.className = "groupCol";
-  noResults_td.colSpan = "2";
-  noResults_td.style.fontWeight = "bold";
-  noResults_td.textContent = "No Results Found";
-
-  noResults_tr.appendChild(noResults_td);
-  tableFragment.appendChild(noResults_tr);
-
   var ratio_tr = document.createElement("tr");
   var ratioLabel_td = document.createElement("td");
   ratioLabel_td.className = "paramLabel";
@@ -966,10 +1002,24 @@ function displayDiagnostics() {
   resSeries_tr.appendChild(resSeries_td);
   tableFragment.appendChild(resSeries_tr);
 
-  // Clear results table & display diagnostic message
-  var resultsTable = document.getElementById("resultsTable");
-  resultsTable.innerHTML = "";
-  resultsTable.appendChild(tableFragment);
+  // Create No Results Title
+  var title_div = document.createElement("div");
+  title_div.className = "titleDiv";
+  title_div.id = "outputTitle";
+  var title_span = document.createElement("span");
+  title_span.className = "titleSpan";
+  title_span.textContent = "No Results Found";
+  title_div.appendChild(title_span);
+
+  var licenseBlock = document.getElementById("licenseBlock");
+  document.body.insertBefore(title_div, licenseBlock);
+
+  // Create table for diagnostic message
+  var results_table = document.createElement("table");
+  results_table.id = "resultsTable";
+  results_table.style.fontSize = "12pt";
+  results_table.appendChild(tableFragment);
+  document.body.insertBefore(results_table, licenseBlock);
   return;
 }
 
@@ -1225,10 +1275,38 @@ function displayResults() {
      tableFragment.appendChild(result_tr);
   }
 
-  // Clear previous results table & display results
-  var resultsTable = document.getElementById("resultsTable");
-  resultsTable.innerHTML = "";
-  resultsTable.appendChild(tableFragment);
+  // Create Results Title
+  var title_div = document.createElement("div");
+  title_div.className = "titleDiv";
+  title_div.id = "outputTitle";
+  var title_span = document.createElement("span");
+  title_span.className = "titleSpan";
+  title_span.textContent = "Results";
+  title_div.appendChild(title_span);
+
+  // Display spreadsheet download links
+  var download_span = document.createElement("span");
+  download_span.style.paddingLeft = "1.2em";
+  download_span.style.fontSize = "14pt";
+  var dl_link = document.createElement("a");
+  dl_link.href = "javascript:;";
+  dl_link.addEventListener('click', function () { download_xlsx(); }, false);
+  dl_link.textContent = "Download .xlsx";
+  download_span.textContent = "(\u2009";
+  download_span.appendChild(dl_link);
+  download_span.insertAdjacentText('beforeend', '\u2009)');
+
+  var dl_link2 = document.createElement("a");
+  dl_link2.href = "javascript:;";
+  dl_link2.addEventListener('click', function () { download_csv(); }, false);
+  dl_link2.textContent = "Download .csv";
+  download_span.insertAdjacentText('beforeend', ' \u2000 (\u2009');
+  download_span.appendChild(dl_link2);
+  download_span.insertAdjacentText('beforeend', '\u2009)');
+
+  title_div.appendChild(download_span);
+  var licenseBlock = document.getElementById("licenseBlock");
+  document.body.insertBefore(title_div, licenseBlock);
 
   // Show target divider ratio value if input is an expression
   if (settings.isExpr) {
@@ -1238,28 +1316,14 @@ function displayResults() {
     ratio_div.style.marginLeft = "4pt";
     ratio_div.style.marginBottom = "10pt";
     ratio_div.textContent = "Target Divider Ratio = " + settings.targetRatio;
-    document.body.insertBefore(ratio_div, resultsTable);
+    document.body.insertBefore(ratio_div, licenseBlock);
   }
 
-  // Display spreadsheet download links
-  var downloadSpan = document.getElementById("downloadSpan");
-  downloadSpan.style.paddingLeft = "1.2em";
-  downloadSpan.style.fontSize = "14pt";
-  var dl_link = document.createElement("a");
-  dl_link.href = "javascript:;";
-  dl_link.addEventListener('click', function () { download_xlsx(); }, false);
-  dl_link.textContent = "Download .xlsx";
-  downloadSpan.textContent = "(\u2009";
-  downloadSpan.appendChild(dl_link);
-  downloadSpan.insertAdjacentText('beforeend', '\u2009)');
-
-  var dl_link2 = document.createElement("a");
-  dl_link2.href = "javascript:;";
-  dl_link2.addEventListener('click', function () { download_csv(); }, false);
-  dl_link2.textContent = "Download .csv";
-  downloadSpan.insertAdjacentText('beforeend', ' \u2000 (\u2009');
-  downloadSpan.appendChild(dl_link2);
-  downloadSpan.insertAdjacentText('beforeend', '\u2009)');
+  var results_table = document.createElement("table");
+  results_table.id = "resultsTable";
+  results_table.style.fontSize = "12pt";
+  results_table.appendChild(tableFragment);
+  document.body.insertBefore(results_table, licenseBlock);
   return;
 }
 
@@ -1975,15 +2039,7 @@ var settings = new Settings();
 // meeting user's divider specification, and outputs results
 // or error messages.
 function solveDivider() {
-  // remove spreadsheet download links from previous results
-  var downloadSpan = document.getElementById("downloadSpan");
-  downloadSpan.innerHTML = "";
-
-  // Remove target ratio value display if present
-  var ratioDiv = document.getElementById("ratioDiv");
-  if (ratioDiv !== null) {
-    document.body.removeChild(ratioDiv);
-  }
+  clearResults();
 
   // These are used for error messages
   var error_tr;

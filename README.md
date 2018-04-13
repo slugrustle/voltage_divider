@@ -36,6 +36,6 @@ See also LICENSE.txt or the first comment in voltage\_divider.html.
 
 ## Acknowledgment
 
-[svgminify](http://www.svgminify.com/) was handy
+[svgo](https://github.com/svg/svgo) was handy
 for reducing the size of the inline .svg images
 used in this project.
