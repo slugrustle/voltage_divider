@@ -2,7 +2,7 @@
 
 Minified forms of voltage\_divider.svg and CC0\_button.svg are
 inlined inside voltage_divider.html. These files are the
-originals before minification with [svgo](https://github.com/svg/svgo).
+originals before optimization with [svgo](https://github.com/svg/svgo).
 
 voltage\_divider.svg is the work of the author of this program.
 

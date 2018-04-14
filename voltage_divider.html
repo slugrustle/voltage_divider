@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <!--
-Voltage Divider Calculator v1.8 - Finds voltage dividers nearest a
+Voltage Divider Calculator v1.9 - Finds voltage dividers nearest a
 target ratio using real-world resistor values.
 
 Written in 2018 by Ben Tesch
@@ -258,7 +258,7 @@ td.paramLabel {
 </head>
 
 <body>
-<div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2001;v1.8&#x2001;2018-04-09</span></div>
+<div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2001;v1.9&#x2001;2018-04-13</span></div>
 <table id="inputTable">
   <tr>
     <td class="labelCol">Target Divider Ratio</td>
@@ -309,22 +309,22 @@ td.paramLabel {
   </tr>
 </table>
 
-<div class="titleDiv" id="eqsTitle">
+<div class="titleDiv" id="eqsTitle" style="margin-bottom: 0px">
   <span class="titleSpan">Equations</span>
   <span style="font-size: 14pt; margin-left: 1em;">
     (&#x2009;<a href="javascript:;" id="toggleMath" onclick="toggleMath();">show</a>&#x2009;)
-  </span></div>
+  </span>
+</div>
 <div id="eqsDiv" style="display: none;">
   <div style="float:left; margin-right: 14pt;">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 221.41 360.341" height="240.228" width="147.606" role="img" aria-label="Voltage Divider Circuit Diagram">
-      <title>Voltage Divider Circuit Diagram</title><desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
-      <g transform="translate(-144.059 -87.502)"><circle cx="279.983" cy="132.322" r="5" fill="none" stroke="#000"/><text style="line-height:125%" x="140.814" y="222.061" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
-      <tspan x="140.814" y="222.061">Upper</tspan></text><text style="line-height:125%" x="142.053" y="353.663" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
-      <tspan x="142.053" y="353.663">Lower</tspan></text><path d="M280 276.103h58.773" fill="none" stroke="#000" stroke-width=".865"/><circle cx="343.912" cy="276.103" r="5" fill="none" stroke="#000"/>
-      <circle cx="280" cy="276.393" r="2" stroke="#000"/><text style="line-height:125%" x="264.041" y="115.867" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
-      <tspan x="264.041" y="115.867">Vi</tspan></text><text style="line-height:125%" x="322.065" y="257.984" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0"><tspan x="322.065" y="257.984">Vo</tspan></text>
-      <path d="M279.995 412.358l.005-17.01m-.005 32.013v-15.003m-20.003 15.003h39.996m-23.998 19.983h8m-16-10h24M280 285.349v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m0-127.99v18m0-128v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m0-109.997v-20" fill="none" stroke="#000"/></g>
-    </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 221.41 360.341" height="240.228" width="147.606" role="img" aria-label="Voltage Divider Circuit Diagram">
+        <g transform="translate(-144.059 -87.502)"><circle cx="279.983" cy="132.322" r="5" fill="none" stroke="#000"/><text style="line-height:125%" x="140.814" y="222.061" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
+        <tspan x="140.814" y="222.061">Upper</tspan></text><text style="line-height:125%" x="142.053" y="353.663" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
+        <tspan x="142.053" y="353.663">Lower</tspan></text><path d="M280 276.103h58.773" fill="none" stroke="#000" stroke-width=".865"/><circle cx="343.912" cy="276.103" r="5" fill="none" stroke="#000"/>
+        <circle cx="280" cy="276.393" r="2" stroke="#000"/><text style="line-height:125%" x="260.511" y="115.867" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0">
+        <tspan x="260.511" y="115.867">Vi</tspan></text><text style="line-height:125%" x="322.065" y="257.984" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0"><tspan x="322.065" y="257.984">Vo</tspan></text>
+        <path d="M279.995 412.358l.005-17.01m-.005 32.013v-15.003m-20.003 15.003h39.996m-23.998 19.983h8m-16-10h24M280 285.349v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m0-127.99v18m0-128v25l15 5-30 10 30 10-30 10 30 10-30 10 15 5v25m0-109.997v-20" fill="none" stroke="#000"/></g>
+      </svg>
   </div>
   <div style="display: inline-block; font-size: 12pt;">
     <div style="margin-bottom: 14pt;">
@@ -357,7 +357,19 @@ td.paramLabel {
   </div>
 </div>
 
-<div xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="display: inline-block; margin-top: 40pt; margin-left: 4pt;" id="licenseBlock">
+<div class="titleDiv" id="outTitleDiv" style="display: none;">
+  <span class="titleSpan" id="outTitleSpan"></span>
+  <span id="downloadSpan" style="margin-left: 1.2em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="download_xlsx();">Download .xlsx</a>&#x2009;)&#x2000;(&#x2009;<a href="javascript:;" onclick="download_csv();">Download .csv</a>&#x2009;)</span>
+</div>
+<div id="ratioDiv" style="font-size: 13pt; margin-left: 4pt; margin-bottom: 10pt; display: none;"></div>
+<table id="resultsTable" style="font-size: 12pt; display: none;"></table>
+
+<div class="titleDiv" id="errorTitleDiv" style="display: none;">
+  <span class="titleSpan" id="errorTitleSpan">Input Error</span>
+</div>
+<div id="errorDiv" style="max-width: 30em; border: 1px solid black; padding: 8pt; display: none;"></div>
+
+<div xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="margin-top: 50pt; margin-left: 4pt;" id="licenseBlock">
   <div style="float: left; margin-right: 1em;">
     <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none;">
       <svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="-0.5 -0.101 88 31" role="img" aria-label="CC0 Button">
@@ -387,38 +399,44 @@ td.paramLabel {
 // Toggles display of equations and schematic
 function toggleMath() {
   var eqsDiv = document.getElementById("eqsDiv");
+  var eqsTitle = document.getElementById("eqsTitle");
   var toggleAnchor = document.getElementById("toggleMath");
 
   if (eqsDiv.style.display === "none")
   {
     toggleAnchor.innerHTML = "hide";
     eqsDiv.style.display = "inline-block";
+    eqsTitle.style.marginBottom = "10pt";
   }
   else
   {
     toggleAnchor.innerHTML = "show";
     eqsDiv.style.display = "none";
+    eqsTitle.style.marginBottom = "0px";
   }
 }
 
 // Clears results from previous run of program,
 // including E24/E96 display, diagnostic message,
-// download links, etc.
+// download links, error display, etc.
 function clearResults() { 
-  var outputTitle = document.getElementById("outputTitle");
-  if (outputTitle !== null) {
-    document.body.removeChild(outputTitle);
-  }
+  var outTitle_div = document.getElementById("outTitleDiv");
+  outTitle_div.style.display = "none";
+  var download_span = document.getElementById("downloadSpan");
+  download_span.style.display = "none";
 
-  var ratioDiv = document.getElementById("ratioDiv");
-  if (ratioDiv !== null) {
-    document.body.removeChild(ratioDiv);
-  }
+  var ratio_div = document.getElementById("ratioDiv");
+  ratio_div.style.display = "none";
+  ratio_div.innerHTML = "";
 
-  var resultsTable = document.getElementById("resultsTable");
-  if (resultsTable !== null) {
-    document.body.removeChild(resultsTable);
-  }
+  var results_table = document.getElementById("resultsTable");
+  results_table.style.display = "none";
+  results_table.innerHTML = "";
+
+  var errTitle_div = document.getElementById("errorTitleDiv");
+  errTitle_div.style.display = "none";
+  var error_div = document.getElementById("errorDiv");
+  error_div.style.display = "none";
 }
 
 // Creates human-readable resistance value strings from
@@ -621,24 +639,17 @@ function ShowE24() {
     tableFragment.appendChild(valuesRow);
   }
 
-  // Create title
-  var title_div = document.createElement("div");
-  title_div.className = "titleDiv";
-  title_div.id = "outputTitle";
-  var title_span = document.createElement("span");
-  title_span.className = "titleSpan";
+  // Display title
+  var title_span = document.getElementById("outTitleSpan");
   title_span.textContent = "EIA E24 Series Resistor Values";
-  title_div.appendChild(title_span);
 
-  var licenseBlock = document.getElementById("licenseBlock");
-  document.body.insertBefore(title_div, licenseBlock);
+  var title_div = document.getElementById("outTitleDiv");
+  title_div.style.display="block";
 
-  // Create table for resistor values
-  var results_table = document.createElement("table");
-  results_table.id = "resultsTable";
-  results_table.style.fontSize = "12pt";
+  // Display table of resistor values
+  var results_table = document.getElementById("resultsTable");
   results_table.appendChild(tableFragment);
-  document.body.insertBefore(results_table, licenseBlock);
+  results_table.style.display="table";
   return;
 }
 
@@ -683,24 +694,16 @@ function ShowE96() {
     tableFragment.appendChild(valuesRow);
   }
 
-  // Create title
-  var title_div = document.createElement("div");
-  title_div.className = "titleDiv";
-  title_div.id = "outputTitle";
-  var title_span = document.createElement("span");
-  title_span.className = "titleSpan";
+  // Display title
+  var title_span = document.getElementById("outTitleSpan");
   title_span.textContent = "EIA E96 Series Resistor Values";
-  title_div.appendChild(title_span);
+  var title_div = document.getElementById("outTitleDiv");
+  title_div.style.display="block";
 
-  var licenseBlock = document.getElementById("licenseBlock");
-  document.body.insertBefore(title_div, licenseBlock);
-
-  // Create table for resistor values
-  var results_table = document.createElement("table");
-  results_table.id = "resultsTable";
-  results_table.style.fontSize = "12pt";
+  // Display table of resistor values
+  var results_table = document.getElementById("resultsTable");
   results_table.appendChild(tableFragment);
-  document.body.insertBefore(results_table, licenseBlock);
+  results_table.style.display="table";
   return;
 }
 
@@ -1022,24 +1025,16 @@ function displayDiagnostics() {
   resSeries_tr.appendChild(resSeries_td);
   tableFragment.appendChild(resSeries_tr);
 
-  // Create No Results Title
-  var title_div = document.createElement("div");
-  title_div.className = "titleDiv";
-  title_div.id = "outputTitle";
-  var title_span = document.createElement("span");
-  title_span.className = "titleSpan";
+  // Display No Results title
+  var title_span = document.getElementById("outTitleSpan");
   title_span.textContent = "No Results Found";
-  title_div.appendChild(title_span);
+  var title_div = document.getElementById("outTitleDiv");
+  title_div.style.display="block";
 
-  var licenseBlock = document.getElementById("licenseBlock");
-  document.body.insertBefore(title_div, licenseBlock);
-
-  // Create table for diagnostic message
-  var results_table = document.createElement("table");
-  results_table.id = "resultsTable";
-  results_table.style.fontSize = "12pt";
+  // Display table with diagnostic message
+  var results_table = document.getElementById("resultsTable");
   results_table.appendChild(tableFragment);
-  document.body.insertBefore(results_table, licenseBlock);
+  results_table.style.display="table";
   return;
 }
 
@@ -1295,55 +1290,27 @@ function displayResults() {
      tableFragment.appendChild(result_tr);
   }
 
-  // Create Results Title
-  var title_div = document.createElement("div");
-  title_div.className = "titleDiv";
-  title_div.id = "outputTitle";
-  var title_span = document.createElement("span");
-  title_span.className = "titleSpan";
+  // Display Results Title
+  var title_span = document.getElementById("outTitleSpan");
   title_span.textContent = "Results";
-  title_div.appendChild(title_span);
+  var title_div = document.getElementById("outTitleDiv");
+  title_div.style.display="block";
 
   // Display spreadsheet download links
-  var download_span = document.createElement("span");
-  download_span.style.paddingLeft = "1.2em";
-  download_span.style.fontSize = "14pt";
-  var dl_link = document.createElement("a");
-  dl_link.href = "javascript:;";
-  dl_link.addEventListener('click', function () { download_xlsx(); }, false);
-  dl_link.textContent = "Download .xlsx";
-  download_span.textContent = "(\u2009";
-  download_span.appendChild(dl_link);
-  download_span.insertAdjacentText('beforeend', '\u2009)');
-
-  var dl_link2 = document.createElement("a");
-  dl_link2.href = "javascript:;";
-  dl_link2.addEventListener('click', function () { download_csv(); }, false);
-  dl_link2.textContent = "Download .csv";
-  download_span.insertAdjacentText('beforeend', ' \u2000 (\u2009');
-  download_span.appendChild(dl_link2);
-  download_span.insertAdjacentText('beforeend', '\u2009)');
-
-  title_div.appendChild(download_span);
-  var licenseBlock = document.getElementById("licenseBlock");
-  document.body.insertBefore(title_div, licenseBlock);
+  var download_span = document.getElementById("downloadSpan");
+  download_span.style.display = "inline";
 
   // Show target divider ratio value if input is an expression
   if (settings.isExpr) {
-    var ratio_div = document.createElement("div");
-    ratio_div.id = "ratioDiv";
-    ratio_div.style.fontSize = "13pt";
-    ratio_div.style.marginLeft = "4pt";
-    ratio_div.style.marginBottom = "10pt";
-    ratio_div.textContent = "Target Divider Ratio = " + settings.targetRatio;
-    document.body.insertBefore(ratio_div, licenseBlock);
+    var ratio_div = document.getElementById("ratioDiv");
+    ratio_div.textContent = "Target Divider Ratio = " + settings.targetRatio.toPrecision(6);
+    ratio_div.style.display = "block";
   }
 
-  var results_table = document.createElement("table");
-  results_table.id = "resultsTable";
-  results_table.style.fontSize = "12pt";
+  // Display table of results
+  var results_table = document.getElementById("resultsTable");
   results_table.appendChild(tableFragment);
-  document.body.insertBefore(results_table, licenseBlock);
+  results_table.style.display="table";
   return;
 }
 
@@ -1717,7 +1684,7 @@ function generate_xlsx() {
 
   var app = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
-    '<Application>Voltage Divider Calculator</Application><AppVersion>1.8</AppVersion><DocSecurity>0</DocSecurity>' +
+    '<Application>Voltage Divider Calculator</Application><AppVersion>1.9</AppVersion><DocSecurity>0</DocSecurity>' +
     '<ScaleCrop>false</ScaleCrop><HeadingPairs><vt:vector size="2" baseType="variant">' +
     '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
     '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
@@ -2062,10 +2029,8 @@ function solveDivider() {
   clearResults();
 
   // These are used for error messages
-  var error_tr;
-  var error_td;
-  var error_span;
-  var resultsTable;
+  var title_div;
+  var error_div;
 
   // Reuse parserOutput for return value from parser functions
   var parserOutput = new ParsedValue(0.0, false);
@@ -2085,19 +2050,12 @@ function solveDivider() {
   // Parse & validate desired divider ratio input.
   var ratioElem = document.getElementById("dividerRatio");
   if (ratioElem.value.length > 200) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Target Divider Ratio must be at most 200 characters long.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Target Divider Ratio must be at most 200 characters long.';
+    error_div.style.display = 'inline-block';
     return;
   }
 
@@ -2123,30 +2081,22 @@ function solveDivider() {
   } 
   
   if (ratioOK !== true) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentHTML('beforeend', 'Target Divider Ratio must be a number on the range (0.0, 1.0),<br/>');
-    error_td.insertAdjacentText('beforeend', 'or a valid four-function expression evaluating to such a number.');
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Target Divider Ratio must be a number on the range (0.0, 1.0), ' + 
+      'or a valid four-function expression evaluating to such a number.';
 
     if (ratioEval.isExpr) {
       if (ratioEval.errMesg.length > 0) {
-        error_td.insertAdjacentHTML('beforeend', '<br/>Parser error: ' + ratioEval.errMesg);
+        error_div.insertAdjacentText('beforeend', ' Parser error: ' + ratioEval.errMesg);
       } else if (ratioEval.isValid === true) {
-        error_td.insertAdjacentHTML('beforeend', '<br/>The input Target Divider Ratio evaluates to ' + ratioEval.value);
+        error_div.insertAdjacentText('beforeend', ' The input Target Divider Ratio evaluates to ' + ratioEval.value);
       }
     }
 
-    error_tr.appendChild(error_td);
-
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div.style.display = 'inline-block';
     return;
   }
 
@@ -2162,19 +2112,12 @@ function solveDivider() {
   // Parse & validate resistor tolerance input.
   var resTolElem = document.getElementById("resTolerance");
   if (resTolElem.value.length > 30) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Resistor Tolerance must be at most 30 characters long.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Resistor Tolerance must be at most 30 characters long.';
+    error_div.style.display = 'inline-block';
     return;
   }
 
@@ -2186,38 +2129,24 @@ function solveDivider() {
     settings.tolAug = 1.0 + settings.resTolerance/100.0;
     settings.tolDim = 1.0 - settings.resTolerance/100.0;
   } else {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Resistor tolerance must be a number on the range [0.0, 100.0).');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Resistor tolerance must be a number on the range [0.0, 100.0).';
+    error_div.style.display = 'inline-block';
     return;
   }
 
   // Parse & validate minimum divider string resistance input.
   var minStringElem = document.getElementById("minStringResistance");
   if (minStringElem.value.length > 30) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Min String Resistance must be at most 30 characters long.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Min String Resistance must be at most 30 characters long.';
+    error_div.style.display = 'inline-block';
     return;
   }
 
@@ -2225,59 +2154,40 @@ function solveDivider() {
   if (parserOutput.isValid === true) {
     settings.minStringRes = parserOutput.value;
   } else {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentHTML('beforeend', 'Min String Resistance must be a nonnegative number.<br/>');
-    error_td.insertAdjacentHTML('beforeend', 'Only the suffixes k (kilo = 10<sup>3</sup>) and ');
-    error_td.insertAdjacentHTML('beforeend', 'M (mega = 10<sup>6</sup>) are recognized.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Min String Resistance must be a nonnegative number.';
+    error_div.insertAdjacentHTML('beforeend', ' Only the suffixes k (kilo = 10<sup>3</sup>) and M (mega = 10<sup>6</sup>) are recognized.');
+    error_div.style.display = 'inline-block';
     return;
   }
 
   if (settings.minStringRes > 2.0 * resArray[resArray.length-1]) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Min String Resistance was set to ' + resValToString(settings.minStringRes, 3));
-    error_td.insertAdjacentHTML('beforeend', ', which will yield no results.<br/>The largest resistor value in this ');
-    error_td.insertAdjacentText('beforeend', 'program is ' + resValToString(resArray[resArray.length-1], 3) + '.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    var maxResistance = resArray[resArray.length-1];
+
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Min String Resistance was set to ' + resValToString(settings.minStringRes, 3) +
+      ', which will yield no results. The largest resistor value in the chosen series is ' +
+      resValToString(maxResistance, 3) + ' so the largest string resistance is ' + 
+      resValToString(2 * maxResistance, 4) + '.';
+    error_div.style.display = 'inline-block';
     return;
   }
 
   // Parse & validate maximum divider string resistance input.
   var maxStringElem = document.getElementById("maxStringResistance");
   if (maxStringElem.value.length > 30) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Max String Resistance must be at most 30 characters long.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Max String Resistance must be at most 30 characters long.';
+    error_div.style.display = 'inline-block';
     return;
   }
 
@@ -2285,57 +2195,38 @@ function solveDivider() {
   if (parserOutput.isValid === true) {
     settings.maxStringRes = parserOutput.value;
   } else {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentHTML('beforeend', 'Max String Resistance must be a nonnegative number.<br/>');
-    error_td.insertAdjacentHTML('beforeend', 'Only the suffixes k (kilo = 10<sup>3</sup>) and ');
-    error_td.insertAdjacentHTML('beforeend', 'M (mega = 10<sup>6</sup>) are recognized.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Max String Resistance must be a nonnegative number.';
+    error_div.insertAdjacentHTML('beforeend', ' Only the suffixes k (kilo = 10<sup>3</sup>) and M (mega = 10<sup>6</sup>) are recognized.');
+    error_div.style.display = 'inline-block';
     return;
   }
 
   if (settings.maxStringRes < 2.0 * resArray[0]) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Max String Resistance was set to ' + resValToString(settings.maxStringRes, 3));
-    error_td.insertAdjacentHTML('beforeend', ', which will yield no results.<br/>The smallest resistor value in this ');
-    error_td.insertAdjacentText('beforeend', 'program is ' + resValToString(resArray[0], 3) + '.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    var minResistance = resArray[0];
+
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Max String Resistance was set to ' + resValToString(settings.maxStringRes, 3) +
+      ', which will yield no results. The smallest resistor value in the chosen series is ' +
+      resValToString(minResistance, 3) + ' so the smallest string resistance is ' + 
+      resValToString(2 * minResistance, 4) + '.';
+    error_div.style.display = 'inline-block';
     return;
   }
 
   if (settings.maxStringRes <= settings.minStringRes) {
-    error_tr = document.createElement("tr");
-    error_td = document.createElement("td");
-    error_td.style.lineHeight = "1.5";
-    error_span = document.createElement("span");
-    error_span.style.fontWeight = "bold";
-    error_span.textContent = "Input Error:\u2000";
-    error_td.appendChild(error_span);
-    error_td.insertAdjacentText('beforeend', 'Max String Resistance must be larger than Min String Resistance.');
-    error_tr.appendChild(error_td);
+    title_div = document.getElementById("errorTitleDiv");
+    title_div.style.display="block";
 
-    resultsTable = document.getElementById("resultsTable");
-    resultsTable.innerHTML = "";
-    resultsTable.appendChild(error_tr);
+    error_div = document.getElementById("errorDiv");
+    error_div.textContent = 'Max String Resistance must be larger than Min String Resistance.';
+    error_div.style.display = 'inline-block';
     return;
   }
 

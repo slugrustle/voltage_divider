@@ -54,7 +54,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
       </cc:Work>
@@ -122,11 +122,11 @@
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:37.33333206px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="264.04117"
+         x="260.51083"
          y="115.86686"
          id="text4354"><tspan
            id="tspan4356"
-           x="264.04117"
+           x="260.51083"
            y="115.86686"
            style="font-size:37.33333206px">Vi</tspan></text>
       <text
