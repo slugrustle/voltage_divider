@@ -502,14 +502,14 @@ function Result(groupNum, resUpper, resLower, stringRes, minRatio, nomRatio, max
 }
 
 // InnerFile stores all relevant data for each file in a ZIP archive.
-function InnerFile(contentString, nameString, timeDate) {
+function InnerFile(contentString, nameString, offset, timeDate) {
   this.content = utf16_to_utf8(contentString);
   this.filename = utf16_to_utf8(nameString);
   this.crc32 = crc32(this.content);
   this.localHeader = local_header(this.filename, this.content.length, this.crc32, timeDate);
-  this.offset = NaN;
+  this.offset = offset;
   this.length = this.content.length + this.localHeader.length;
-  this.dirHeader = null;
+  this.dirHeader = dir_header(this.filename, this.localHeader, this.offset);
 }
 
 // Clears results from previous run of program, including E24/E96 
@@ -1442,27 +1442,27 @@ function local_header(filename, filesize, file_crc, timeDate) {
 }
 
 // Generate ZIP central directory header for an InnerFile object
-function dir_header(innerFile) {
-  var header_len = 46 + innerFile.filename.length;
+function dir_header(filename, localHeader, offset) {
+  var header_len = 46 + filename.length;
   var headArray = new Uint8Array(header_len);
 
   headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
 
-  // Copy dosTimeDate, file sizes, and filename length from local header of innerFile
-  headArray.set(innerFile.localHeader.slice(10,28), 12);
+  // Copy timeDate, file_crc, file sizes, and filename length
+  // from existing local header
+  headArray.set(localHeader.subarray(10,28), 12);
 
   headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
 
   // Store offset of innerFile local header in ZIP
-  headArray[42] = innerFile.offset & 0x000000FF;
-  headArray[43] = (innerFile.offset & 0x0000FF00) >>> 8;
-  headArray[44] = (innerFile.offset & 0x00FF0000) >>> 16;
-  headArray[45] = (innerFile.offset & 0xFF000000) >>> 24;
+  headArray[42] = offset & 0x000000FF;
+  headArray[43] = (offset & 0x0000FF00) >>> 8;
+  headArray[44] = (offset & 0x00FF0000) >>> 16;
+  headArray[45] = (offset & 0xFF000000) >>> 24;
 
-  headArray.set(innerFile.filename, 46);
+  headArray.set(filename, 46);
 
-  // Store directory header inside innerFile.
-  innerFile.dirHeader = headArray;
+  return headArray;
 }
 
 // Generate a ZIP end of central directory record from
@@ -1544,7 +1544,7 @@ function generate_xlsx() {
     '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
     '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
     '</Types>';
-  content_types = new InnerFile(content_types_str, '[Content_Types].xml', timeDate);
+  content_types = new InnerFile(content_types_str, '[Content_Types].xml', 0, timeDate);
 
   rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
@@ -1552,7 +1552,7 @@ function generate_xlsx() {
     '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
     '</Relationships>';
-  rels = new InnerFile(rels_str, '_rels/.rels', timeDate);
+  rels = new InnerFile(rels_str, '_rels/.rels', content_types.offset + content_types.length, timeDate);
 
   app_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
@@ -1561,7 +1561,7 @@ function generate_xlsx() {
     '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
     '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
     '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged></Properties>';
-  app = new InnerFile(app_str, 'docProps/app.xml', timeDate);
+  app = new InnerFile(app_str, 'docProps/app.xml', rels.offset + rels.length, timeDate);
 
   isoDate = thisMoment.toISOString().substr(0, 19) + 'Z';
   core_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -1570,7 +1570,7 @@ function generate_xlsx() {
     '<dcterms:created xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:created>' +
     '<dcterms:modified xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:modified>' +
     '</cp:coreProperties>';
-  core = new InnerFile(core_str, 'docProps/core.xml', timeDate);
+  core = new InnerFile(core_str, 'docProps/core.xml', app.offset + app.length, timeDate);
 
   styles_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
@@ -1589,20 +1589,20 @@ function generate_xlsx() {
 
   styles_str += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
     '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
-  styles = new InnerFile(styles_str, 'xl/styles.xml', timeDate);
+  styles = new InnerFile(styles_str, 'xl/styles.xml', core.offset + core.length, timeDate);
 
   workbook_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
     '<sheets><sheet name="results" sheetId="1" r:id="rId1"/></sheets>' +
     '<calcPr fullPrecision="1"/></workbook>';
-  workbook = new InnerFile(workbook_str, 'xl/workbook.xml', timeDate);
+  workbook = new InnerFile(workbook_str, 'xl/workbook.xml', styles.offset + styles.length, timeDate);
 
   wb_rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
     '</Relationships>';
-  wb_rels = new InnerFile(wb_rels_str, 'xl/_rels/workbook.xml.rels', timeDate);
+  wb_rels = new InnerFile(wb_rels_str, 'xl/_rels/workbook.xml.rels', workbook.offset + workbook.length, timeDate);
 
   numRows = 4 + sortedResults.length;
   settingsRow = 1;
@@ -1728,27 +1728,7 @@ function generate_xlsx() {
     sheet1_str += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
   }
   sheet1_str += '</worksheet>';
-  sheet1 = new InnerFile(sheet1_str, 'xl/worksheets/sheet1.xml', timeDate);
-
-  // Compute offset for each InnerFile
-  content_types.offset = 0;
-  rels.offset = content_types.offset + content_types.length;
-  app.offset = rels.offset + rels.length;
-  core.offset = app.offset + app.length;
-  styles.offset = core.offset + core.length;
-  workbook.offset = styles.offset + styles.length;
-  wb_rels.offset = workbook.offset + workbook.length;
-  sheet1.offset = wb_rels.offset + wb_rels.length;
-
-  // Generate a central directory header for each InnerFile
-  dir_header(content_types);
-  dir_header(rels);
-  dir_header(app);
-  dir_header(core);
-  dir_header(styles);
-  dir_header(workbook);
-  dir_header(wb_rels);
-  dir_header(sheet1);
+  sheet1 = new InnerFile(sheet1_str, 'xl/worksheets/sheet1.xml', wb_rels.offset + wb_rels.length, timeDate);
 
   // Generate the end of central directory record
   dir_size = content_types.dirHeader.length + rels.dirHeader.length +
