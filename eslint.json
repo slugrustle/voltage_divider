@@ -1,0 +1,58 @@
+{
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 5
+  },
+  "rules": {
+    "no-label-var": "error",
+    "no-shadow": "error",
+    "no-shadow-restricted-names": "error",
+    "no-undef-init": "error",
+    "no-use-before-define": "error",
+    "no-extra-parens": "error",
+    "block-scoped-var": "error",
+    "class-methods-use-this": "error",
+    "no-alert": "error",
+    "no-else-return": "error",
+    "no-empty-function": "error",
+    "no-extend-native": "error",
+    "no-implicit-globals": "error",
+    "no-invalid-this": "error",
+    "no-lone-blocks": "error",
+    "no-loop-func": "error",
+    "no-new-func": "error",
+    "no-new-wrappers": "error",
+    "no-octal-escape": "error",
+    "no-param-reassign": "error",
+    "no-return-assign": "error",
+    "no-sequences": "error",
+    "no-unused-expressions": "error",
+    "no-useless-call": "error",
+    "no-useless-concat": "error",
+    "no-useless-escape": "error",
+    "no-useless-return": "error",
+    "no-with": "error",
+    "wrap-iife": ["error", "any", {"functionPrototypeMethods": false}],
+    "vars-on-top": "error",
+    "strict": ["error", "safe"],
+    "consistent-return": "error",
+    "eqeqeq": "error",
+    "dot-location": "error",
+    "dot-notation": "error",
+    "no-fallthrough": "error",
+    "no-implicit-coercion": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-tabs": "error",
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "no-lonely-if": "error",
+    "no-new-object": "error"
+  },
+  "env": {
+    "browser": true
+  },
+  "plugins": [
+    "html"
+  ]
+}
