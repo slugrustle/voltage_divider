@@ -3,6 +3,11 @@
   "parserOptions": {
     "ecmaVersion": 5
   },
+  "globals": {
+    "Uint8Array": false,
+    "Uint16Array": false,
+    "Uint32Array": false
+  },
   "rules": {
     "no-label-var": "error",
     "no-shadow": "error",

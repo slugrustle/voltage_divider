@@ -403,7 +403,7 @@ var seriesEnum = Object.freeze({E24:1, E96:2, E24E96:3});
 var ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
 
 // All user input settings stored in this object
-var settings = new Settings();
+var settings;
 
 // Final results for display are stored here after sorting.
 var sortedResults = [];
@@ -437,18 +437,29 @@ var crc32table = new Uint32Array([0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA
 
 // Constructor for Settings object that stores user input settings
 function Settings() {
-  this.targetRatio = 0.5;
+  this.targetRatio = NaN;
   this.isExpr = false;
   this.ratioExpr = '';
   this.ratioType = ratioEnum.NOM;
-  this.ratioThresholdLow = 0.49;
-  this.ratioThresholdHigh = 0.51;
-  this.resTolerance = 0.0;
-  this.tolAug = 1.0;
-  this.tolDim = 1.0;
+  this.ratioThresholdLow = NaN;
+  this.ratioThresholdHigh = NaN;
+  this.resTolerance = NaN;
+  this.tolAug = NaN;
+  this.tolDim = NaN;
   this.resSeries = seriesEnum.E24E96;
-  this.minStringRes = 0.0;
-  this.maxStringRes = 20.0e6;
+  this.minStringRes = NaN;
+  this.maxStringRes = NaN;
+}
+
+// Constructor for ParsedInput object, returned by all 
+// user input parsing functions
+function ParsedInput(value, isValid) {
+  this.value = value;
+  if (isValid === true) {
+    this.isValid = true;
+  } else {
+    this.isValid = false;
+  }
 }
 
 // Used to store operators and operands (tokens)
@@ -494,6 +505,192 @@ function Result(groupNum, resUpper, resLower, stringRes, minRatio, nomRatio, max
   this.nomRatio = nomRatio;
   this.maxRatio = maxRatio;
   this.ratioDiff = ratioDiff;
+}
+
+// Calculates the CRC32 of a Uint8Array. Same version of CRC32 as
+// used by ZIP.
+function crc32(uint8ar) {
+  var crcreg = new Uint32Array([0xFFFFFFFF]);
+  var indx = new Uint32Array([0]);
+  var j;
+  for (j = 0; j < uint8ar.length; j++) {
+    indx[0] = 0x000000FF & (crcreg[0] ^ uint8ar[j]);
+    crcreg[0] >>>= 8;
+    crcreg[0] ^= crc32table[indx[0]];
+  }
+  crcreg[0] ^= 0xFFFFFFFF;
+  return crcreg[0];
+}
+
+// Returns length in bytes of equivalent utf8 string given a utf16 string input.
+function utf8len(utf16str) {
+  var len = 0;
+  var j;
+  var charCode;
+  var codeNext;
+
+  for (j = 0; j < utf16str.length-1; j++) {
+    charCode = utf16str.charCodeAt(j);
+    if (charCode <= 127) {
+      len++;
+    } else if (charCode <= 2047) {
+      len += 2;
+    } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      codeNext = utf16str.charCodeAt(j+1);
+      if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
+        len += 4;
+        j++;
+      } else {
+        len += 3;
+      }
+    } else {
+      len += 3;
+    }
+  }
+
+  if (j < utf16str.length) {
+    charCode = utf16str.charCodeAt(j);
+    if (charCode <= 127) {
+      len++;
+    } else if (charCode <= 2047) {
+      len += 2;
+    } else {
+      len += 3;
+    }
+  }
+
+  return len;
+}
+
+// Converts a utf16 javascript string to a utf8 Unit8Array.
+function utf16_to_utf8(utf16str) {
+  var outArray = new Uint8Array(utf8len(utf16str));
+  var k = 0;
+  var j;
+  var charCode;
+  var codeNext;
+  var code32;
+
+  for (j = 0; j < utf16str.length-1; j++) {
+    charCode = utf16str.charCodeAt(j);
+    if (charCode <= 127) {
+      outArray[k] = 0x7F & charCode;
+      k++;
+    } else if (charCode <= 2047) {
+      outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
+      k++;
+      outArray[k] = 0x80 | (0x3F & charCode);
+      k++;
+    } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      codeNext = utf16str.charCodeAt(j+1);
+      if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
+        // We have a surrogate pair
+        code32 = ((charCode - 0xD800) << 10) + (codeNext - 0xDC00) + 0x10000;
+        outArray[k] = 0xF0 | (0x07 & (code32 >>> 18));
+        k++;
+        outArray[k] = 0x80 | (0x3F & (code32 >>> 12));
+        k++;
+        outArray[k] = 0x80 | (0x3F & (code32 >>> 6));
+        k++;
+        outArray[k] = 0x80 | (0x3F & code32);
+        k++;
+
+        j++;
+      } else {
+        outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+        k++;
+        outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+        k++;
+        outArray[k] = 0x80 | (0x3F & charCode);
+        k++;
+      }
+    } else {
+      outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+      k++;
+      outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+      k++;
+      outArray[k] = 0x80 | (0x3F & charCode);
+      k++;
+    }
+  }
+
+  if (j < utf16str.length) {
+    charCode = utf16str.charCodeAt(j);
+    if (charCode <= 127) {
+      outArray[k] = 0x7F & charCode;
+      k++;
+    } else if (charCode <= 2047) {
+      outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
+      k++;
+      outArray[k] = 0x80 | (0x3F & charCode);
+      k++;
+    } else {
+      outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+      k++;
+      outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+      k++;
+      outArray[k] = 0x80 | (0x3F & charCode);
+      k++;
+    }
+  }
+
+  return outArray;
+}
+
+// Generate ZIP local file header from utf8 Uint8Array filename,
+// numeric file size in bytes, numeric crc32, and 4 byte Uint8Array
+// little-endian dos time and date (in that order)
+function local_header(filename, filesize, file_crc, timeDate) {
+  var header_len = 30 + filename.length;
+  var headArray = new Uint8Array(header_len);
+
+  headArray.set([0x50, 0x4b, 0x03, 0x04, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+  headArray.set(timeDate, 10);
+
+  headArray[14] = file_crc & 0x000000FF;
+  headArray[15] = (file_crc & 0x0000FF00) >>> 8;
+  headArray[16] = (file_crc & 0x00FF0000) >>> 16;
+  headArray[17] = (file_crc & 0xFF000000) >>> 24;
+
+  headArray[18] = filesize & 0x000000FF;
+  headArray[19] = (filesize & 0x0000FF00) >>> 8;
+  headArray[20] = (filesize & 0x00FF0000) >>> 16;
+  headArray[21] = (filesize & 0xFF000000) >>> 24;
+
+  // Compressed file size and uncompressed file size are equal
+  headArray.set(headArray.subarray(18,22), 22);
+
+  headArray[26] = filename.length & 0x00FF;
+  headArray[27] = (filename.length & 0xFF00) >>> 8;
+  headArray.set([0x00, 0x00], 28);
+  headArray.set(filename, 30);
+
+  return headArray;
+}
+
+// Generate ZIP central directory header for an InnerFile object
+function dir_header(filename, localHeader, offset) {
+  var header_len = 46 + filename.length;
+  var headArray = new Uint8Array(header_len);
+
+  headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+  // Copy timeDate, file_crc, file sizes, and filename length
+  // from existing local header
+  headArray.set(localHeader.subarray(10,28), 12);
+
+  headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
+
+  // Store offset of innerFile local header in ZIP
+  headArray[42] = offset & 0x000000FF;
+  headArray[43] = (offset & 0x0000FF00) >>> 8;
+  headArray[44] = (offset & 0x00FF0000) >>> 16;
+  headArray[45] = (offset & 0xFF000000) >>> 24;
+
+  headArray.set(filename, 46);
+
+  return headArray;
 }
 
 // InnerFile stores all relevant data for each file in a ZIP archive.
@@ -1312,136 +1509,6 @@ function generate_csv() {
   return csvBlob;
 }
 
-// Calculates the CRC32 of a Uint8Array. Same version of CRC32 as
-// used by ZIP.
-function crc32(uint8ar) {
-  var crcreg = new Uint32Array([0xFFFFFFFF]);
-  var indx = new Uint32Array([0]);
-  var j;
-  for (j = 0; j < uint8ar.length; j++) {
-    indx[0] = 0x000000FF & (crcreg[0] ^ uint8ar[j]);
-    crcreg[0] >>>= 8;
-    crcreg[0] ^= crc32table[indx[0]];
-  }
-  crcreg[0] ^= 0xFFFFFFFF;
-  return crcreg[0];
-}
-
-// Returns length in bytes of equivalent utf8 string given a utf16 string input.
-function utf8len(utf16str) {
-  var len = 0;
-  var j;
-  var charCode;
-  var codeNext;
-
-  for (j = 0; j < utf16str.length-1; j++) {
-    charCode = utf16str.charCodeAt(j);
-    if (charCode <= 127) {
-      len++;
-    } else if (charCode <= 2047) {
-      len += 2;
-    } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-      codeNext = utf16str.charCodeAt(j+1);
-      if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
-        len += 4;
-        j++;
-      } else {
-        len += 3;
-      }
-    } else {
-      len += 3;
-    }
-  }
-
-  if (j < utf16str.length) {
-    charCode = utf16str.charCodeAt(j);
-    if (charCode <= 127) {
-      len++;
-    } else if (charCode <= 2047) {
-      len += 2;
-    } else {
-      len += 3;
-    }
-  }
-
-  return len;
-}
-
-// Converts a utf16 javascript string to a utf8 Unit8Array.
-function utf16_to_utf8(utf16str) {
-  var outArray = new Uint8Array(utf8len(utf16str));
-  var k = 0;
-  var j;
-  var charCode;
-  var codeNext;
-  var code32;
-
-  for (j = 0; j < utf16str.length-1; j++) {
-    charCode = utf16str.charCodeAt(j);
-    if (charCode <= 127) {
-      outArray[k] = 0x7F & charCode;
-      k++;
-    } else if (charCode <= 2047) {
-      outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
-      k++;
-      outArray[k] = 0x80 | (0x3F & charCode);
-      k++;
-    } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-      codeNext = utf16str.charCodeAt(j+1);
-      if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
-        // We have a surrogate pair
-        code32 = ((charCode - 0xD800) << 10) + (codeNext - 0xDC00) + 0x10000;
-        outArray[k] = 0xF0 | (0x07 & (code32 >>> 18));
-        k++;
-        outArray[k] = 0x80 | (0x3F & (code32 >>> 12));
-        k++;
-        outArray[k] = 0x80 | (0x3F & (code32 >>> 6));
-        k++;
-        outArray[k] = 0x80 | (0x3F & code32);
-        k++;
-
-        j++;
-      } else {
-        outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
-        k++;
-        outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
-        k++;
-        outArray[k] = 0x80 | (0x3F & charCode);
-        k++;
-      }
-    } else {
-      outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
-      k++;
-      outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
-      k++;
-      outArray[k] = 0x80 | (0x3F & charCode);
-      k++;
-    }
-  }
-
-  if (j < utf16str.length) {
-    charCode = utf16str.charCodeAt(j);
-    if (charCode <= 127) {
-      outArray[k] = 0x7F & charCode;
-      k++;
-    } else if (charCode <= 2047) {
-      outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
-      k++;
-      outArray[k] = 0x80 | (0x3F & charCode);
-      k++;
-    } else {
-      outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
-      k++;
-      outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
-      k++;
-      outArray[k] = 0x80 | (0x3F & charCode);
-      k++;
-    }
-  }
-
-  return outArray;
-}
-
 // Returns DOS time and date in four-byte little endian format
 // given a JavaScript date.
 function dosTimeDate(aDate) {
@@ -1465,62 +1532,6 @@ function dosTimeDate(aDate) {
   timeDate[3] = (dosDate & 0xFF00) >>> 8;
 
   return timeDate;
-}
-
-// Generate ZIP local file header from utf8 Uint8Array filename,
-// numeric file size in bytes, numeric crc32, and 4 byte Uint8Array
-// little-endian dos time and date (in that order)
-function local_header(filename, filesize, file_crc, timeDate) {
-  var header_len = 30 + filename.length;
-  var headArray = new Uint8Array(header_len);
-
-  headArray.set([0x50, 0x4b, 0x03, 0x04, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-  headArray.set(timeDate, 10);
-
-  headArray[14] = file_crc & 0x000000FF;
-  headArray[15] = (file_crc & 0x0000FF00) >>> 8;
-  headArray[16] = (file_crc & 0x00FF0000) >>> 16;
-  headArray[17] = (file_crc & 0xFF000000) >>> 24;
-
-  headArray[18] = filesize & 0x000000FF;
-  headArray[19] = (filesize & 0x0000FF00) >>> 8;
-  headArray[20] = (filesize & 0x00FF0000) >>> 16;
-  headArray[21] = (filesize & 0xFF000000) >>> 24;
-
-  // Compressed file size and uncompressed file size are equal
-  headArray.set(headArray.subarray(18,22), 22);
-
-  headArray[26] = filename.length & 0x00FF;
-  headArray[27] = (filename.length & 0xFF00) >>> 8;
-  headArray.set([0x00, 0x00], 28);
-  headArray.set(filename, 30);
-
-  return headArray;
-}
-
-// Generate ZIP central directory header for an InnerFile object
-function dir_header(filename, localHeader, offset) {
-  var header_len = 46 + filename.length;
-  var headArray = new Uint8Array(header_len);
-
-  headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-  // Copy timeDate, file_crc, file sizes, and filename length
-  // from existing local header
-  headArray.set(localHeader.subarray(10,28), 12);
-
-  headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
-
-  // Store offset of innerFile local header in ZIP
-  headArray[42] = offset & 0x000000FF;
-  headArray[43] = (offset & 0x0000FF00) >>> 8;
-  headArray[44] = (offset & 0x00FF0000) >>> 16;
-  headArray[45] = (offset & 0xFF000000) >>> 24;
-
-  headArray.set(filename, 46);
-
-  return headArray;
 }
 
 // Generate a ZIP end of central directory record from
@@ -1575,8 +1586,8 @@ function generate_xlsx() {
   var sheet1;
 
   // Other helper variables.
-  var thisMoment;
-  var timeDate;
+  var thisMoment = new Date();
+  var timeDate = dosTimeDate(thisMoment);
   var numRows;
   var settingsRow;
   var headerRow;
@@ -1588,9 +1599,6 @@ function generate_xlsx() {
   var dir_offset;
   var end_record;
   var xlsxBlob;
-
-  thisMoment = new Date();
-  timeDate = dosTimeDate(thisMoment);
 
   content_types_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
@@ -1805,16 +1813,6 @@ function generate_xlsx() {
   return xlsxBlob;
 }
 
-// Constructor for ParsedValue object, returned by all parsing functions
-function ParsedValue(value, isValid) {
-  this.value = value;
-  if (isValid === true) {
-    this.isValid = true;
-  } else {
-    this.isValid = false;
-  }
-}
-
 // Returns a new string that is inString without leading/trailing whitespace.
 function trimString(inString) {
   return inString.replace(/^\s*([^\s]*)\s*$/, '$1');
@@ -1823,7 +1821,7 @@ function trimString(inString) {
 // Parser for resistance values. Accepts 'k' (kilo, 10^3) and
 // 'M' (mega, 10^6) suffixes.
 function parseResistance(inString) {
-  var output = new ParsedValue(0.0, false);
+  var output = new ParsedInput(0.0, false);
   var inTrim = trimString(inString);
   var lastChar = '';
 
@@ -1851,7 +1849,7 @@ function parseResistance(inString) {
 
 // Parser for tolerance values, which must be on the range [0.0, 100.0).
 function parseTolerance(inString) {
-  var output = new ParsedValue(0.0, false);
+  var output = new ParsedInput(0.0, false);
   var inTrim = trimString(inString);
 
   output.value = Number(inTrim);
@@ -2265,7 +2263,7 @@ window.voltDiv.showE96 = function() {
   results_table.style.display = 'table';
 };
 
-// The function download_csv() comes from a Stack Overflow post
+// The function download_csv comes from a Stack Overflow post
 // https://stackoverflow.com/a/33542499
 // by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
 // Retrieved 2018-03-31 and changed slightly to fit this program.
@@ -2292,7 +2290,7 @@ window.voltDiv.download_csv = function() {
   }
 };
 
-// The function download_xlsx() comes from a Stack Overflow post
+// The function download_xlsx comes from a Stack Overflow post
 // https://stackoverflow.com/a/33542499
 // by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
 // Retrieved 2018-03-31 and changed slightly to fit this program.
@@ -2335,9 +2333,11 @@ window.voltDiv.solveDivider = function() {
   var maxResistance;
   var maxStringElem;
   var minResistance;
-  var parserOutput = new ParsedValue(0.0, false);
+  var parserOutput = new ParsedInput(0.0, false);
 
   clearResults();
+
+  settings = new Settings();
 
   // Figure out whether to use E24 values, E96 values, or both.
   if (document.getElementById('resSeriesE24').checked) {
