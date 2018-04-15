@@ -490,22 +490,28 @@ function Candidate(resUpper, resLower, diff) {
   this.resUpper = resUpper;
   this.resLower = resLower;
   this.diff = diff;
-  this.absDiff = Math.abs(diff);
 }
+
+Candidate.prototype.absDiff = function() {
+  return Math.abs(this.diff);
+};
 
 // Result objects are the best candidates --- those that
 // will be displayed. All values required by display routine
 // and spreadsheet generators are stored.
-function Result(groupNum, resUpper, resLower, stringRes, minRatio, nomRatio, maxRatio, ratioDiff) {
+function Result(groupNum, resUpper, resLower, minRatio, nomRatio, maxRatio, ratioDiff) {
   this.groupNum = groupNum;
   this.resUpper = resUpper;
   this.resLower = resLower;
-  this.stringRes = stringRes;
   this.minRatio = minRatio;
   this.nomRatio = nomRatio;
   this.maxRatio = maxRatio;
   this.ratioDiff = ratioDiff;
 }
+
+Result.prototype.stringRes = function() {
+  return this.resLower + this.resUpper;
+};
 
 // Calculates the CRC32 of a Uint8Array. Same version of CRC32 as
 // used by ZIP.
@@ -643,16 +649,12 @@ function utf16_to_utf8(utf16str) {
 function local_header(filename, filesize, file_crc, timeDate) {
   var header_len = 30 + filename.length;
   var headArray = new Uint8Array(header_len);
-
   headArray.set([0x50, 0x4b, 0x03, 0x04, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
   headArray.set(timeDate, 10);
-
   headArray[14] = file_crc & 0x000000FF;
   headArray[15] = (file_crc & 0x0000FF00) >>> 8;
   headArray[16] = (file_crc & 0x00FF0000) >>> 16;
   headArray[17] = (file_crc & 0xFF000000) >>> 24;
-
   headArray[18] = filesize & 0x000000FF;
   headArray[19] = (filesize & 0x0000FF00) >>> 8;
   headArray[20] = (filesize & 0x00FF0000) >>> 16;
@@ -660,36 +662,10 @@ function local_header(filename, filesize, file_crc, timeDate) {
 
   // Compressed file size and uncompressed file size are equal
   headArray.set(headArray.subarray(18,22), 22);
-
   headArray[26] = filename.length & 0x00FF;
   headArray[27] = (filename.length & 0xFF00) >>> 8;
   headArray.set([0x00, 0x00], 28);
   headArray.set(filename, 30);
-
-  return headArray;
-}
-
-// Generate ZIP central directory header for an InnerFile object
-function dir_header(filename, localHeader, offset) {
-  var header_len = 46 + filename.length;
-  var headArray = new Uint8Array(header_len);
-
-  headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-  // Copy timeDate, file_crc, file sizes, and filename length
-  // from existing local header
-  headArray.set(localHeader.subarray(10,28), 12);
-
-  headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
-
-  // Store offset of innerFile local header in ZIP
-  headArray[42] = offset & 0x000000FF;
-  headArray[43] = (offset & 0x0000FF00) >>> 8;
-  headArray[44] = (offset & 0x00FF0000) >>> 16;
-  headArray[45] = (offset & 0xFF000000) >>> 24;
-
-  headArray.set(filename, 46);
-
   return headArray;
 }
 
@@ -697,12 +673,36 @@ function dir_header(filename, localHeader, offset) {
 function InnerFile(contentString, nameString, offset, timeDate) {
   this.content = utf16_to_utf8(contentString);
   this.filename = utf16_to_utf8(nameString);
-  this.crc32 = crc32(this.content);
-  this.localHeader = local_header(this.filename, this.content.length, this.crc32, timeDate);
+  this.localHeader = local_header(this.filename, this.content.length, crc32(this.content), timeDate);
   this.offset = offset;
-  this.length = this.content.length + this.localHeader.length;
-  this.dirHeader = dir_header(this.filename, this.localHeader, this.offset);
 }
+
+// Offset one past end of this InnerFile from start of ZIP archive
+InnerFile.prototype.endOffset = function() {
+  return this.offset + this.content.length + this.localHeader.length;
+};
+
+// Length of central directory header for this InnerFile object
+InnerFile.prototype.dirHeaderLength = function() {
+  return 46 + this.filename.length;
+};
+
+// Generate ZIP central directory header for an InnerFile object
+InnerFile.prototype.dirHeader = function() {
+  var headArray = new Uint8Array(this.dirHeaderLength());
+  headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+  // Copy timeDate, file_crc, file sizes, and filename length
+  // from existing local header
+  headArray.set(this.localHeader.subarray(10,28), 12);
+  headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
+  headArray[42] = this.offset & 0x000000FF;
+  headArray[43] = (this.offset & 0x0000FF00) >>> 8;
+  headArray[44] = (this.offset & 0x00FF0000) >>> 16;
+  headArray[45] = (this.offset & 0xFF000000) >>> 24;
+  headArray.set(this.filename, 46);
+  return headArray;
+};
 
 // Clears results from previous run of program, including E24/E96 
 // display, diagnostic message, download links, error display, etc.
@@ -717,7 +717,6 @@ function clearResults() {
   outTitle_div.style.display = 'none';
   download_span.style.display = 'none';
   ratio_span.style.display = 'none';
-  ratio_span.textContent = '';
 
   results_table.style.display = 'none';
   results_table.innerHTML = '';
@@ -1184,7 +1183,6 @@ function sortResults(candidates) {
   var prevUpperRes;
   var jMember;
   var thisResult;
-  var stringRes;
   var minRatio;
   var nomRatio;
   var maxRatio;
@@ -1197,7 +1195,7 @@ function sortResults(candidates) {
   sortedResults = [];
   
   // Sort candidates by closeness to target divider ratio.
-  candidates.sort(function(a,b){return a.absDiff - b.absDiff;});
+  candidates.sort(function(a,b){return a.absDiff() - b.absDiff();});
 
   // Group candidates with similar absolute difference from target divider ratio.
   groupNumber = 1;
@@ -1247,8 +1245,7 @@ function sortResults(candidates) {
     // Store the results in this group.
     for (jMember = 0; jMember < resultsGroup.length; jMember++) {
       thisResult = resultsGroup[jMember];
-      stringRes = thisResult.resUpper + thisResult.resLower;
-      nomRatio = thisResult.resLower / stringRes;
+      nomRatio = thisResult.resLower / (thisResult.resUpper + thisResult.resLower);
 
       dimLower = settings.tolDim * thisResult.resLower;
       augUpper = settings.tolAug * thisResult.resUpper;
@@ -1259,7 +1256,7 @@ function sortResults(candidates) {
       maxRatio = augLower / (augLower + dimUpper);
 
       sortedResults.push(new Result(groupNumber, thisResult.resUpper, thisResult.resLower,
-                                    stringRes, minRatio, nomRatio, maxRatio, thisResult.diff));
+                                    minRatio, nomRatio, maxRatio, thisResult.diff));
     }
 
     groupNumber++;
@@ -1377,7 +1374,7 @@ function displayResults() {
      resultGroup_td.textContent = thisResult.groupNum.toString();
      resultUpper_td.textContent = resValToString(thisResult.resUpper, 3);
      resultLower_td.textContent = resValToString(thisResult.resLower, 3);
-     resultString_td.textContent = resValToString(thisResult.stringRes, 6);
+     resultString_td.textContent = resValToString(thisResult.stringRes(), 6);
      resultMinRatio_td.textContent = thisResult.minRatio.toPrecision(6);
      resultNomRatio_td.textContent = thisResult.nomRatio.toPrecision(6);
      resultMaxRatio_td.textContent = thisResult.maxRatio.toPrecision(6);
@@ -1500,7 +1497,7 @@ function generate_csv() {
     // Line break for header row or previous result row.
     // Final result row has no line break.
     csvString += '\n' + thisResult.groupNum.toString() + ',' + thisResult.resUpper.toPrecision(7) + ',' +
-      thisResult.resLower.toPrecision(7) + ',' + thisResult.stringRes.toPrecision(9) + ',' +
+      thisResult.resLower.toPrecision(7) + ',' + thisResult.stringRes().toPrecision(9) + ',' +
       thisResult.minRatio.toPrecision(17) + ',' + thisResult.nomRatio.toPrecision(17) + ',' +
       thisResult.maxRatio.toPrecision(17) + ',' + thisResult.ratioDiff.toExponential(17);
   }
@@ -1596,7 +1593,6 @@ function generate_xlsx() {
   var rowNum;
   var expString;
   var dir_size;
-  var dir_offset;
   var end_record;
   var xlsxBlob;
 
@@ -1618,7 +1614,7 @@ function generate_xlsx() {
     '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
     '</Relationships>';
-  rels = new InnerFile(rels_str, '_rels/.rels', content_types.offset + content_types.length, timeDate);
+  rels = new InnerFile(rels_str, '_rels/.rels', content_types.endOffset(), timeDate);
 
   app_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
@@ -1627,7 +1623,7 @@ function generate_xlsx() {
     '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
     '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
     '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged></Properties>';
-  app = new InnerFile(app_str, 'docProps/app.xml', rels.offset + rels.length, timeDate);
+  app = new InnerFile(app_str, 'docProps/app.xml', rels.endOffset(), timeDate);
 
   isoDate = thisMoment.toISOString().substr(0, 19) + 'Z';
   core_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -1636,7 +1632,7 @@ function generate_xlsx() {
     '<dcterms:created xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:created>' +
     '<dcterms:modified xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:modified>' +
     '</cp:coreProperties>';
-  core = new InnerFile(core_str, 'docProps/core.xml', app.offset + app.length, timeDate);
+  core = new InnerFile(core_str, 'docProps/core.xml', app.endOffset(), timeDate);
 
   styles_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
@@ -1655,20 +1651,20 @@ function generate_xlsx() {
 
   styles_str += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
     '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
-  styles = new InnerFile(styles_str, 'xl/styles.xml', core.offset + core.length, timeDate);
+  styles = new InnerFile(styles_str, 'xl/styles.xml', core.endOffset(), timeDate);
 
   workbook_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
     '<sheets><sheet name="results" sheetId="1" r:id="rId1"/></sheets>' +
     '<calcPr fullPrecision="1"/></workbook>';
-  workbook = new InnerFile(workbook_str, 'xl/workbook.xml', styles.offset + styles.length, timeDate);
+  workbook = new InnerFile(workbook_str, 'xl/workbook.xml', styles.endOffset(), timeDate);
 
   wb_rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
     '</Relationships>';
-  wb_rels = new InnerFile(wb_rels_str, 'xl/_rels/workbook.xml.rels', workbook.offset + workbook.length, timeDate);
+  wb_rels = new InnerFile(wb_rels_str, 'xl/_rels/workbook.xml.rels', workbook.endOffset(), timeDate);
 
   numRows = 4 + sortedResults.length;
   settingsRow = 1;
@@ -1775,7 +1771,7 @@ function generate_xlsx() {
       '<c r="A' + rowNum + '"><v>' + thisResult.groupNum.toString() + '</v></c>' +
       '<c r="B' + rowNum + '"><v>' + thisResult.resUpper.toPrecision(7) + '</v></c>' +
       '<c r="C' + rowNum + '"><v>' + thisResult.resLower.toPrecision(7) + '</v></c>' +
-      '<c r="D' + rowNum + '"><v>' + thisResult.stringRes.toPrecision(9) + '</v></c>' +
+      '<c r="D' + rowNum + '"><v>' + thisResult.stringRes().toPrecision(9) + '</v></c>' +
       '<c r="E' + rowNum + '"><v>' + thisResult.minRatio.toPrecision(17) + '</v></c>' +
       '<c r="F' + rowNum + '"><v>' + thisResult.nomRatio.toPrecision(17) + '</v></c>' +
       '<c r="G' + rowNum + '"><v>' + thisResult.maxRatio.toPrecision(17) + '</v></c>';
@@ -1794,20 +1790,19 @@ function generate_xlsx() {
     sheet1_str += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
   }
   sheet1_str += '</worksheet>';
-  sheet1 = new InnerFile(sheet1_str, 'xl/worksheets/sheet1.xml', wb_rels.offset + wb_rels.length, timeDate);
+  sheet1 = new InnerFile(sheet1_str, 'xl/worksheets/sheet1.xml', wb_rels.endOffset(), timeDate);
 
   // Generate the end of central directory record
-  dir_size = content_types.dirHeader.length + rels.dirHeader.length +
-    app.dirHeader.length + core.dirHeader.length + styles.dirHeader.length +
-    workbook.dirHeader.length + wb_rels.dirHeader.length + sheet1.dirHeader.length;
-  dir_offset = sheet1.offset + sheet1.length;
-  end_record = end_cen_dir(8, dir_size, dir_offset);
+  dir_size = content_types.dirHeaderLength() + rels.dirHeaderLength() +
+    app.dirHeaderLength() + core.dirHeaderLength() + styles.dirHeaderLength() +
+    workbook.dirHeaderLength() + wb_rels.dirHeaderLength() + sheet1.dirHeaderLength();
+  end_record = end_cen_dir(8, dir_size, sheet1.endOffset());
 
   xlsxBlob = new Blob([content_types.localHeader, content_types.content, rels.localHeader, rels.content, 
     app.localHeader, app.content, core.localHeader, core.content, styles.localHeader, styles.content, 
     workbook.localHeader, workbook.content, wb_rels.localHeader, wb_rels.content, sheet1.localHeader, 
-    sheet1.content, content_types.dirHeader, rels.dirHeader, app.dirHeader, core.dirHeader, styles.dirHeader, 
-    workbook.dirHeader, wb_rels.dirHeader, sheet1.dirHeader, end_record], 
+    sheet1.content, content_types.dirHeader(), rels.dirHeader(), app.dirHeader(), core.dirHeader(), 
+    styles.dirHeader(), workbook.dirHeader(), wb_rels.dirHeader(), sheet1.dirHeader(), end_record], 
     {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 
   return xlsxBlob;
