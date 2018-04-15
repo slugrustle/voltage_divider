@@ -1333,13 +1333,32 @@ function crc32(uint8ar) {
 }
 
 // Returns length in bytes of equivalent utf8 string given a utf16 string input.
-// Does not handle surrogate pairs.
 function utf8len(utf16str) {
   var len = 0;
   var j;
   var charCode;
+  var codeNext;
 
-  for (j = 0; j < utf16str.length; j++) {
+  for (j = 0; j < utf16str.length-1; j++) {
+    charCode = utf16str.charCodeAt(j);
+    if (charCode <= 127) {
+      len++;
+    } else if (charCode <= 2047) {
+      len += 2;
+    } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      codeNext = utf16str.charCodeAt(j+1);
+      if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
+        len += 4;
+        j++;
+      } else {
+        len += 3;
+      }
+    } else {
+      len += 3;
+    }
+  }
+
+  if (j < utf16str.length) {
     charCode = utf16str.charCodeAt(j);
     if (charCode <= 127) {
       len++;
@@ -1354,29 +1373,73 @@ function utf8len(utf16str) {
 }
 
 // Converts a utf16 javascript string to a utf8 Unit8Array.
-// Does not handle surrogate pairs.
 function utf16_to_utf8(utf16str) {
   var outArray = new Uint8Array(utf8len(utf16str));
   var k = 0;
   var j;
   var charCode;
+  var codeNext;
+  var code32;
 
-  for (j = 0; j < utf16str.length; j++) {
+  for (j = 0; j < utf16str.length-1; j++) {
     charCode = utf16str.charCodeAt(j);
     if (charCode <= 127) {
-      outArray[k] = charCode;
+      outArray[k] = 0x7F & charCode;
       k++;
     } else if (charCode <= 2047) {
-      outArray[k] = 0xC0 | (0xDF & (charCode >>> 6));
+      outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
       k++;
-      outArray[k] = 0x80 | (0xBF & charCode);
+      outArray[k] = 0x80 | (0x3F & charCode);
+      k++;
+    } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+      codeNext = utf16str.charCodeAt(j+1);
+      if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
+        // We have a surrogate pair
+        code32 = ((charCode - 0xD800) << 10) + (codeNext - 0xDC00) + 0x10000;
+        outArray[k] = 0xF0 | (0x07 & code32 >>> 18);
+        k++;
+        outArray[k] = 0x80 | (0x3F & (code32 >>> 12));
+        k++
+        outArray[k] = 0x80 | (0x3F & (code32 >>> 6));
+        k++;
+        outArray[k] = 0x80 | (0x3F & code32);
+        k++;
+
+        j++;
+      } else {
+        outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+        k++;
+        outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+        k++;
+        outArray[k] = 0x80 | (0x3F & charCode);
+        k++;
+      }
+    } else {
+      outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+      k++;
+      outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+      k++;
+      outArray[k] = 0x80 | (0x3F & charCode);
+      k++;
+    }
+  }
+
+  if (j < utf16str.length) {
+    charCode = utf16str.charCodeAt(j);
+    if (charCode <= 127) {
+      outArray[k] = 0x7F & charCode;
+      k++;
+    } else if (charCode <= 2047) {
+      outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
+      k++;
+      outArray[k] = 0x80 | (0x3F & charCode);
       k++;
     } else {
-      outArray[k] = 0xE0 | (0xEF & (charCode >>> 12));
+      outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
       k++;
-      outArray[k] = 0x80 | (0xBF & (charCode >>> 6));
+      outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
       k++;
-      outArray[k] = 0x80 | (0xBF & charCode);
+      outArray[k] = 0x80 | (0x3F & charCode);
       k++;
     }
   }
