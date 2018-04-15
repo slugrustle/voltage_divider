@@ -258,7 +258,7 @@ td.paramLabel {
 </head>
 
 <body>
-<div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2001;v1.9&#x2001;2018-04-13</span></div>
+<div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2003;v1.9&#x2003;2018-04-13</span></div>
 <table id="inputTable">
   <tr>
     <td class="labelCol">Target Divider Ratio</td>
@@ -269,9 +269,9 @@ td.paramLabel {
     <td class="labelCol">Ratio Type</td>
     <td class="buttonCol">
       <input type="radio" name="ratioType" id="ratioTypeMin"/>
-      <label for="ratioTypeMin" class="buttonLabel">MIN</label> &#x2000;
+      <label for="ratioTypeMin" class="buttonLabel">MIN</label> &#x2002;
       <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
-      <label for="ratioTypeNom" class="buttonLabel">NOM</label> &#x2000;
+      <label for="ratioTypeNom" class="buttonLabel">NOM</label> &#x2002;
       <input type="radio" name="ratioType" id="ratioTypeMax"/>
       <label for="ratioTypeMax" class="buttonLabel">MAX</label>
     </td>
@@ -296,13 +296,13 @@ td.paramLabel {
     <td class="labelCol">Resistor Value Series</td>
     <td class="buttonCol">
         <input type="radio" name="resSeries" id="resSeriesE24"/>
-        <label for="resSeriesE24" class="buttonLabel">E24</label> &#x2000;
+        <label for="resSeriesE24" class="buttonLabel">E24</label> &#x2002;
         <input type="radio" name="resSeries" id="resSeriesE96"/>
-        <label for="resSeriesE96" class="buttonLabel">E96</label> &#x2000;
+        <label for="resSeriesE96" class="buttonLabel">E96</label> &#x2002;
         <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
         <label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
     </td>
-    <td>View&#x2000;<a href="javascript:;" onclick="voltDiv.showE24();">E24</a>,&#x2000;<a href="javascript:;" onclick="voltDiv.showE96();">E96</a></td>
+    <td>View&#x2002;<a href="javascript:;" onclick="voltDiv.showE24();">E24</a>,&#x2002;<a href="javascript:;" onclick="voltDiv.showE96();">E96</a></td>
   </tr>
   <tr>
     <td class="buttonCol" colspan="3"><button onclick="voltDiv.solveDivider();">Solve</button></td>
@@ -327,15 +327,15 @@ td.paramLabel {
       </svg>
   </div>
   <div style="display: inline-block; font-size: 12pt;">
-    <div style="margin-bottom: 14pt;"><b>String Resistance</b>&#x2000;=&#x2000;Lower + Upper</div>
-    <div style="margin-bottom: 14pt;"><b>Divider Ratio</b>&#x2000;=&#x2000;Vo <b>/</b> Vi</div>
-    <div style="margin-bottom: 4pt;"><b>Min Ratio</b>&#x2000;=&#x2000;LowerDim <b>/</b> (LowerDim + UpperAug)</div>
-    <div style="margin-bottom: 4pt;"><i>LowerDim</i>&#x2000;=&#x2000;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Lower</div>
-    <div style="margin-bottom: 14pt;"><i>UpperAug</i>&#x2000;=&#x2000;(1 + Tolerance<b>/</b>100) &#x2022; Upper</div>
-    <div style="margin-bottom: 14pt;"><b>Nom Ratio</b>&#x2000;=&#x2000;Lower <b>/</b> (Lower + Upper)</div>
-    <div style="margin-bottom: 4pt;"><b>Max Ratio</b>&#x2000;=&#x2000;LowerAug <b>/</b> (LowerAug + UpperDim)</div>
-    <div style="margin-bottom: 4pt;"><i>LowerAug</i>&#x2000;=&#x2000;(1 + Tolerance<b>/</b>100) &#x2022; Lower</div>
-    <div><i>UpperDim</i>&#x2000;=&#x2000;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Upper</div>
+    <div style="margin-bottom: 14pt;"><b>String Resistance</b>&#x2002;=&#x2002;Lower + Upper</div>
+    <div style="margin-bottom: 14pt;"><b>Divider Ratio</b>&#x2002;=&#x2002;Vo <b>/</b> Vi</div>
+    <div style="margin-bottom: 4pt;"><b>Min Ratio</b>&#x2002;=&#x2002;LowerDim <b>/</b> (LowerDim + UpperAug)</div>
+    <div style="margin-bottom: 4pt;"><i>LowerDim</i>&#x2002;=&#x2002;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Lower</div>
+    <div style="margin-bottom: 14pt;"><i>UpperAug</i>&#x2002;=&#x2002;(1 + Tolerance<b>/</b>100) &#x2022; Upper</div>
+    <div style="margin-bottom: 14pt;"><b>Nom Ratio</b>&#x2002;=&#x2002;Lower <b>/</b> (Lower + Upper)</div>
+    <div style="margin-bottom: 4pt;"><b>Max Ratio</b>&#x2002;=&#x2002;LowerAug <b>/</b> (LowerAug + UpperDim)</div>
+    <div style="margin-bottom: 4pt;"><i>LowerAug</i>&#x2002;=&#x2002;(1 + Tolerance<b>/</b>100) &#x2022; Lower</div>
+    <div><i>UpperDim</i>&#x2002;=&#x2002;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Upper</div>
   </div>
 </div>
 
@@ -351,7 +351,7 @@ td.paramLabel {
 </div>
 <div id="errorDiv" style="max-width: 30em; border: 1px solid black; padding: 8pt; display: none;"></div>
 
-<div xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" style="margin-top: 50pt; margin-left: 4pt;" id="licenseBlock">
+<div style="margin-top: 50pt; margin-left: 4pt;" id="licenseBlock">
   <div style="float: left; margin-right: 1em;">
     <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none;">
       <svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="-0.5 -0.101 88 31" role="img" aria-label="CC0 Button">
@@ -375,7 +375,7 @@ td.paramLabel {
   </div>
 </div>
 
-<script type="text/javascript">
+<script>
 // Provide a local scope for code
 (function() {
 'use strict';
@@ -610,7 +610,7 @@ function displayDiagnostics() {
   ratioRangeLabel_td.className = 'paramLabel';
   ratioRangeLabel_td.textContent = 'Ratio search range';
   ratioRangeValue_td = document.createElement('td');
-  ratioRangeValue_td.textContent = '[\u00A0' + settings.ratioThresholdLow.toPrecision(6) + ',\u2000' + settings.ratioThresholdHigh.toPrecision(6) + '\u00A0]';
+  ratioRangeValue_td.textContent = '[\u00A0' + settings.ratioThresholdLow.toPrecision(6) + ',\u2002' + settings.ratioThresholdHigh.toPrecision(6) + '\u00A0]';
 
   ratioRange_tr.appendChild(ratioRangeLabel_td);
   ratioRange_tr.appendChild(ratioRangeValue_td);
@@ -1624,7 +1624,7 @@ function generate_xlsx() {
       
   if (settings.isExpr) {
     sheet1_str += '<row r="1" spans="1:8">' +
-      '<c r="A1" s="3" t="inlineStr"><is><t>Target Ratio Expression:\u2000</t></is></c>' +
+      '<c r="A1" s="3" t="inlineStr"><is><t>Target Ratio Expression:\u2002</t></is></c>' +
       '<c r="B1" s="3"/>' + 
       '<c r="C1" t="inlineStr"><is><t>' + settings.ratioExpr + '</t></is></c>' +
       '<c r="D1"/><c r="E1"/><c r="F1"/><c r="G1"/><c r="H1"/></row>';
@@ -2127,7 +2127,7 @@ window.voltDiv.showE24 = function() {
       if ((jVal + 1) % 6 === 0) {
         values_td.insertAdjacentHTML('beforeend', '<br/>');
       } else {
-        values_td.insertAdjacentText('beforeend', '\u2000');
+        values_td.insertAdjacentText('beforeend', '\u2002');
       }
     }
 
@@ -2186,7 +2186,7 @@ window.voltDiv.showE96 = function() {
       if ((jVal + 1) % 8 === 0) {
         values_td.insertAdjacentHTML('beforeend', '<br/>');
       } else {
-        values_td.insertAdjacentText('beforeend', '\u2000');
+        values_td.insertAdjacentText('beforeend', '\u2002');
       }
     }
 
