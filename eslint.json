@@ -9,7 +9,6 @@
     "no-shadow-restricted-names": "error",
     "no-undef-init": "error",
     "no-use-before-define": "error",
-    "no-extra-parens": "error",
     "block-scoped-var": "error",
     "class-methods-use-this": "error",
     "no-alert": "error",

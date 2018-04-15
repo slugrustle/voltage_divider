@@ -1396,10 +1396,10 @@ function utf16_to_utf8(utf16str) {
       if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
         // We have a surrogate pair
         code32 = ((charCode - 0xD800) << 10) + (codeNext - 0xDC00) + 0x10000;
-        outArray[k] = 0xF0 | (0x07 & code32 >>> 18);
+        outArray[k] = 0xF0 | (0x07 & (code32 >>> 18));
         k++;
         outArray[k] = 0x80 | (0x3F & (code32 >>> 12));
-        k++
+        k++;
         outArray[k] = 0x80 | (0x3F & (code32 >>> 6));
         k++;
         outArray[k] = 0x80 | (0x3F & code32);
