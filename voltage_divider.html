@@ -744,7 +744,7 @@ function end_cen_dir(num_entries, dir_size, dir_offset) {
 
 // Constructor for object that simplifies the creation of
 // ZIP files from strings. fileType is for type of Blob
-// returned by ZipBuilder.finalize(). modDate is file
+// returned by ZipBuilder.compile(). modDate is the file
 // modification time Date object.
 function ZipBuilder(fileType, modDate) {
   this.content_ar = [];
@@ -773,7 +773,7 @@ ZipBuilder.prototype.addFile = function(filename, contentString) {
 // Compiles the ZIP archive and returns it as a Blob.
 // Does not alter the ZipBuilder internal state; may
 // be called multiple times.
-ZipBuilder.prototype.finalize = function() {
+ZipBuilder.prototype.compile = function() {
   var zipBlob;
   var endRecord;
 
@@ -783,7 +783,7 @@ ZipBuilder.prototype.finalize = function() {
     return zipBlob;
   }
 
-  var endRecord = end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset);
+  endRecord = end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset);
   zipBlob = new Blob(this.content_ar.concat(this.directory_ar, [endRecord]), {type : this.fileType});
   return zipBlob;
 };
@@ -1812,7 +1812,7 @@ function generate_xlsx() {
   sheet1_str += '</worksheet>';
   zipBuilder.addFile('xl/worksheets/sheet1.xml', sheet1_str);
 
-  return zipBuilder.finalize();
+  return zipBuilder.compile();
 }
 
 // Returns a new string that is inString without leading/trailing whitespace.
