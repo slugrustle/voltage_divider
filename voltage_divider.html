@@ -770,27 +770,21 @@ ZipBuilder.prototype.addFile = function(filename, contentString) {
   this.directory_ar.push(dirHeader);
 };
 
-// Compiles ZIP archive, returns it as a Blob,
-// and resets internal state. Calling more than once
-// results in an empty Blob.
+// Compiles the ZIP archive and returns it as a Blob.
+// Does not alter the ZipBuilder internal state; may
+// be called multiple times.
 ZipBuilder.prototype.finalize = function() {
   var zipBlob;
-  
+  var endRecord;
+
   if (this.nextOffset < 1) {
     // There is no data to return.
     zipBlob = new Blob();
     return zipBlob;
   }
 
-  this.content_ar.push(new Blob(this.directory_ar));
-  this.content_ar.push(end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset));
-  zipBlob = new Blob(this.content_ar, {type : this.fileType});
-  
-  this.content_ar = [];
-  this.directory_ar = [];
-  this.nextOffset = 0;
-  this.dirSize = 0;
-  
+  var endRecord = end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset);
+  zipBlob = new Blob(this.content_ar.concat(this.directory_ar, [endRecord]), {type : this.fileType});
   return zipBlob;
 };
 
