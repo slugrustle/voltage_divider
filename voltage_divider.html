@@ -643,6 +643,31 @@ function utf16_to_utf8(utf16str) {
   return outArray;
 }
 
+// Returns DOS time and date in four-byte little endian format
+// given a JavaScript date.
+function dosTimeDate(aDate) {
+  var dosTime = new Uint16Array(1);
+  var dosDate = new Uint16Array(1);
+  var timeDate = new Uint8Array(4);
+
+  // I love this so much. They didn't have 6 bits for seconds,
+  // so the DOS timestamp stores 2 second intervals.
+  dosTime = Math.floor(aDate.getSeconds() / 2);
+  dosTime |= aDate.getMinutes() << 5;
+  dosTime |= aDate.getHours() << 11;
+  timeDate[0] = dosTime & 0x00FF;
+  timeDate[1] = (dosTime & 0xFF00) >>> 8;
+  
+  dosDate = new Uint16Array(1);
+  dosDate = aDate.getDate();
+  dosDate |= (aDate.getMonth() + 1) << 5;
+  dosDate |= (aDate.getFullYear() - 1980) << 9;
+  timeDate[2] = dosDate & 0x00FF;
+  timeDate[3] = (dosDate & 0xFF00) >>> 8;
+
+  return timeDate;
+}
+
 // Generate ZIP local file header from utf8 Uint8Array filename,
 // numeric file size in bytes, numeric crc32, and 4 byte Uint8Array
 // little-endian dos time and date (in that order)
@@ -669,44 +694,109 @@ function local_header(filename, filesize, file_crc, timeDate) {
   return headArray;
 }
 
-// InnerFile stores all relevant data for each file in a ZIP archive.
-function InnerFile(contentString, nameString, offset, timeDate) {
-  this.content = utf16_to_utf8(contentString);
-  this.filename = utf16_to_utf8(nameString);
-  this.localHeader = local_header(this.filename, this.content.length, crc32(this.content), timeDate);
-  this.offset = offset;
-}
-
-// Offset one past end of this InnerFile from start of ZIP archive
-InnerFile.prototype.endOffset = function() {
-  return this.offset + this.content.length + this.localHeader.length;
-};
-
-// Length of central directory header for this InnerFile object
-InnerFile.prototype.dirHeaderLength = function() {
-  return 46 + this.filename.length;
-};
-
-// Generate ZIP central directory header for an InnerFile object
-InnerFile.prototype.dirHeader = function() {
-  var headArray = new Uint8Array(this.dirHeaderLength());
+// Generate ZIP central directory header from utf8 Uint8Array filename,
+// Uint8Array local_header, and numeric offset of file local header
+// from start of ZIP archive in bytes
+function dir_header(filename, localHeader, offset) {
+  var headArray = new Uint8Array(46 + filename.length);
   headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
 
   // Copy timeDate, file_crc, file sizes, and filename length
   // from existing local header
-  headArray.set(this.localHeader.subarray(10,28), 12);
+  headArray.set(localHeader.subarray(10,28), 12);
   headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
-  headArray[42] = this.offset & 0x000000FF;
-  headArray[43] = (this.offset & 0x0000FF00) >>> 8;
-  headArray[44] = (this.offset & 0x00FF0000) >>> 16;
-  headArray[45] = (this.offset & 0xFF000000) >>> 24;
-  headArray.set(this.filename, 46);
+  headArray[42] = offset & 0x000000FF;
+  headArray[43] = (offset & 0x0000FF00) >>> 8;
+  headArray[44] = (offset & 0x00FF0000) >>> 16;
+  headArray[45] = (offset & 0xFF000000) >>> 24;
+  headArray.set(filename, 46);
   return headArray;
+}
+
+// Generate a ZIP end of central directory record from
+// number of entries in central directory, size of central directory in
+// bytes, and offset of central directory from start of ZIP file.
+function end_cen_dir(num_entries, dir_size, dir_offset) {
+  var record_len = 22;
+  var recordArray = new Uint8Array(record_len);
+
+  recordArray.set([0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00]);
+
+  recordArray[8] = num_entries & 0x00FF;
+  recordArray[9] = (num_entries & 0xFF00) >>> 8;
+
+  recordArray.set(recordArray.subarray(8,10), 10);
+
+  recordArray[12] = dir_size & 0x000000FF;
+  recordArray[13] = (dir_size & 0x0000FF00) >>> 8;
+  recordArray[14] = (dir_size & 0x00FF0000) >>> 16;
+  recordArray[15] = (dir_size & 0xFF000000) >>> 24;
+
+  recordArray[16] = dir_offset & 0x000000FF;
+  recordArray[17] = (dir_offset & 0x0000FF00) >>> 8;
+  recordArray[18] = (dir_offset & 0x00FF0000) >>> 16;
+  recordArray[19] = (dir_offset & 0xFF000000) >>> 24;
+
+  recordArray.set([0x00, 0x00], 20);
+
+  return recordArray;
+}
+
+// Constructor for object that simplifies the creation of
+// ZIP files from strings. fileType is for type of Blob
+// returned by ZipBuilder.finalize(). modDate is file
+// modification time Date object.
+function ZipBuilder(fileType, modDate) {
+  this.content_ar = [];
+  this.directory_ar = [];
+  this.nextOffset = 0;
+  this.dirSize = 0;
+  this.timeDate = dosTimeDate(modDate);
+  this.fileType = fileType;
+}
+
+// Adds a file to the ZIP archive.
+// filename is relative path of file in ZIP archive as a string
+// contentString is file contents
+ZipBuilder.prototype.addFile = function(filename, contentString) {
+  var content_utf8 = utf16_to_utf8(contentString);
+  var filename_utf8 = utf16_to_utf8(filename);
+  var localHeader = local_header(filename_utf8, content_utf8.length, crc32(content_utf8), this.timeDate);
+  var dirHeader = dir_header(filename_utf8, localHeader, this.nextOffset);
+  this.nextOffset += localHeader.length + content_utf8.length;
+  this.dirSize += dirHeader.length;
+  this.content_ar.push(localHeader);
+  this.content_ar.push(content_utf8);
+  this.directory_ar.push(dirHeader);
+};
+
+// Compiles ZIP archive, returns it as a Blob,
+// and resets internal state. Calling more than once
+// results in an empty Blob.
+ZipBuilder.prototype.finalize = function() {
+  var zipBlob;
+  
+  if (this.nextOffset < 1) {
+    // There is no data to return.
+    zipBlob = new Blob();
+    return zipBlob;
+  }
+
+  this.content_ar.push(new Blob(this.directory_ar));
+  this.content_ar.push(end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset));
+  zipBlob = new Blob(this.content_ar, {type : this.fileType});
+  
+  this.content_ar = [];
+  this.directory_ar = [];
+  this.nextOffset = 0;
+  this.dirSize = 0;
+  
+  return zipBlob;
 };
 
 // Clears results from previous run of program, including E24/E96 
 // display, diagnostic message, download links, error display, etc.
-function clearResults() { 
+function clearResults() {
   var outTitle_div = document.getElementById('outTitleDiv');
   var download_span = document.getElementById('downloadSpan');
   var ratio_span = document.getElementById('ratioSpan');
@@ -1506,85 +1596,22 @@ function generate_csv() {
   return csvBlob;
 }
 
-// Returns DOS time and date in four-byte little endian format
-// given a JavaScript date.
-function dosTimeDate(aDate) {
-  var dosTime = new Uint16Array(1);
-  var dosDate = new Uint16Array(1);
-  var timeDate = new Uint8Array(4);
-
-  // I love this so much. They didn't have 6 bits for seconds,
-  // so the DOS timestamp stores 2 second intervals.
-  dosTime = Math.floor(aDate.getSeconds() / 2);
-  dosTime |= aDate.getMinutes() << 5;
-  dosTime |= aDate.getHours() << 11;
-  timeDate[0] = dosTime & 0x00FF;
-  timeDate[1] = (dosTime & 0xFF00) >>> 8;
-  
-  dosDate = new Uint16Array(1);
-  dosDate = aDate.getDate();
-  dosDate |= (aDate.getMonth() + 1) << 5;
-  dosDate |= (aDate.getFullYear() - 1980) << 9;
-  timeDate[2] = dosDate & 0x00FF;
-  timeDate[3] = (dosDate & 0xFF00) >>> 8;
-
-  return timeDate;
-}
-
-// Generate a ZIP end of central directory record from
-// number of entries in central directory, size of central directory in
-// bytes, and offset of central directory from start of ZIP file.
-function end_cen_dir(num_entries, dir_size, dir_offset) {
-  var record_len = 22;
-  var recordArray = new Uint8Array(record_len);
-
-  recordArray.set([0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00]);
-
-  recordArray[8] = num_entries & 0x00FF;
-  recordArray[9] = (num_entries & 0xFF00) >>> 8;
-
-  recordArray.set(recordArray.subarray(8,10), 10);
-
-  recordArray[12] = dir_size & 0x000000FF;
-  recordArray[13] = (dir_size & 0x0000FF00) >>> 8;
-  recordArray[14] = (dir_size & 0x00FF0000) >>> 16;
-  recordArray[15] = (dir_size & 0xFF000000) >>> 24;
-
-  recordArray[16] = dir_offset & 0x000000FF;
-  recordArray[17] = (dir_offset & 0x0000FF00) >>> 8;
-  recordArray[18] = (dir_offset & 0x00FF0000) >>> 16;
-  recordArray[19] = (dir_offset & 0xFF000000) >>> 24;
-
-  recordArray.set([0x00, 0x00], 20);
-
-  return recordArray;
-}
-
 // Generates an Office OpenDocument spreadsheet of the results.
 // Returns an appropriate Blob.
 function generate_xlsx() {
-  // Content string and object variables for files in ZIP archive.
+  // Content string variables for files in ZIP archive.
   var content_types_str;
-  var content_types;
   var rels_str;
-  var rels;
   var app_str;
-  var app;
-  var isoDate;
   var core_str;
-  var core;
   var styles_str;
-  var styles;
   var workbook_str;
-  var workbook;
   var wb_rels_str;
-  var wb_rels;
   var sheet1_str;
-  var sheet1;
 
   // Other helper variables.
   var thisMoment = new Date();
-  var timeDate = dosTimeDate(thisMoment);
+  var isoDate;
   var numRows;
   var settingsRow;
   var headerRow;
@@ -1592,9 +1619,8 @@ function generate_xlsx() {
   var thisResult;
   var rowNum;
   var expString;
-  var dir_size;
-  var end_record;
-  var xlsxBlob;
+
+  var zipBuilder = new ZipBuilder('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', thisMoment);
 
   content_types_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
@@ -1606,7 +1632,7 @@ function generate_xlsx() {
     '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
     '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
     '</Types>';
-  content_types = new InnerFile(content_types_str, '[Content_Types].xml', 0, timeDate);
+  zipBuilder.addFile('[Content_Types].xml', content_types_str);
 
   rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
@@ -1614,7 +1640,7 @@ function generate_xlsx() {
     '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
     '</Relationships>';
-  rels = new InnerFile(rels_str, '_rels/.rels', content_types.endOffset(), timeDate);
+  zipBuilder.addFile('_rels/.rels', rels_str);
 
   app_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
@@ -1623,7 +1649,7 @@ function generate_xlsx() {
     '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
     '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
     '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged></Properties>';
-  app = new InnerFile(app_str, 'docProps/app.xml', rels.endOffset(), timeDate);
+  zipBuilder.addFile('docProps/app.xml', app_str);
 
   isoDate = thisMoment.toISOString().substr(0, 19) + 'Z';
   core_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -1632,7 +1658,7 @@ function generate_xlsx() {
     '<dcterms:created xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:created>' +
     '<dcterms:modified xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:modified>' +
     '</cp:coreProperties>';
-  core = new InnerFile(core_str, 'docProps/core.xml', app.endOffset(), timeDate);
+  zipBuilder.addFile('docProps/core.xml', core_str);
 
   styles_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
@@ -1651,20 +1677,20 @@ function generate_xlsx() {
 
   styles_str += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
     '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
-  styles = new InnerFile(styles_str, 'xl/styles.xml', core.endOffset(), timeDate);
+  zipBuilder.addFile('xl/styles.xml', styles_str);
 
   workbook_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
     '<sheets><sheet name="results" sheetId="1" r:id="rId1"/></sheets>' +
     '<calcPr fullPrecision="1"/></workbook>';
-  workbook = new InnerFile(workbook_str, 'xl/workbook.xml', styles.endOffset(), timeDate);
+  zipBuilder.addFile('xl/workbook.xml', workbook_str);
 
   wb_rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
     '</Relationships>';
-  wb_rels = new InnerFile(wb_rels_str, 'xl/_rels/workbook.xml.rels', workbook.endOffset(), timeDate);
+  zipBuilder.addFile('xl/_rels/workbook.xml.rels', wb_rels_str);
 
   numRows = 4 + sortedResults.length;
   settingsRow = 1;
@@ -1790,22 +1816,9 @@ function generate_xlsx() {
     sheet1_str += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
   }
   sheet1_str += '</worksheet>';
-  sheet1 = new InnerFile(sheet1_str, 'xl/worksheets/sheet1.xml', wb_rels.endOffset(), timeDate);
+  zipBuilder.addFile('xl/worksheets/sheet1.xml', sheet1_str);
 
-  // Generate the end of central directory record
-  dir_size = content_types.dirHeaderLength() + rels.dirHeaderLength() +
-    app.dirHeaderLength() + core.dirHeaderLength() + styles.dirHeaderLength() +
-    workbook.dirHeaderLength() + wb_rels.dirHeaderLength() + sheet1.dirHeaderLength();
-  end_record = end_cen_dir(8, dir_size, sheet1.endOffset());
-
-  xlsxBlob = new Blob([content_types.localHeader, content_types.content, rels.localHeader, rels.content, 
-    app.localHeader, app.content, core.localHeader, core.content, styles.localHeader, styles.content, 
-    workbook.localHeader, workbook.content, wb_rels.localHeader, wb_rels.content, sheet1.localHeader, 
-    sheet1.content, content_types.dirHeader(), rels.dirHeader(), app.dirHeader(), core.dirHeader(), 
-    styles.dirHeader(), workbook.dirHeader(), wb_rels.dirHeader(), sheet1.dirHeader(), end_record], 
-    {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-
-  return xlsxBlob;
+  return zipBuilder.finalize();
 }
 
 // Returns a new string that is inString without leading/trailing whitespace.
