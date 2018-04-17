@@ -1617,7 +1617,7 @@ function generate_xlsx() {
   var rowNum;
   var expString;
 
-  var zipBuilder = new ZipBuilder('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', thisMoment);
+  var xlsxZip = new ZipBuilder('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', thisMoment);
 
   content_types_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
@@ -1629,7 +1629,7 @@ function generate_xlsx() {
     '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
     '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
     '</Types>';
-  zipBuilder.addFile('[Content_Types].xml', content_types_str);
+  xlsxZip.addFile('[Content_Types].xml', content_types_str);
 
   rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
@@ -1637,7 +1637,7 @@ function generate_xlsx() {
     '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
     '</Relationships>';
-  zipBuilder.addFile('_rels/.rels', rels_str);
+  xlsxZip.addFile('_rels/.rels', rels_str);
 
   app_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
@@ -1646,7 +1646,7 @@ function generate_xlsx() {
     '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
     '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
     '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged></Properties>';
-  zipBuilder.addFile('docProps/app.xml', app_str);
+  xlsxZip.addFile('docProps/app.xml', app_str);
 
   isoDate = thisMoment.toISOString().substr(0, 19) + 'Z';
   core_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -1655,7 +1655,7 @@ function generate_xlsx() {
     '<dcterms:created xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:created>' +
     '<dcterms:modified xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:modified>' +
     '</cp:coreProperties>';
-  zipBuilder.addFile('docProps/core.xml', core_str);
+  xlsxZip.addFile('docProps/core.xml', core_str);
 
   styles_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
@@ -1674,20 +1674,20 @@ function generate_xlsx() {
 
   styles_str += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
     '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
-  zipBuilder.addFile('xl/styles.xml', styles_str);
+  xlsxZip.addFile('xl/styles.xml', styles_str);
 
   workbook_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
     '<sheets><sheet name="results" sheetId="1" r:id="rId1"/></sheets>' +
     '<calcPr fullPrecision="1"/></workbook>';
-  zipBuilder.addFile('xl/workbook.xml', workbook_str);
+  xlsxZip.addFile('xl/workbook.xml', workbook_str);
 
   wb_rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
     '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
     '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
     '</Relationships>';
-  zipBuilder.addFile('xl/_rels/workbook.xml.rels', wb_rels_str);
+  xlsxZip.addFile('xl/_rels/workbook.xml.rels', wb_rels_str);
 
   numRows = 4 + sortedResults.length;
   settingsRow = 1;
@@ -1813,9 +1813,9 @@ function generate_xlsx() {
     sheet1_str += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
   }
   sheet1_str += '</worksheet>';
-  zipBuilder.addFile('xl/worksheets/sheet1.xml', sheet1_str);
+  xlsxZip.addFile('xl/worksheets/sheet1.xml', sheet1_str);
 
-  return zipBuilder.compile();
+  return xlsxZip.compile();
 }
 
 // Returns a new string that is inString without leading/trailing whitespace.
@@ -1969,6 +1969,7 @@ function shuntingYard(tokens, startToken) {
 // Evaluates any valid four-function calculator expression
 // to a single value. Accepts parentheses and unary minus.
 function evalExpression(inputStr) {
+  // input is inputStr with all space characters removed
   var input = inputStr.replace(/\s/g, '');
   var tokens = [];
   var jChar;
