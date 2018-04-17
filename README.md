@@ -30,8 +30,8 @@ which are modified from [this Stack Overflow post](https://stackoverflow.com/a/3
 and are therefore distributed under the 
 [CC BY-SA 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/).
 
-The remainder of the voltage\_divider project is distributed under the
-[CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/).
+The remainder of the voltage\_divider project, including the functions generate_csv() and generate_xslx(),
+is distributed under the [CC0 1.0 Universal Public Domain Dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 See also LICENSE.txt or the first comment in voltage\_divider.html.
 
 ## Acknowledgment
