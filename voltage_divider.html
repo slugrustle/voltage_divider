@@ -411,51 +411,6 @@ var settings;
 // Final results for display are stored here after sorting.
 var sortedResults = [];
 
-// Constructor for Settings object that stores user input settings
-function Settings() {
-  this.targetRatio = NaN;
-  this.isExpr = false;
-  this.ratioExpr = '';
-  this.ratioType = ratioEnum.NOM;
-  this.ratioThresholdLow = NaN;
-  this.ratioThresholdHigh = NaN;
-  this.resTolerance = NaN;
-  this.tolAug = NaN;
-  this.tolDim = NaN;
-  this.resSeries = seriesEnum.E24E96;
-  this.minStringRes = NaN;
-  this.maxStringRes = NaN;
-}
-
-// Constructor for Candidate objects that store potential
-// voltage divider solutions
-function Candidate(resUpper, resLower, diff) {
-  this.resUpper = resUpper;
-  this.resLower = resLower;
-  this.diff = diff;
-}
-
-Candidate.prototype.absDiff = function() {
-  return Math.abs(this.diff);
-};
-
-// Result objects are the best candidates --- those that
-// will be displayed. All values required by display routine
-// and spreadsheet generators are stored.
-function Result(groupNum, resUpper, resLower, minRatio, nomRatio, maxRatio, ratioDiff) {
-  this.groupNum = groupNum;
-  this.resUpper = resUpper;
-  this.resLower = resLower;
-  this.minRatio = minRatio;
-  this.nomRatio = nomRatio;
-  this.maxRatio = maxRatio;
-  this.ratioDiff = ratioDiff;
-}
-
-Result.prototype.stringRes = function() {
-  return this.resLower + this.resUpper;
-};
-
 // Clears results from previous run of program, including E24/E96 
 // display, diagnostic message, download links, error display, etc.
 function clearResults() {
@@ -671,6 +626,18 @@ function initialize_resArray() {
 // Find potential voltage divider solutions near the target ratio
 // that satisfy all constraints, and store them in candidates.
 var populate_candidates = (function(){
+  // Constructor for Candidate objects that store potential
+  // voltage divider solutions
+  function Candidate(resUpper, resLower, diff) {
+    this.resUpper = resUpper;
+    this.resLower = resLower;
+    this.diff = diff;
+  }
+
+  Candidate.prototype.absDiff = function() {
+    return Math.abs(this.diff);
+  };
+
   // Returns the index in resArray of the value nearest to resVal.
   function findNearest(resVal, resArray) {
     // Perform a binary search; resArray must be sorted in ascending order.
@@ -923,100 +890,120 @@ var populate_candidates = (function(){
 // Takes the fully-populated candidates array, sorts by lowest
 // difference from the target ratio, collects best matches into
 // groups, and stores them in sortedResults.
-function sortResults(candidates) {
-  var groupNumber;
-  var groupLength;
-  var anchorDiff;
-  var candidateGroup;
-  var resultsGroup;
-  var subLength;
-  var anchor_resLower;
-  var matchTolerance;
-  var subGroup;
-  var testIndx;
-  var testUpperRes;
-  var prevUpperRes;
-  var jMember;
-  var thisResult;
-  var minRatio;
-  var nomRatio;
-  var maxRatio;
-  var dimLower;
-  var augLower;
-  var dimUpper;
-  var augUpper;
+var sortResults = (function(){
+  // Result objects are the best candidates --- those that
+  // will be displayed. All values required by display routine
+  // and spreadsheet generators are stored.
+  function Result(groupNum, resUpper, resLower, minRatio, nomRatio, maxRatio, ratioDiff) {
+    this.groupNum = groupNum;
+    this.resUpper = resUpper;
+    this.resLower = resLower;
+    this.minRatio = minRatio;
+    this.nomRatio = nomRatio;
+    this.maxRatio = maxRatio;
+    this.ratioDiff = ratioDiff;
+  }
 
-  // Clear previous results
-  sortedResults = [];
-  
-  // Sort candidates by closeness to target divider ratio.
-  candidates.sort(function(a,b){return a.absDiff() - b.absDiff();});
+  Result.prototype.stringRes = function() {
+    return this.resLower + this.resUpper;
+  };
 
-  // Group candidates with similar absolute difference from target divider ratio.
-  groupNumber = 1;
-  while (candidates.length > 0 && groupNumber <= 20) {
-    groupLength = 1;
-    anchorDiff = candidates[0].diff;  
-    while (groupLength < candidates.length &&
-           Math.abs(candidates[groupLength].diff-anchorDiff) < 1e-10) {
-      groupLength++;
-    }
+  // sortResults()
+  return function(candidates) {
+    var groupNumber;
+    var groupLength;
+    var anchorDiff;
+    var candidateGroup;
+    var resultsGroup;
+    var subLength;
+    var anchor_resLower;
+    var matchTolerance;
+    var subGroup;
+    var testIndx;
+    var testUpperRes;
+    var prevUpperRes;
+    var jMember;
+    var thisResult;
+    var minRatio;
+    var nomRatio;
+    var maxRatio;
+    var dimLower;
+    var augLower;
+    var dimUpper;
+    var augUpper;
+
+    // Clear previous results
+    sortedResults = [];
     
-    // Store unique elements of candidateGroup in resultsGroup
-    candidateGroup = candidates.splice(0, groupLength);
-    candidateGroup.sort(function(a,b){return a.resLower - b.resLower;});
-    resultsGroup = [];
+    // Sort candidates by closeness to target divider ratio.
+    candidates.sort(function(a,b){return a.absDiff() - b.absDiff();});
 
-    while (candidateGroup.length > 0) {
-      // Find subgroup with same resLower value.
-      subLength = 1;
-      anchor_resLower = candidateGroup[0].resLower;
-      matchTolerance = 1e-8 * anchor_resLower;
-
-      while (subLength < candidateGroup.length &&
-             Math.abs(anchor_resLower - candidateGroup[subLength].resLower) < matchTolerance) {
-        subLength++;
+    // Group candidates with similar absolute difference from target divider ratio.
+    groupNumber = 1;
+    while (candidates.length > 0 && groupNumber <= 20) {
+      groupLength = 1;
+      anchorDiff = candidates[0].diff;  
+      while (groupLength < candidates.length &&
+            Math.abs(candidates[groupLength].diff-anchorDiff) < 1e-10) {
+        groupLength++;
       }
-      subGroup = candidateGroup.splice(0, subLength);
+      
+      // Store unique elements of candidateGroup in resultsGroup
+      candidateGroup = candidates.splice(0, groupLength);
+      candidateGroup.sort(function(a,b){return a.resLower - b.resLower;});
+      resultsGroup = [];
 
-      // Store non-duplicate entries of subGroup in resultsGroup
-      if (subGroup.length === 1) {
-        resultsGroup.push(subGroup[0]);
-      } else if (subGroup.length > 1) {
-        subGroup.sort(function(a,b){return a.resUpper - b.resUpper;});
-        resultsGroup.push(subGroup[0]);
+      while (candidateGroup.length > 0) {
+        // Find subgroup with same resLower value.
+        subLength = 1;
+        anchor_resLower = candidateGroup[0].resLower;
+        matchTolerance = 1e-8 * anchor_resLower;
 
-        prevUpperRes = subGroup[0].resUpper;
-        for (testIndx = 1; testIndx < subGroup.length; testIndx++) {
-          testUpperRes = subGroup[testIndx].resUpper;
-          if (Math.abs(testUpperRes - prevUpperRes) > 1e-8 * testUpperRes) {
-            resultsGroup.push(testUpperRes);
+        while (subLength < candidateGroup.length &&
+              Math.abs(anchor_resLower - candidateGroup[subLength].resLower) < matchTolerance) {
+          subLength++;
+        }
+        subGroup = candidateGroup.splice(0, subLength);
+
+        // Store non-duplicate entries of subGroup in resultsGroup
+        if (subGroup.length === 1) {
+          resultsGroup.push(subGroup[0]);
+        } else if (subGroup.length > 1) {
+          subGroup.sort(function(a,b){return a.resUpper - b.resUpper;});
+          resultsGroup.push(subGroup[0]);
+
+          prevUpperRes = subGroup[0].resUpper;
+          for (testIndx = 1; testIndx < subGroup.length; testIndx++) {
+            testUpperRes = subGroup[testIndx].resUpper;
+            if (Math.abs(testUpperRes - prevUpperRes) > 1e-8 * testUpperRes) {
+              resultsGroup.push(testUpperRes);
+            }
+            prevUpperRes = testUpperRes;
           }
-          prevUpperRes = testUpperRes;
         }
       }
+
+      // Store the results in this group.
+      for (jMember = 0; jMember < resultsGroup.length; jMember++) {
+        thisResult = resultsGroup[jMember];
+        nomRatio = thisResult.resLower / (thisResult.resUpper + thisResult.resLower);
+
+        dimLower = settings.tolDim * thisResult.resLower;
+        augUpper = settings.tolAug * thisResult.resUpper;
+        minRatio = dimLower / (dimLower + augUpper);
+
+        augLower = settings.tolAug * thisResult.resLower;
+        dimUpper = settings.tolDim * thisResult.resUpper;
+        maxRatio = augLower / (augLower + dimUpper);
+
+        sortedResults.push(new Result(groupNumber, thisResult.resUpper, thisResult.resLower,
+                                      minRatio, nomRatio, maxRatio, thisResult.diff));
+      }
+
+      groupNumber++;
     }
-
-    // Store the results in this group.
-    for (jMember = 0; jMember < resultsGroup.length; jMember++) {
-      thisResult = resultsGroup[jMember];
-      nomRatio = thisResult.resLower / (thisResult.resUpper + thisResult.resLower);
-
-      dimLower = settings.tolDim * thisResult.resLower;
-      augUpper = settings.tolAug * thisResult.resUpper;
-      minRatio = dimLower / (dimLower + augUpper);
-
-      augLower = settings.tolAug * thisResult.resLower;
-      dimUpper = settings.tolDim * thisResult.resUpper;
-      maxRatio = augLower / (augLower + dimUpper);
-
-      sortedResults.push(new Result(groupNumber, thisResult.resUpper, thisResult.resLower,
-                                    minRatio, nomRatio, maxRatio, thisResult.diff));
-    }
-
-    groupNumber++;
-  }
-}
+  };
+}) ();
 
 // Displays the results in a table on the .html page
 // as well as the spreadsheet download links.
@@ -1180,10 +1167,13 @@ var evalExpression = (function() {
   // Operator precedence. typeEnum value is array index.
   var precedence = Object.freeze([0, 0, 1, 1, 3, 2, 2, 4, 4]);
 
-  // Used for return of shuntingYard
-    function YardOut(value, nSkip) {
+  // Used for return of evalExpression
+  function EvalOut(isExpr, expr, isValid, errMesg, value) {
+    this.isExpr = isExpr;
+    this.expr = expr;
+    this.isValid = isValid;
+    this.errMesg = errMesg;
     this.value = value;
-    this.nSkip = nSkip;
   }
 
   // Used to store operators and operands (tokens)
@@ -1193,14 +1183,11 @@ var evalExpression = (function() {
     this.value = value;
   }
 
-  // Used for return of evalExpression
-  function EvalOut(isExpr, expr, isValid, errMesg, value) {
-    this.isExpr = isExpr;
-    this.expr = expr;
-    this.isValid = isValid;
-    this.errMesg = errMesg;
+  // Used for return of shuntingYard
+  function YardOut(value, nSkip) {
     this.value = value;
-  }
+    this.nSkip = nSkip;
+  }  
 
   // An implementation of the classic shunting yard algorithm.
   // Calls itself recursively on an L_PAREN.
@@ -1469,6 +1456,22 @@ window.voltDiv = {};
 // meeting user's divider specification, and outputs results
 // or error messages.
 window.voltDiv.solveDivider = (function() {
+  // Constructor for Settings object that stores user input settings
+  function Settings() {
+    this.targetRatio = NaN;
+    this.isExpr = false;
+    this.ratioExpr = '';
+    this.ratioType = ratioEnum.NOM;
+    this.ratioThresholdLow = NaN;
+    this.ratioThresholdHigh = NaN;
+    this.resTolerance = NaN;
+    this.tolAug = NaN;
+    this.tolDim = NaN;
+    this.resSeries = seriesEnum.E24E96;
+    this.minStringRes = NaN;
+    this.maxStringRes = NaN;
+  }
+
   // Returns a new string that is inString without leading/trailing whitespace.
   function trimString(inString) {
     return inString.replace(/^\s*([^\s]*)\s*$/, '$1');
