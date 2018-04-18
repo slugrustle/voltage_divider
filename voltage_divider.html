@@ -302,7 +302,7 @@ td.paramLabel {
         <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
         <label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
     </td>
-    <td>View&#x2002;<a href="javascript:;" onclick="voltDiv.showE24();">E24</a>,&#x2002;<a href="javascript:;" onclick="voltDiv.showE96();">E96</a></td>
+    <td>View&#x2002;<a href="javascript:;" onclick="voltDiv.displayResistorValues('E24');">E24</a>,&#x2002;<a href="javascript:;" onclick="voltDiv.displayResistorValues('E96');">E96</a></td>
   </tr>
   <tr>
     <td class="buttonCol" colspan="3"><button onclick="voltDiv.solveDivider();">Solve</button></td>
@@ -441,17 +441,6 @@ function resValToString(resVal, precision) {
     return (1.0e-3*resVal).toPrecision(precision) + 'k\u03A9';
   }   
   return resVal.toPrecision(precision) + '\u03A9';
-}
-
-// Displays human-readable resistance values in ohms,
-// kilo ohms or megohms, rounded to the nearest digit.
-function resistanceString(resistance) {
-  if (resistance >= 1.0e6) {
-    return Math.round(1.0e-6*resistance) + 'M\u03A9';
-  } else if (resistance >= 1.0e3) {
-    return Math.round(1.0e-3*resistance) + 'k\u03A9';
-  }
-  return Math.round(resistance) + '\u03A9';
 }
 
 // Diagnostic message that summarizes settings.
@@ -1449,6 +1438,11 @@ var evalExpression = (function() {
   };
 }) ();
 
+// Focus divider ratio input on load
+window.onload = function () {
+  document.getElementById('dividerRatio').focus();
+};
+
 // Store all globals in this object
 window.voltDiv = {};
 
@@ -1787,121 +1781,96 @@ window.voltDiv.toggleMath = function() {
 };
 
 // Display E24 series resistor values
-window.voltDiv.showE24 = function() {
-  var tableFragment = document.createDocumentFragment();
-  var jMult;
-  var multiplier;
-  var jVal;
-  var headerRow;
-  var decade_td;
-  var valuesRow;
-  var values_td;
-  var title_span;
-  var title_div;
-  var results_table;
+window.voltDiv.displayResistorValues = (function() {
+  // Displays human-readable resistance values in ohms,
+  // kilo ohms or megohms, rounded to the nearest digit.
+  function resistanceString(resistance) {
+    if (resistance >= 1.0e6) {
+      return Math.round(1.0e-6*resistance) + 'M\u03A9';
+    } else if (resistance >= 1.0e3) {
+      return Math.round(1.0e-3*resistance) + 'k\u03A9';
+    }
+    return Math.round(resistance) + '\u03A9';
+  }
+  
+  // displayResistorValues()
+  return function(series) {
+    var tableFragment = document.createDocumentFragment();
+    var jMult;
+    var multiplier;
+    var jVal;
+    var headerRow;
+    var decade_td;
+    var valuesRow;
+    var values_td;
+    var title_span;
+    var title_div;
+    var results_table;
 
-  clearResults();
-
-  for (jMult = 0; jMult < multipliers.length; jMult++) {
-    multiplier = multipliers[jMult];
-
-    headerRow = document.createElement('tr');
-    headerRow.className = 'shadedRow';
-
-    decade_td = document.createElement('td');
-    decade_td.setAttribute('style', 'text-align:center; font-weight: bold');
-    decade_td.textContent = resistanceString(multiplier) + ' decade';
-    headerRow.appendChild(decade_td);
-    tableFragment.appendChild(headerRow);
-
-    valuesRow = document.createElement('tr');
-    values_td = document.createElement('td');
-    values_td.style.lineHeight = '1.5';
-
-    for (jVal = 0; jVal < E24.length-1; jVal++) {
-      values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[jVal], 3));
-      if ((jVal + 1) % 6 === 0) {
-        values_td.insertAdjacentHTML('beforeend', '<br/>');
-      } else {
-        values_td.insertAdjacentText('beforeend', '\u2002');
-      }
+    // Make sure input is valid before continuing
+    if (series !== 'E24' && series !== 'E96') {
+      return;
     }
 
-    values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[E24.length-1], 3));
-    valuesRow.appendChild(values_td);
-    tableFragment.appendChild(valuesRow);
-  }
+    clearResults();
 
-  // Display title
-  title_span = document.getElementById('outTitleSpan');
-  title_span.textContent = 'EIA E24 Series Resistor Values';
+    for (jMult = 0; jMult < multipliers.length; jMult++) {
+      multiplier = multipliers[jMult];
 
-  title_div = document.getElementById('outTitleDiv');
-  title_div.style.display='block';
+      headerRow = document.createElement('tr');
+      headerRow.className = 'shadedRow';
 
-  // Display table of resistor values
-  results_table = document.getElementById('resultsTable');
-  results_table.appendChild(tableFragment);
-  results_table.style.display='table';
-};
+      decade_td = document.createElement('td');
+      decade_td.setAttribute('style', 'text-align:center; font-weight: bold');
+      decade_td.textContent = resistanceString(multiplier) + ' decade';
+      headerRow.appendChild(decade_td);
+      tableFragment.appendChild(headerRow);
 
-// Display E96 series resistor values
-window.voltDiv.showE96 = function() {
-  var tableFragment = document.createDocumentFragment();
-  var jMult;
-  var multiplier;
-  var jVal;
-  var headerRow;
-  var decade_td;
-  var valuesRow;
-  var values_td;
-  var title_span;
-  var title_div;
-  var results_table;
+      valuesRow = document.createElement('tr');
+      values_td = document.createElement('td');
+      values_td.style.lineHeight = '1.5';
 
-  clearResults();
+      if (series === 'E24') {
+        for (jVal = 0; jVal < E24.length-1; jVal++) {
+          values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[jVal], 3));
+          if ((jVal + 1) % 6 === 0) {
+            values_td.insertAdjacentHTML('beforeend', '<br/>');
+          } else {
+            values_td.insertAdjacentText('beforeend', '\u2002');
+          }
+        }
 
-  for (jMult = 0; jMult < multipliers.length; jMult++) {
-    multiplier = multipliers[jMult];
+        values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[E24.length-1], 3));
+      } else if (series === 'E96') {
+        for (jVal = 0; jVal < E96.length-1; jVal++) {
+          values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[jVal], 3));
+          if ((jVal + 1) % 8 === 0) {
+            values_td.insertAdjacentHTML('beforeend', '<br/>');
+          } else {
+            values_td.insertAdjacentText('beforeend', '\u2002');
+          }
+        }
 
-    headerRow = document.createElement('tr');
-    headerRow.className = 'shadedRow';
-
-    decade_td = document.createElement('td');
-    decade_td.setAttribute('style', 'text-align:center; font-weight: bold');
-    decade_td.textContent = resistanceString(multiplier) + ' decade';
-    headerRow.appendChild(decade_td);
-    tableFragment.appendChild(headerRow);
-
-    valuesRow = document.createElement('tr');
-    values_td = document.createElement('td');
-    values_td.style.lineHeight = '1.5';
-
-    for (jVal = 0; jVal < E96.length-1; jVal++) {
-      values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[jVal], 3));
-      if ((jVal + 1) % 8 === 0) {
-        values_td.insertAdjacentHTML('beforeend', '<br/>');
-      } else {
-        values_td.insertAdjacentText('beforeend', '\u2002');
+        values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[E96.length-1], 3));
       }
+
+      valuesRow.appendChild(values_td);
+      tableFragment.appendChild(valuesRow);
     }
 
-    values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[E96.length-1], 3));
-    valuesRow.appendChild(values_td);
-    tableFragment.appendChild(valuesRow);
-  }
+    // Display title
+    title_span = document.getElementById('outTitleSpan');
+    title_span.textContent = 'EIA ' + series + ' Series Resistor Values';
 
-  // Display title
-  title_span = document.getElementById('outTitleSpan');
-  title_span.textContent = 'EIA E96 Series Resistor Values';
-  title_div = document.getElementById('outTitleDiv');
-  title_div.style.display = 'block';
+    title_div = document.getElementById('outTitleDiv');
+    title_div.style.display='block';
 
-  // Display table of resistor values
-  results_table = document.getElementById('resultsTable');
-  results_table.appendChild(tableFragment);
-  results_table.style.display = 'table';
-};
+    // Display table of resistor values
+    results_table = document.getElementById('resultsTable');
+    results_table.appendChild(tableFragment);
+    results_table.style.display='table';
+  };
+}) ();
 
 // Converts num to a string and adds a leading 0 if num < 10 and num >= 0
 function zeroPad(num) {
