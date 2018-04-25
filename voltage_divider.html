@@ -318,6 +318,8 @@ td.paramLabel {
 <div id="eqsDiv" style="display: none;">
   <div style="float:left; margin-right: 14pt;">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 221.41 360.341" height="240.228" width="147.606" role="img" aria-label="Voltage Divider Circuit Diagram">
+        <title>Voltage Divider Circuit Diagram</title>
+        <desc>Two resistor voltage divider. Upper resistor connects to input and output; lower resistor connects to output and ground.</desc>
         <g transform="translate(-144.059 -87.502)">
           <circle cx="279.983" cy="132.322" r="5" fill="none" stroke="#000"/>
           <text style="line-height:125%" x="140.814" y="222.061" font-weight="400" font-size="37.333" font-family="sans-serif" letter-spacing="0" word-spacing="0"><tspan x="140.814" y="222.061">Upper</tspan></text>
@@ -1307,7 +1309,7 @@ var evalExpression = (function() {
           numString = input.substring(anchor, jChar);
           aNumber = Number(numString);
           if (isNaN(aNumber) || aNumber === Infinity) {
-            errMesg = 'Found non-operator non-number " + numString + ".';
+            errMesg = 'Found non-operator non-number "' + numString + '".';
             out = new EvalOut(true, '', false, errMesg, NaN);
             return out;
           } else if (tokens.length > 0 && tokens[tokens.length-1].opType === typeEnum.R_PAREN) {
@@ -1466,9 +1468,15 @@ window.voltDiv.solveDivider = (function() {
     this.maxStringRes = NaN;
   }
 
-  // Returns a new string that is inString without leading/trailing whitespace.
-  function trimString(inString) {
-    return inString.replace(/^\s*([^\s]*)\s*$/, '$1');
+  // Returns a new string that is inStr without leading/trailing whitespace.
+  function trimString(inStr) { 
+    var firstNonSpace = inStr.search(/[^\0\s]+/); 
+    var lastNonSpace = inStr.search(/[^\0\s][\0\s]*$/); 
+    
+    if (firstNonSpace === -1) { 
+      return ''; 
+    } 
+    return inStr.substr(firstNonSpace, lastNonSpace-firstNonSpace+1); 
   }
 
   // Constructor for ParsedInput object, returned by all 
@@ -1726,7 +1734,7 @@ window.voltDiv.solveDivider = (function() {
       error_div.textContent = 'Max String Resistance was set to ' + resValToString(settings.maxStringRes, 3) +
         ', which will yield no results. The smallest resistor value in the chosen series is ' +
         resValToString(minResistance, 3) + ' so the smallest string resistance is ' + 
-        resValToString(2 * minResistance, 4) + '.';
+        resValToString(2.0 * minResistance, 4) + '.';
       error_div.style.display = 'inline-block';
       return;
     }
