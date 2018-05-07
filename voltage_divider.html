@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <!--
-Voltage Divider Calculator v1.11 - Finds voltage dividers nearest a
+Voltage Divider Calculator v1.12 - Finds voltage dividers nearest a
 target ratio using real-world resistor values.
 
 Written in 2018 by Ben Tesch
@@ -15,9 +15,8 @@ by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
 I retrieved this code on 2018-03-31 and changed it slightly.
 Stack Overflow code is distributed under the CC BY-SA 3.0 license:
 https://creativecommons.org/licenses/by-sa/3.0/
-The remainder of voltage_divider.html, including generate_csv() and
-generate_xlsx(), is under the CC0 1.0 Universal Public Domain Dedication, 
-which is reproduced below.
+The remainder of voltage_divider.html is under the 
+CC0 1.0 Universal Public Domain Dedication, which is reproduced below.
 
 To the extent possible under law, the author has dedicated all copyright
 and related and neighboring rights to this software to the public domain
@@ -169,10 +168,11 @@ a:active {
   color: blue;
 }
 
-div.titleDiv {
+.titleDiv {
   margin-left: 4pt;
   margin-top: 16pt;
   margin-bottom: 10pt;
+  font-weight: normal;
 }
 
 span.titleSpan {
@@ -199,7 +199,12 @@ td.buttonCol {
 }
 
 input[type="radio"] {
-  display: none;
+  opacity: 0;
+  position: absolute;
+}
+
+input[type="radio"]:focus+label {
+  border: 1px solid black;
 }
 
 input[type="radio"]:checked+label {
@@ -258,16 +263,16 @@ td.paramLabel {
 </head>
 
 <body>
-<div class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2003;v1.11&#x2003;2018-05-02</span></div>
-<table id="inputTable">
+<header class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2003;v1.12&#x2003;2018-05-06</span></header>
+<form action="javascript:void(0)" aria-label="calculator input"><table id="inputTable">
   <tr>
-    <td class="labelCol">Target Divider Ratio</td>
-    <td class="buttonCol"><input id="dividerRatio" maxlength="200"/></td>
+    <td class="labelCol"><label for="dividerRatio">Target Divider Ratio</label></td>
+    <td class="buttonCol"><input id="dividerRatio" maxlength="200" autofocus/></td>
     <td>&gt;0 and &lt;1</td>
   </tr>
   <tr>
-    <td class="labelCol">Ratio Type</td>
-    <td class="buttonCol">
+    <td id="ratioTypeLabel" class="labelCol">Ratio Type</td>
+    <td class="buttonCol" role="radiogroup" aria-labelledby="ratioTypeLabel">
       <input type="radio" name="ratioType" id="ratioTypeMin"/>
       <label for="ratioTypeMin" class="buttonLabel">MIN</label> &#x2002;
       <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
@@ -278,43 +283,41 @@ td.paramLabel {
     <td>Over Tolerance</td>
   </tr>
   <tr>
-    <td class="labelCol">Resistor Tolerance</td>
+    <td class="labelCol"><label for="resTolerance">Resistor Tolerance</label></td>
     <td class="buttonCol"><input id="resTolerance" value="1" maxlength="30"/></td>
     <td>%</td>
   </tr>
   <tr>
-    <td class="labelCol">Min String Resistance</td>
+    <td class="labelCol"><label for="minStringResistance">Min String Resistance</label></td>
     <td class="buttonCol"><input id="minStringResistance" value="0" maxlength="30"/></td>
     <td>&#x03A9;</td>
   </tr>
   <tr>
-    <td class="labelCol">Max String Resistance</td>
+    <td class="labelCol"><label for="maxStringResistance">Max String Resistance</label></td>
     <td class="buttonCol"><input id="maxStringResistance" value="20M" maxlength="30"/></td>
     <td>&#x03A9;</td>
   </tr>
   <tr>
-    <td class="labelCol">Resistor Value Series</td>
-    <td class="buttonCol">
-        <input type="radio" name="resSeries" id="resSeriesE24"/>
-        <label for="resSeriesE24" class="buttonLabel">E24</label> &#x2002;
-        <input type="radio" name="resSeries" id="resSeriesE96"/>
-        <label for="resSeriesE96" class="buttonLabel">E96</label> &#x2002;
-        <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
-        <label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
+    <td id="seriesLabel" class="labelCol">Resistor Value Series</td>
+    <td class="buttonCol" role="radiogroup" aria-labelledby="seriesLabel">
+      <input type="radio" name="resSeries" id="resSeriesE24"/>
+      <label for="resSeriesE24" class="buttonLabel">E24</label> &#x2002;
+      <input type="radio" name="resSeries" id="resSeriesE96"/>
+      <label for="resSeriesE96" class="buttonLabel">E96</label> &#x2002;
+      <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
+      <label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
     </td>
     <td>View&#x2002;<a href="javascript:;" onclick="voltDiv.displayResistorValues('E24');">E24</a>,&#x2002;<a href="javascript:;" onclick="voltDiv.displayResistorValues('E96');">E96</a></td>
   </tr>
   <tr>
     <td class="buttonCol" colspan="3"><button onclick="voltDiv.solveDivider();">Solve</button></td>
   </tr>
-</table>
+</table></form>
 
-<div class="titleDiv" id="eqsTitle" style="margin-bottom: 0px">
-  <span class="titleSpan">Equations</span>
-  <span style="font-size: 14pt; margin-left: 1em;">
-    (&#x2009;<a href="javascript:;" id="toggleMath" onclick="voltDiv.toggleMath();">show</a>&#x2009;)
-  </span>
-</div>
+<section aria-labelledby="eqsTitleSpan">
+<h2 class="titleDiv" id="eqsTitle" style="margin-bottom: 0px">
+  <span id="eqsTitleSpan" class="titleSpan">Equations</span><span style="font-size: 14pt; margin-left: 1em;">(&#x2009;<a href="javascript:;" id="toggleMath" onclick="voltDiv.toggleMath();">show</a>&#x2009;)</span>
+</h2>
 <div id="eqsDiv" style="display: none;">
   <div style="float:left; margin-right: 14pt;">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 221.41 360.341" height="240.228" width="147.606" role="img" aria-label="Voltage Divider Circuit Diagram">
@@ -331,36 +334,39 @@ td.paramLabel {
         </g>
       </svg>
   </div>
-  <div style="display: inline-block; font-size: 12pt;">
+  <div style="display: inline-block; font-size: 12pt;" aria-label="voltage divider equations">
     <div style="margin-bottom: 14pt;"><b>String Resistance</b>&#x2002;=&#x2002;Lower + Upper</div>
     <div style="margin-bottom: 14pt;"><b>Divider Ratio</b>&#x2002;=&#x2002;Vo <b>/</b> Vi</div>
+    <div style="margin-bottom: 14pt;"><b>Nom Ratio</b>&#x2002;=&#x2002;Lower <b>/</b> (Lower + Upper)</div>
     <div style="margin-bottom: 4pt;"><b>Min Ratio</b>&#x2002;=&#x2002;LowerDim <b>/</b> (LowerDim + UpperAug)</div>
     <div style="margin-bottom: 4pt;"><i>LowerDim</i>&#x2002;=&#x2002;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Lower</div>
     <div style="margin-bottom: 14pt;"><i>UpperAug</i>&#x2002;=&#x2002;(1 + Tolerance<b>/</b>100) &#x2022; Upper</div>
-    <div style="margin-bottom: 14pt;"><b>Nom Ratio</b>&#x2002;=&#x2002;Lower <b>/</b> (Lower + Upper)</div>
     <div style="margin-bottom: 4pt;"><b>Max Ratio</b>&#x2002;=&#x2002;LowerAug <b>/</b> (LowerAug + UpperDim)</div>
     <div style="margin-bottom: 4pt;"><i>LowerAug</i>&#x2002;=&#x2002;(1 + Tolerance<b>/</b>100) &#x2022; Lower</div>
     <div><i>UpperDim</i>&#x2002;=&#x2002;(1 &#x2212; Tolerance<b>/</b>100) &#x2022; Upper</div>
   </div>
 </div>
+</section>
 
-<div class="titleDiv" id="outTitleDiv" style="display: none;">
-  <span class="titleSpan" id="outTitleSpan"></span>
-  <span id="downloadSpan" style="margin-left: 1.2em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.download_xlsx();">Download .xlsx</a>&#x2009;)&#x2003;(&#x2009;<a href="javascript:;" onclick="voltDiv.download_csv();">Download .csv</a>&#x2009;)</span>
-  <span id="ratioSpan" style="font-size: 13pt; margin-left: 1em;"></span>
-</div>
+<main aria-labelledby="outTitleSpan">
+<h2 class="titleDiv" id="outTitleDiv" style="display: none;">
+  <span class="titleSpan" id="outTitleSpan" style="margin-right: 0.2em"></span><span id="downloadSpan" style="margin-left: 1em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.download_xlsx();">Download .xlsx</a>&#x2009;)&#x2003;(&#x2009;<a href="javascript:;" onclick="voltDiv.download_csv();">Download .csv</a>&#x2009;)</span><span id="clearSpan" style="margin-left: 1em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.clearResults();">clear</a>&#x2009;)</span><span id="ratioSpan" style="margin-left: 1em; font-size: 13pt;"></span>
+</h2>
 <table id="resultsTable" style="font-size: 12pt; display: none;"></table>
+</main>
 
-<div class="titleDiv" id="errorTitleDiv" style="display: none;">
+<section aria-labelledby="errorTitleSpan">
+<h2 class="titleDiv" id="errorTitleDiv" style="display: none;" role="heading">
   <span class="titleSpan" id="errorTitleSpan">Input Error</span>
-</div>
+</h2>
 <div id="errorDiv" style="max-width: 30em; border: 1px solid black; padding: 8pt; display: none;"></div>
+</section>
 
-<div style="margin-top: 50pt; margin-left: 4pt;" id="licenseBlock">
+<footer style="margin-top: 50pt; margin-left: 4pt;" id="licenseBlock">
   <div style="float: left; margin-right: 1em;">
     <a href="http://creativecommons.org/publicdomain/zero/1.0/" style="text-decoration: none;" target="_blank" rel="noopener noreferrer">
       <svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="-0.5 -0.101 88 31" role="img" aria-label="CC0 Button">
-        <title>CC0</title><desc>Creative Commons CC0 1.0 Universal Button Image</desc>
+        <title>CC0 Button</title><desc>Creative Commons CC0 1.0 Universal Button Image</desc>
         <path fill="#FFF" d="M1.803.482L84.93.631c1.161 0 2.198-.173 2.198 2.333l-.103 27.556H-.295V2.862c0-1.236.118-2.38 2.098-2.38z"/><ellipse fill="#FFF" cx="13.887" cy="15.502" rx="11.101" ry="11.174"/><path d="M23.271 4.061a14.23 14.23 0 0 1 5.755 11.44 14.232 14.232 0 0 1-4.842 10.705h62.853V4.061H23.271z"/>
         <path d="M35.739 7.559c.392 0 .728.059 1.002.173.276.116.5.268.674.456.173.189.299.405.379.647a2.437 2.437 0 0 1 0 1.502c-.08.244-.206.462-.379.65a1.874 1.874 0 0 1-.674.456c-.274.114-.61.173-1.002.173h-1.452v2.267h-1.382V7.559h2.834zm-.379 2.976c.158 0 .312-.012.457-.035.147-.023.276-.069.388-.137.112-.068.201-.164.269-.288s.101-.287.101-.487-.033-.362-.101-.487a.725.725 0 0 0-.269-.287 1.058 1.058 0 0 0-.388-.138 2.82 2.82 0 0 0-.457-.036h-1.073v1.896l1.073-.001zm8.391 2.865c-.476.417-1.133.625-1.972.625-.851 0-1.509-.207-1.976-.62-.466-.412-.699-1.052-.699-1.913V7.559h1.381v3.934c0 .171.016.338.045.505.029.165.091.311.185.439.094.126.225.229.392.309.167.081.392.12.673.12.493 0 .833-.11 1.021-.332.188-.222.282-.568.282-1.04V7.559h1.382v3.934c-.001.855-.238 1.49-.714 1.907zm5.319-5.841c.3 0 .572.027.818.081.244.054.457.14.633.261.177.121.312.282.41.482.096.201.146.45.146.745 0 .318-.072.584-.216.796a1.583 1.583 0 0 1-.639.523c.387.112.676.31.865.589.189.281.286.62.286 1.015 0 .319-.062.595-.187.828a1.631 1.631 0 0 1-.496.571 2.165 2.165 0 0 1-.713.327 3.24 3.24 0 0 1-.822.105h-3.047V7.559h2.962zm-.175 2.56c.246 0 .448-.059.607-.178.158-.118.236-.309.236-.576a.737.737 0 0 0-.078-.363.598.598 0 0 0-.211-.221.846.846 0 0 0-.305-.109 1.875 1.875 0 0 0-.355-.032h-1.294v1.48l1.4-.001zm.08 2.685c.135 0 .264-.014.387-.04a.977.977 0 0 0 .326-.133.707.707 0 0 0 .226-.254.86.86 0 0 0 .083-.406c0-.324-.092-.557-.271-.695-.182-.138-.424-.208-.723-.208h-1.505v1.738h1.479v-.002h-.002zm5.168-5.245v5.156h3.062v1.168H52.76V7.559h1.383zm5.605 0v6.324h-1.382V7.559h1.382zm5.703 1.688a1.405 1.405 0 0 0-.309-.349 1.387 1.387 0 0 0-.418-.236 1.399 1.399 0 0 0-.488-.084c-.312 0-.574.062-.793.183-.217.12-.394.283-.525.486a2.182 2.182 0 0 0-.296.695 3.453 3.453 0 0 0 0 1.582c.062.251.16.477.296.678.134.201.312.361.525.483.219.12.481.181.793.181.424 0 .752-.13.99-.389.236-.26.383-.602.437-1.028H67a3.242 3.242 0 0 1-.271 1.072 2.574 2.574 0 0 1-.582.815 2.404 2.404 0 0 1-.845.513 3.06 3.06 0 0 1-1.065.178c-.479 0-.914-.084-1.297-.252a2.763 2.763 0 0 1-.973-.695 3.036 3.036 0 0 1-.607-1.04 3.818 3.818 0 0 1-.211-1.289c0-.473.069-.911.211-1.316a3.19 3.19 0 0 1 .607-1.059 2.77 2.77 0 0 1 .973-.708 3.135 3.135 0 0 1 1.297-.258c.348 0 .676.051.981.15.308.102.583.248.827.44.243.191.443.43.604.712.158.283.259.608.301.975h-1.34a1.121 1.121 0 0 0-.159-.44zm-29.836 7.171c.405 0 .782.062 1.131.192.35.13.651.324.906.585.255.26.455.586.599.975.144.391.216.849.216 1.371 0 .463-.059.888-.176 1.277a2.845 2.845 0 0 1-.532 1.012 2.54 2.54 0 0 1-.89.668c-.354.16-.772.242-1.254.242h-2.71v-6.322h2.71zm-.096 5.154c.199 0 .393-.031.581-.098a1.26 1.26 0 0 0 .502-.323c.146-.151.264-.347.352-.59.088-.241.132-.536.132-.886 0-.317-.031-.606-.093-.863a1.698 1.698 0 0 0-.304-.659 1.347 1.347 0 0 0-.559-.421c-.231-.098-.517-.146-.858-.146h-.984v3.986h1.231zm4.281-3.283c.141-.403.344-.756.606-1.059.265-.303.589-.538.973-.709a3.16 3.16 0 0 1 1.298-.257c.487 0 .921.086 1.303.257.381.171.704.406.969.709.264.303.466.652.605 1.059.143.404.213.845.213 1.316 0 .46-.07.891-.213 1.288a3.168 3.168 0 0 1-.605 1.04 2.843 2.843 0 0 1-.969.695 3.235 3.235 0 0 1-1.303.252c-.481 0-.913-.086-1.298-.252a2.82 2.82 0 0 1-.973-.695 3.122 3.122 0 0 1-.606-1.04 3.854 3.854 0 0 1-.211-1.288c0-.471.07-.911.211-1.316zm1.262 2.09c.062.252.16.479.295.68.135.2.312.359.527.482.218.121.481.183.792.183a1.6 1.6 0 0 0 .792-.183c.218-.121.394-.281.529-.482.134-.2.231-.428.295-.68a3.465 3.465 0 0 0 0-1.58 2.157 2.157 0 0 0-.295-.696 1.522 1.522 0 0 0-.529-.485 1.6 1.6 0 0 0-.792-.184c-.311 0-.574.062-.792.184-.216.12-.393.284-.527.485a2.164 2.164 0 0 0-.295.696 3.446 3.446 0 0 0 0 1.58zm8.03-3.961l1.471 4.348h.02l1.393-4.348h1.942v6.322h-1.294v-4.48h-.02l-1.539 4.48H50l-1.54-4.437h-.019v4.437h-1.293v-6.322h1.944zm9.672 0l2.35 6.322H59.68l-.476-1.408h-2.351l-.492 1.408H54.97l2.377-6.322h1.417zm.08 3.879l-.793-2.322h-.018l-.817 2.322h1.628zm4.703-3.879v6.322h-1.382v-6.322h1.382zm3.057 0l2.623 4.242h.018v-4.242h1.294v6.322h-1.384l-2.611-4.234h-.02v4.234H65.23v-6.322h1.374z" fill="#FFF"/>
         <path d="M85.852 0H1.147C.239 0-.5.744-.5 1.658v28.969c0 .207.167.373.372.373h87.256a.372.372 0 0 0 .372-.373V1.658C87.5.744 86.762 0 85.852 0zM1.147.75h84.705c.498 0 .902.406.902.908v28.557H.245V1.658c0-.501.405-.908.902-.908z"/><ellipse fill="#FFF" cx="14.156" cy="15.661" rx="11.004" ry="11.076"/>
@@ -370,787 +376,1439 @@ td.paramLabel {
     </a>
   </div>
   <div style="max-width: 29em; display: inline-block; font-size: 11pt;">
-    To the extent possible under law, Ben Tesch has waived all copyright and related or neighboring rights to
-    Voltage Divider Calculator. This work is published from: United States.
+    To the extent possible under law, Ben Tesch has waived all copyright and related or neighboring rights to Voltage Divider Calculator. This work is published from: United States.
   </div>
-</div>
+</footer>
 
 <script>
-// Provide a local scope for code
+(function () {
+'use strict';
+  // Store all globals in this object
+  window.voltDiv = {};
+
+  // E24 contains EIA E24 series resistor values in the 1s decade.
+  window.voltDiv.E24 = Object.freeze([1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]);
+
+  // E96 contains EIA E96 series resistor values in the 1s decade.
+  window.voltDiv.E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15, 1.18, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 1.58, 
+    1.62, 1.65, 1.69, 1.74, 1.78, 1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10, 2.15, 2.21, 2.26, 2.32, 2.37, 2.43, 2.49, 2.55, 2.61, 2.67, 2.74, 2.80, 
+    2.87, 2.94, 3.01, 3.09, 3.16, 3.24, 3.32, 3.40, 3.48, 3.57, 3.65, 3.74, 3.83, 3.92, 4.02, 4.12, 4.22, 4.32, 4.42, 4.53, 4.64, 4.75, 4.87, 4.99, 
+    5.11, 5.23, 5.36, 5.49, 5.62, 5.76, 5.90, 6.04, 6.19, 6.34, 6.49, 6.65, 6.81, 6.98, 7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.25, 8.45, 8.66, 8.87, 
+    9.09, 9.31, 9.53, 9.76]);
+
+  // E24E96 contains the union of E24 and E96.
+  window.voltDiv.E24E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15, 1.18, 1.20, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 
+    1.58, 1.60, 1.62, 1.65, 1.69, 1.74, 1.78, 1.80, 1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10, 2.15, 2.20, 2.21, 2.26, 2.32, 2.37, 2.40, 2.43, 2.49, 
+    2.55, 2.61, 2.67, 2.70, 2.74, 2.80, 2.87, 2.94, 3.00, 3.01, 3.09, 3.16, 3.24, 3.30, 3.32, 3.40, 3.48, 3.57, 3.60, 3.65, 3.74, 3.83, 3.90, 3.92, 
+    4.02, 4.12, 4.22, 4.30, 4.32, 4.42, 4.53, 4.64, 4.70, 4.75, 4.87, 4.99, 5.10, 5.11, 5.23, 5.36, 5.49, 5.60, 5.62, 5.76, 5.90, 6.04, 6.19, 6.20, 
+    6.34, 6.49, 6.65, 6.80, 6.81, 6.98, 7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.20, 8.25, 8.45, 8.66, 8.87, 9.09, 9.10, 9.31, 9.53, 9.76]);
+
+  // Each value in E24, E96, or E24E96 is multiplied by all scalars 
+  // in multipliers to create the full array of resistance values.
+  window.voltDiv.multipliers = Object.freeze([1.0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6]);
+
+  // "enum" type containing possible resistor series
+  window.voltDiv.seriesEnum = Object.freeze({E24:1, E96:2, E24E96:3});
+
+  // "enum" type with possible target ratio options
+  window.voltDiv.ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
+
+  // All user input settings stored in this object
+  window.voltDiv.settings = null;
+
+  // Sorted results are stored in this object
+  window.voltDiv.sortedResults = null;
+}) ();
+
+(function () {
+'use strict';
+  // Bring in globals with shorter names.
+  var seriesEnum = window.voltDiv.seriesEnum;
+  var ratioEnum = window.voltDiv.ratioEnum;
+  var settings;
+
+  // Fill in form inputs based on sessionStorage
+  var settingsString;
+  var dividerRatio_input = document.getElementById('dividerRatio');
+  var ratioTypeMin_radio = document.getElementById('ratioTypeMin');
+  var ratioTypeNom_radio = document.getElementById('ratioTypeNom');
+  var ratioTypeMax_radio = document.getElementById('ratioTypeMax');
+  var resTolerance_input = document.getElementById('resTolerance');
+  var minStringRes_input = document.getElementById('minStringResistance');
+  var maxStringRes_input = document.getElementById('maxStringResistance');
+  var resSerE24_radio = document.getElementById('resSeriesE24');
+  var resSerE96_radio = document.getElementById('resSeriesE96');
+  var resSerE24E96_radio = document.getElementById('resSeriesE24E96');
+
+  try {
+    settingsString = window.sessionStorage.getItem('settings');
+  } catch(err) {
+    // Ignore exceptions
+  }
+
+  if (settingsString !== null) {
+    window.voltDiv.settings = JSON.parse(settingsString);
+    settings = window.voltDiv.settings;
+    
+    dividerRatio_input.value = settings.ratioExpr;
+
+    ratioTypeMin_radio.checked = false;
+    ratioTypeNom_radio.checked = false;
+    ratioTypeMax_radio.checked = false;
+    switch (settings.ratioType) {
+    case ratioEnum.MIN:
+      ratioTypeMin_radio.checked = true;
+      break;
+    case ratioEnum.NOM:
+      ratioTypeNom_radio.checked = true;
+      break;
+    case ratioEnum.MAX:
+      ratioTypeMax_radio.checked = true;
+      break;
+    }
+
+    resTolerance_input.value = settings.resTolExpr;
+    minStringRes_input.value = settings.minStringExpr;
+    maxStringRes_input.value = settings.maxStringExpr;
+ 
+    resSerE24_radio.checked = false;
+    resSerE96_radio.checked = false;
+    resSerE24E96_radio.checked = false;
+    switch (settings.resSeries) {
+    case seriesEnum.E24:
+      resSerE24_radio.checked = true;
+      break;
+    case seriesEnum.E96:
+      resSerE96_radio.checked = true;
+      break;
+    case seriesEnum.E24E96:
+      resSerE24E96_radio.checked = true;
+      break;
+    }
+  }
+}) ();
+
+(function () {
+'use strict';
+  // Creates human-readable resistance value strings from
+  // resistance values in Ohms.
+  window.voltDiv.resValToString = function(resVal, precision) {
+    if (resVal >= 1.0e6) {
+      return (1.0e-6*resVal).toPrecision(precision) + 'M\u03A9';
+    } else if (resVal >= 1.0e3) {
+      return (1.0e-3*resVal).toPrecision(precision) + 'k\u03A9';
+    }   
+    return resVal.toPrecision(precision) + '\u03A9';
+  };
+}) ();
+
+(function () {
+'use strict';
+  // Decide whether to display equations & schematic based on
+  // sessionStorage
+  var displayEqs;
+  
+  (function() {
+    // Local scope here to prevent redeclaration of these vars
+    // in toggleMath().
+    var eqsDiv;
+    var eqsTitle;
+    var toggleAnchor;
+
+    try {
+      displayEqs = window.sessionStorage.getItem('displayEqs');
+    } catch (err) {
+      // Ignore exceptions
+      displayEqs = null;
+    }
+
+    if (displayEqs !== 'true' && displayEqs !== 'false') {
+      displayEqs = 'false';
+
+      try {
+        window.sessionStorage.setItem('displayEqs', displayEqs);
+      } catch (err) {
+        // Ignore exceptions
+      }
+    }
+
+    if (displayEqs === 'true') {
+      eqsDiv = document.getElementById('eqsDiv');
+      eqsTitle = document.getElementById('eqsTitle');
+      toggleAnchor = document.getElementById('toggleMath');
+
+      toggleAnchor.innerHTML = 'hide';
+      eqsDiv.style.display = 'inline-block';
+      eqsTitle.style.marginBottom = '10pt';
+    }
+  }) ();
+
+  // Toggles display of equations and schematic
+  window.voltDiv.toggleMath = function() {
+    var eqsDiv = document.getElementById('eqsDiv');
+    var eqsTitle = document.getElementById('eqsTitle');
+    var toggleAnchor = document.getElementById('toggleMath');
+
+    if (displayEqs === 'false')
+    {
+      toggleAnchor.innerHTML = 'hide';
+      eqsDiv.style.display = 'inline-block';
+      eqsTitle.style.marginBottom = '10pt';
+
+      displayEqs = 'true';
+      try {
+        window.sessionStorage.setItem('displayEqs', displayEqs);
+      } catch (err) {
+        // Ignore exceptions
+      } 
+    }
+    else
+    {
+      toggleAnchor.innerHTML = 'show';
+      eqsDiv.style.display = 'none';
+      eqsTitle.style.marginBottom = '0px';
+
+      displayEqs = 'false';
+      try {
+        window.sessionStorage.setItem('displayEqs', displayEqs);
+      } catch (err) {
+        // Ignore exceptions
+      }
+    }
+  };
+}) ();
+
+(function () {
+'use strict';
+  // Clears results from previous run of program, including E24/E96 
+  // display, diagnostic message, download links, error display, etc.
+  window.voltDiv.clearResults = function () {
+    var outTitle_div = document.getElementById('outTitleDiv');
+    var download_span = document.getElementById('downloadSpan');
+    var clear_span = document.getElementById('clearSpan');
+    var ratio_span = document.getElementById('ratioSpan');
+    var results_table = document.getElementById('resultsTable');
+    var errTitle_div = document.getElementById('errorTitleDiv');
+    var error_div = document.getElementById('errorDiv');
+
+    outTitle_div.style.display = 'none';
+    download_span.style.display = 'none';
+    clear_span.style.display = 'none';
+    ratio_span.style.display = 'none';
+
+    results_table.style.display = 'none';
+    results_table.innerHTML = '';
+    
+    errTitle_div.style.display = 'none';
+    error_div.style.display = 'none';
+
+    // Set displayType in sessionStorage and remove previous stored
+    // results.
+    try {
+      window.sessionStorage.removeItem('displayType');
+      window.sessionStorage.removeItem('sortedResults');
+    } catch(err) {
+      // Ignore exceptions
+    }
+  };
+}) ();
+
+(function () {
+'use strict';
+  // Bring in globals with shorter names.
+  var E24 = window.voltDiv.E24;
+  var E96 = window.voltDiv.E96;
+  var multipliers = window.voltDiv.multipliers;
+  var resValToString = window.voltDiv.resValToString;
+
+  // Displays human-readable resistance values in ohms,
+  // kilo ohms or megohms, rounded to the nearest digit.
+  function resistanceString(resistance) {
+    if (resistance >= 1.0e6) {
+      return Math.round(1.0e-6*resistance) + 'M\u03A9';
+    } else if (resistance >= 1.0e3) {
+      return Math.round(1.0e-3*resistance) + 'k\u03A9';
+    }
+    return Math.round(resistance) + '\u03A9';
+  }
+
+  // Display E24 or E96 series resistor values.
+  // Argument series must be the string 'E24' or 'E96'.
+  window.voltDiv.displayResistorValues = function(series) {
+    var tableFragment = document.createDocumentFragment();
+    var jMult;
+    var multiplier;
+    var jVal;
+    var headerRow;
+    var decade_td;
+    var valuesRow;
+    var values_td;
+    var title_span;
+    var title_div;
+    var clear_span;
+    var results_table;
+
+    // Make sure input is valid before continuing
+    if (series !== 'E24' && series !== 'E96') {
+      return;
+    }
+
+    window.voltDiv.clearResults();
+
+    for (jMult = 0; jMult < multipliers.length; jMult++) {
+      multiplier = multipliers[jMult];
+
+      headerRow = document.createElement('tr');
+      headerRow.className = 'shadedRow';
+
+      decade_td = document.createElement('td');
+      decade_td.setAttribute('style', 'text-align:center; font-weight: bold');
+      decade_td.textContent = resistanceString(multiplier) + ' decade';
+      headerRow.appendChild(decade_td);
+      tableFragment.appendChild(headerRow);
+
+      valuesRow = document.createElement('tr');
+      values_td = document.createElement('td');
+      values_td.style.lineHeight = '1.5';
+
+      if (series === 'E24') {
+        for (jVal = 0; jVal < E24.length-1; jVal++) {
+          values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[jVal], 3));
+          if ((jVal + 1) % 6 === 0) {
+            values_td.insertAdjacentHTML('beforeend', '<br/>');
+          } else {
+            values_td.insertAdjacentText('beforeend', '\u2002');
+          }
+        }
+
+        values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[E24.length-1], 3));
+      } else if (series === 'E96') {
+        for (jVal = 0; jVal < E96.length-1; jVal++) {
+          values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[jVal], 3));
+          if ((jVal + 1) % 8 === 0) {
+            values_td.insertAdjacentHTML('beforeend', '<br/>');
+          } else {
+            values_td.insertAdjacentText('beforeend', '\u2002');
+          }
+        }
+
+        values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[E96.length-1], 3));
+      }
+
+      valuesRow.appendChild(values_td);
+      tableFragment.appendChild(valuesRow);
+    }
+
+    // Display title
+    title_span = document.getElementById('outTitleSpan');
+    title_span.textContent = 'EIA ' + series + ' Series Resistor Values';
+
+    title_div = document.getElementById('outTitleDiv');
+    title_div.style.display = 'block';
+
+    // Display clear link
+    clear_span = document.getElementById('clearSpan');
+    clear_span.style.display = 'inline';
+
+    // Display table of resistor values
+    results_table = document.getElementById('resultsTable');
+    results_table.appendChild(tableFragment);
+    results_table.style.display='table';
+
+    // Set displayType in sessionStorage and remove previously stored
+    // results.
+    try {
+      window.sessionStorage.removeItem('displayType');
+      window.sessionStorage.setItem('displayType', series);
+      window.sessionStorage.removeItem('sortedResults');
+    } catch(err) {
+      // Ignore exceptions
+    }
+  };
+}) ();
+
+(function(){
+'use strict';
+  // Bring in globals with shorter names.
+  var seriesEnum = window.voltDiv.seriesEnum;
+  var ratioEnum = window.voltDiv.ratioEnum;
+  var resValToString = window.voltDiv.resValToString;
+
+  // Diagnostic message that summarizes settings.
+  // Displayed when no results are found.
+  window.voltDiv.displayDiagnostics = function() {
+    // Bring in globals with shorter names.
+    var settings = window.voltDiv.settings;
+
+    var tableFragment = document.createDocumentFragment();
+    var ratio_tr;
+    var ratioLabel_td;
+    var ratioValue_td;
+    var ratioRange_tr;
+    var ratioRangeLabel_td;
+    var ratioRangeValue_td;
+    var tolerance_tr;
+    var toleranceLabel_td;
+    var toleranceValue_td;
+    var minString_tr;
+    var minStringLabel_td;
+    var minStringValue_td;
+    var maxString_tr;
+    var maxStringLabel_td;
+    var maxStringValue_td;
+    var resSeries_tr;
+    var resSeries_td;
+    var title_span;
+    var title_div;
+    var results_table;
+
+    ratio_tr = document.createElement('tr');
+    ratioLabel_td = document.createElement('td');
+    ratioLabel_td.className = 'paramLabel';
+
+    switch (settings.ratioType) {
+    case ratioEnum.MIN:
+      ratioLabel_td.textContent = 'Target minimum divider ratio';
+      break;
+    case ratioEnum.MAX:
+      ratioLabel_td.textContent = 'Target maximum divider ratio';
+      break;
+    default:
+      ratioLabel_td.textContent = 'Target nominal divider ratio';
+      break;
+    }
+
+    ratioValue_td = document.createElement('td');
+    ratioValue_td.textContent = settings.targetRatio.toPrecision(6);
+
+    ratio_tr.appendChild(ratioLabel_td);
+    ratio_tr.appendChild(ratioValue_td);
+    tableFragment.appendChild(ratio_tr);
+
+    ratioRange_tr = document.createElement('tr');
+    ratioRange_tr.className = 'shadedRow';
+    ratioRangeLabel_td = document.createElement('td');
+    ratioRangeLabel_td.className = 'paramLabel';
+    ratioRangeLabel_td.textContent = 'Ratio search range';
+    ratioRangeValue_td = document.createElement('td');
+    ratioRangeValue_td.textContent = '[\u00A0' + settings.ratioThresholdLow.toPrecision(6) + ',\u2002' + settings.ratioThresholdHigh.toPrecision(6) + '\u00A0]';
+
+    ratioRange_tr.appendChild(ratioRangeLabel_td);
+    ratioRange_tr.appendChild(ratioRangeValue_td);
+    tableFragment.appendChild(ratioRange_tr);
+
+    tolerance_tr = document.createElement('tr');
+    toleranceLabel_td = document.createElement('td');
+    toleranceLabel_td.className = 'paramLabel';
+    toleranceLabel_td.textContent = 'Resistor tolerance';
+    toleranceValue_td = document.createElement('td');
+    toleranceValue_td.textContent = '\u00B1' + settings.resTolerance.toPrecision(4) + '%';
+
+    tolerance_tr.appendChild(toleranceLabel_td);
+    tolerance_tr.appendChild(toleranceValue_td);
+    tableFragment.appendChild(tolerance_tr);
+
+    minString_tr = document.createElement('tr');
+    minString_tr.className = 'shadedRow';
+    minStringLabel_td = document.createElement('td');
+    minStringLabel_td.className = 'paramLabel';
+    minStringLabel_td.textContent = 'Minimum string resistance';
+    minStringValue_td = document.createElement('td');
+    minStringValue_td.textContent = resValToString(settings.minStringRes, 6);
+
+    minString_tr.appendChild(minStringLabel_td);
+    minString_tr.appendChild(minStringValue_td);
+    tableFragment.appendChild(minString_tr);
+
+    maxString_tr = document.createElement('tr');
+    maxStringLabel_td = document.createElement('td');
+    maxStringLabel_td.className = 'paramLabel';
+    maxStringLabel_td.textContent = 'Maximum string resistance';
+    maxStringValue_td = document.createElement('td');
+    maxStringValue_td.textContent = resValToString(settings.maxStringRes, 6);
+
+    maxString_tr.appendChild(maxStringLabel_td);
+    maxString_tr.appendChild(maxStringValue_td);
+    tableFragment.appendChild(maxString_tr);
+
+    resSeries_tr = document.createElement('tr');
+    resSeries_tr.className = 'shadedRow';
+    resSeries_td = document.createElement('td');
+    resSeries_td.className = 'groupCol';
+    resSeries_td.colSpan = '2';
+
+    switch (settings.resSeries) {
+    case seriesEnum.E24:
+      resSeries_td.textContent = 'EIA E24 series resistor values';
+      break;
+    case seriesEnum.E96:
+      resSeries_td.textContent = 'EIA E96 series resistor values';
+      break;
+    default:
+      resSeries_td.textContent = 'EIA E24 and E96 series resistor values';
+      break;
+    }
+
+    resSeries_tr.appendChild(resSeries_td);
+    tableFragment.appendChild(resSeries_tr);
+
+    // Display No Results title
+    title_span = document.getElementById('outTitleSpan');
+    title_span.textContent = 'No Results Found';
+    title_div = document.getElementById('outTitleDiv');
+    title_div.style.display = 'block';
+
+    // Display table with diagnostic message
+    results_table = document.getElementById('resultsTable');
+    results_table.appendChild(tableFragment);
+    results_table.style.display = 'table';
+
+    // Set displayType in sessionStorage and remove previously
+    // stored results.
+    try {
+      window.sessionStorage.removeItem('displayType');
+      window.sessionStorage.removeItem('storedResults');
+    } catch(err) {
+      // Ignore exceptions
+    }
+  };  
+}) ();
+
 (function() {
 'use strict';
-
-// E24 contains EIA E24 series resistor values in the 1s decade.
-var E24 = Object.freeze([1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]);
-
-// E96 contains EIA E96 series resistor values in the 1s decade.
-var E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15, 1.18, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 1.58, 
-  1.62, 1.65, 1.69, 1.74, 1.78, 1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10, 2.15, 2.21, 2.26, 2.32, 2.37, 2.43, 2.49, 2.55, 2.61, 2.67, 2.74, 2.80, 
-  2.87, 2.94, 3.01, 3.09, 3.16, 3.24, 3.32, 3.40, 3.48, 3.57, 3.65, 3.74, 3.83, 3.92, 4.02, 4.12, 4.22, 4.32, 4.42, 4.53, 4.64, 4.75, 4.87, 4.99, 
-  5.11, 5.23, 5.36, 5.49, 5.62, 5.76, 5.90, 6.04, 6.19, 6.34, 6.49, 6.65, 6.81, 6.98, 7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.25, 8.45, 8.66, 8.87, 
-  9.09, 9.31, 9.53, 9.76]);
-
-// E24E96 contains the union of E24 and E96.
-var E24E96 = Object.freeze([1.00, 1.02, 1.05, 1.07, 1.10, 1.13, 1.15, 1.18, 1.20, 1.21, 1.24, 1.27, 1.30, 1.33, 1.37, 1.40, 1.43, 1.47, 1.50, 1.54, 
-  1.58, 1.60, 1.62, 1.65, 1.69, 1.74, 1.78, 1.80, 1.82, 1.87, 1.91, 1.96, 2.00, 2.05, 2.10, 2.15, 2.20, 2.21, 2.26, 2.32, 2.37, 2.40, 2.43, 2.49, 
-  2.55, 2.61, 2.67, 2.70, 2.74, 2.80, 2.87, 2.94, 3.00, 3.01, 3.09, 3.16, 3.24, 3.30, 3.32, 3.40, 3.48, 3.57, 3.60, 3.65, 3.74, 3.83, 3.90, 3.92, 
-  4.02, 4.12, 4.22, 4.30, 4.32, 4.42, 4.53, 4.64, 4.70, 4.75, 4.87, 4.99, 5.10, 5.11, 5.23, 5.36, 5.49, 5.60, 5.62, 5.76, 5.90, 6.04, 6.19, 6.20, 
-  6.34, 6.49, 6.65, 6.80, 6.81, 6.98, 7.15, 7.32, 7.50, 7.68, 7.87, 8.06, 8.20, 8.25, 8.45, 8.66, 8.87, 9.09, 9.10, 9.31, 9.53, 9.76]);
-
-// Each value in E24, E96, or E24E96 is multiplied by all scalars 
-// in multipliers to create the full array of resistance values.
-var multipliers = Object.freeze([1.0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6]);
-
-// "enum" type containing possible resistor series
-var seriesEnum = Object.freeze({E24:1, E96:2, E24E96:3});
-
-// "enum" type with possible target ratio options
-var ratioEnum = Object.freeze({MIN:1, NOM:2, MAX:3});
-
-// All user input settings stored in this object
-var settings;
-
-// Final results for display are stored here after sorting.
-var sortedResults = [];
-
-// Clears results from previous run of program, including E24/E96 
-// display, diagnostic message, download links, error display, etc.
-function clearResults() {
-  var outTitle_div = document.getElementById('outTitleDiv');
-  var download_span = document.getElementById('downloadSpan');
-  var ratio_span = document.getElementById('ratioSpan');
-  var results_table = document.getElementById('resultsTable');
-  var errTitle_div = document.getElementById('errorTitleDiv');
-  var error_div = document.getElementById('errorDiv');
-
-  outTitle_div.style.display = 'none';
-  download_span.style.display = 'none';
-  ratio_span.style.display = 'none';
-
-  results_table.style.display = 'none';
-  results_table.innerHTML = '';
-  
-  errTitle_div.style.display = 'none';
-  error_div.style.display = 'none';
-}
-
-// Creates human-readable resistance value strings from
-// resistance values in Ohms.
-function resValToString(resVal, precision) {
-  if (resVal >= 1.0e6) {
-    return (1.0e-6*resVal).toPrecision(precision) + 'M\u03A9';
-  } else if (resVal >= 1.0e3) {
-    return (1.0e-3*resVal).toPrecision(precision) + 'k\u03A9';
-  }   
-  return resVal.toPrecision(precision) + '\u03A9';
-}
-
-// Diagnostic message that summarizes settings.
-// Displayed when no results are found.
-function displayDiagnostics() {
-  var tableFragment = document.createDocumentFragment();
-  var ratio_tr;
-  var ratioLabel_td;
-  var ratioValue_td;
-  var ratioRange_tr;
-  var ratioRangeLabel_td;
-  var ratioRangeValue_td;
-  var tolerance_tr;
-  var toleranceLabel_td;
-  var toleranceValue_td;
-  var minString_tr;
-  var minStringLabel_td;
-  var minStringValue_td;
-  var maxString_tr;
-  var maxStringLabel_td;
-  var maxStringValue_td;
-  var resSeries_tr;
-  var resSeries_td;
-  var title_span;
-  var title_div;
-  var results_table;
-
-  ratio_tr = document.createElement('tr');
-  ratioLabel_td = document.createElement('td');
-  ratioLabel_td.className = 'paramLabel';
-
-  switch (settings.ratioType) {
-  case ratioEnum.MIN:
-    ratioLabel_td.textContent = 'Target minimum divider ratio';
-    break;
-  case ratioEnum.MAX:
-    ratioLabel_td.textContent = 'Target maximum divider ratio';
-    break;
-  default:
-    ratioLabel_td.textContent = 'Target nominal divider ratio';
-    break;
-  }
-
-  ratioValue_td = document.createElement('td');
-  ratioValue_td.textContent = settings.targetRatio.toPrecision(6);
-
-  ratio_tr.appendChild(ratioLabel_td);
-  ratio_tr.appendChild(ratioValue_td);
-  tableFragment.appendChild(ratio_tr);
-
-  ratioRange_tr = document.createElement('tr');
-  ratioRange_tr.className = 'shadedRow';
-  ratioRangeLabel_td = document.createElement('td');
-  ratioRangeLabel_td.className = 'paramLabel';
-  ratioRangeLabel_td.textContent = 'Ratio search range';
-  ratioRangeValue_td = document.createElement('td');
-  ratioRangeValue_td.textContent = '[\u00A0' + settings.ratioThresholdLow.toPrecision(6) + ',\u2002' + settings.ratioThresholdHigh.toPrecision(6) + '\u00A0]';
-
-  ratioRange_tr.appendChild(ratioRangeLabel_td);
-  ratioRange_tr.appendChild(ratioRangeValue_td);
-  tableFragment.appendChild(ratioRange_tr);
-
-  tolerance_tr = document.createElement('tr');
-  toleranceLabel_td = document.createElement('td');
-  toleranceLabel_td.className = 'paramLabel';
-  toleranceLabel_td.textContent = 'Resistor tolerance';
-  toleranceValue_td = document.createElement('td');
-  toleranceValue_td.textContent = '\u00B1' + settings.resTolerance.toPrecision(4) + '%';
-
-  tolerance_tr.appendChild(toleranceLabel_td);
-  tolerance_tr.appendChild(toleranceValue_td);
-  tableFragment.appendChild(tolerance_tr);
-
-  minString_tr = document.createElement('tr');
-  minString_tr.className = 'shadedRow';
-  minStringLabel_td = document.createElement('td');
-  minStringLabel_td.className = 'paramLabel';
-  minStringLabel_td.textContent = 'Minimum string resistance';
-  minStringValue_td = document.createElement('td');
-  minStringValue_td.textContent = resValToString(settings.minStringRes, 6);
-
-  minString_tr.appendChild(minStringLabel_td);
-  minString_tr.appendChild(minStringValue_td);
-  tableFragment.appendChild(minString_tr);
-
-  maxString_tr = document.createElement('tr');
-  maxStringLabel_td = document.createElement('td');
-  maxStringLabel_td.className = 'paramLabel';
-  maxStringLabel_td.textContent = 'Maximum string resistance';
-  maxStringValue_td = document.createElement('td');
-  maxStringValue_td.textContent = resValToString(settings.maxStringRes, 6);
-
-  maxString_tr.appendChild(maxStringLabel_td);
-  maxString_tr.appendChild(maxStringValue_td);
-  tableFragment.appendChild(maxString_tr);
-
-  resSeries_tr = document.createElement('tr');
-  resSeries_tr.className = 'shadedRow';
-  resSeries_td = document.createElement('td');
-  resSeries_td.className = 'groupCol';
-  resSeries_td.colSpan = '2';
-
-  switch (settings.resSeries) {
-  case seriesEnum.E24:
-    resSeries_td.textContent = 'EIA E24 series resistor values';
-    break;
-  case seriesEnum.E96:
-    resSeries_td.textContent = 'EIA E96 series resistor values';
-    break;
-  default:
-    resSeries_td.textContent = 'EIA E24 and E96 series resistor values';
-    break;
-  }
-
-  resSeries_tr.appendChild(resSeries_td);
-  tableFragment.appendChild(resSeries_tr);
-
-  // Display No Results title
-  title_span = document.getElementById('outTitleSpan');
-  title_span.textContent = 'No Results Found';
-  title_div = document.getElementById('outTitleDiv');
-  title_div.style.display = 'block';
-
-  // Display table with diagnostic message
-  results_table = document.getElementById('resultsTable');
-  results_table.appendChild(tableFragment);
-  results_table.style.display = 'table';
-}
-
-// Returns an array of all valid individual resistance values, 
-// stored in ascending order.
-function initialize_resArray() {
-  var resArray = [];
-  var jMult;
-  var multiplier;
-  var jVal;
-
-  switch (settings.resSeries) {
-  case seriesEnum.E24:
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      multiplier = multipliers[jMult];
-
-      for (jVal = 0; jVal < E24.length; jVal++) {
-        resArray.push(multiplier*E24[jVal]);
-      }
-    }
-    break;
-  case seriesEnum.E96:
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      multiplier = multipliers[jMult];
-
-      for (jVal = 0; jVal < E96.length; jVal++) {
-        resArray.push(multiplier*E96[jVal]);
-      }
-    }
-    break;
-  default:
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      multiplier = multipliers[jMult];
-
-      for (jVal = 0; jVal < E24E96.length; jVal++) {
-        resArray.push(multiplier*E24E96[jVal]);
-      }
-    }
-    break;
-  }
-
-  Object.freeze(resArray);
-  return resArray;
-}
-
-// Find potential voltage divider solutions near the target ratio
-// that satisfy all constraints, and store them in candidates.
-var populate_candidates = (function(){
-  // Constructor for Candidate objects that store potential
-  // voltage divider solutions
-  function Candidate(resUpper, resLower, diff) {
-    this.resUpper = resUpper;
-    this.resLower = resLower;
-    this.diff = diff;
-  }
-
-  Candidate.prototype.absDiff = function() {
-    return Math.abs(this.diff);
-  };
-
-  // Returns the index in resArray of the value nearest to resVal.
-  function findNearest(resVal, resArray) {
-    // Perform a binary search; resArray must be sorted in ascending order.
-    var upperBound = resArray.length-1;
-    var lowerBound = 0;
-    var intvlLen = upperBound-lowerBound+1;
-    var midPoint;
-
-    while (intvlLen > 2) {
-      midPoint = Math.round(0.5*(upperBound+lowerBound));
-      if (resVal <= resArray[midPoint]) {
-        upperBound = midPoint;
-        intvlLen = upperBound-lowerBound+1;
-      } else {
-        lowerBound = midPoint;
-        intvlLen = upperBound-lowerBound+1;
-      }
-    }
-
-    if (Math.abs(resVal - resArray[lowerBound]) < Math.abs(resVal - resArray[upperBound])) {
-      return lowerBound;
-    }
-    return upperBound;
-  }
-  
-  // populate_candidates()
-  return function(resArray) {
-    var candidates = [];
-    var jRes;
-    var minRatio;
-    var nomRatio;
-    var maxRatio;
-    var stringRes;
-    var dimLower;
-    var augLower;
-    var resLower;
-    var nearUpper;
-    var resUpper;
-    var nearLower;
-    
-    var lowToUpRatio;
-    var lowToUpRatioMin;
-    var lowToUpRatioMax;
-    var upToLowRatio;
-    var upToLowRatioMin;
-    var upToLowRatioMax;
-    var onePlus_lowToUpRatioMax;
-    var onePlus_lowToUpRatioMin;
-    var onePlus_upToLowRatioMax;
-    var onePlus_upToLowRatioMin;
-    
-    var lowerStartRes;
-    var lowerStartIndex;
-    var lowerEndRes;
-    var lowerEndIndex;
-    var upperStartRes;
-    var upperStartIndex;
-    var upperEndRes;
-    var upperEndIndex;
-
-    // Use resTolerance to create ratio conversion constants from lower
-    // to upper resistors and vice versa
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      lowToUpRatio = settings.tolDim * (1.0-settings.targetRatio) / (settings.targetRatio * settings.tolAug);
-      lowToUpRatioMin = settings.tolDim * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * settings.tolAug);
-      lowToUpRatioMax = settings.tolDim * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * settings.tolAug);
-      break;
-    case ratioEnum.MAX:
-      lowToUpRatio = settings.tolAug * (1.0-settings.targetRatio) / (settings.targetRatio * settings.tolDim);
-      lowToUpRatioMin = settings.tolAug * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * settings.tolDim);
-      lowToUpRatioMax = settings.tolAug * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * settings.tolDim);
-      break;
-    default:
-      lowToUpRatio = (1.0-settings.targetRatio) / settings.targetRatio;
-      lowToUpRatioMin = (1.0-settings.ratioThresholdHigh) / settings.ratioThresholdHigh;
-      lowToUpRatioMax = (1.0-settings.ratioThresholdLow) / settings.ratioThresholdLow;
-      break;
-    }
-
-    upToLowRatio = 1.0 / lowToUpRatio;
-    upToLowRatioMin = 1.0 / lowToUpRatioMax;
-    upToLowRatioMax = 1.0 / lowToUpRatioMin;
-    onePlus_lowToUpRatioMax = 1.0 + lowToUpRatioMax;
-    onePlus_lowToUpRatioMin = 1.0 + lowToUpRatioMin;
-    onePlus_upToLowRatioMax = 1.0 + upToLowRatioMax;
-    onePlus_upToLowRatioMin = 1.0 + upToLowRatioMin;
-
-    // Bound the candidate search range based on min and max
-    // string resistance.
-    lowerStartRes = settings.minStringRes / onePlus_lowToUpRatioMax;
-    lowerStartIndex = findNearest(lowerStartRes, resArray);
-    while (lowerStartIndex > 0 && resArray[lowerStartIndex] > lowerStartRes) {
-      lowerStartIndex--;
-    }
-
-    lowerEndRes = settings.maxStringRes / onePlus_lowToUpRatioMin;
-    lowerEndIndex = Math.max(1, findNearest(lowerEndRes, resArray));
-    while (lowerEndIndex < resArray.length && resArray[lowerEndIndex-1] < lowerEndRes) {
-      lowerEndIndex++;
-    }
-
-    upperStartRes = settings.minStringRes / onePlus_upToLowRatioMax;
-    upperStartIndex = findNearest(upperStartRes, resArray);
-    while (upperStartIndex > 0 && resArray[upperStartIndex] > upperStartRes) {
-      upperStartIndex--;
-    }
-
-    upperEndRes = settings.maxStringRes / onePlus_upToLowRatioMin;
-    upperEndIndex = Math.max(1, findNearest(upperEndRes, resArray));
-    while (upperEndIndex < resArray.length && resArray[upperEndIndex-1] < upperEndRes) {
-      upperEndIndex++;
-    }
-
-    // Done with preliminaries. Populate the candidates array.
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
-        // Test this resVal as a lower resistor.
-        resLower = resArray[jRes];
-
-        if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes &&
-            onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
-          nearUpper = resArray[findNearest(lowToUpRatio * resLower, resArray)];
-          stringRes = resLower + nearUpper;
-
-          if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-            dimLower = settings.tolDim * resLower;
-            minRatio = dimLower / (dimLower + settings.tolAug * nearUpper);
-
-            if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
-              candidates.push(new Candidate(nearUpper, resLower, minRatio-settings.targetRatio));
-            }
-          }
-        }
-      }
-      break;
-    case ratioEnum.MAX:
-      for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
-        // Test this resVal as a lower resistor.
-        resLower = resArray[jRes];
-
-        if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes &&
-            onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
-          nearUpper = resArray[findNearest(lowToUpRatio * resLower, resArray)];
-          stringRes = resLower + nearUpper;
-
-          if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-            augLower = settings.tolAug * resLower;
-            maxRatio = augLower / (augLower + settings.tolDim * nearUpper);
-
-            if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
-              candidates.push(new Candidate(nearUpper, resLower, maxRatio-settings.targetRatio));
-            }
-          }
-        }
-      }
-      break;
-    default:
-      for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
-        // Test this resVal as a lower resistor.
-        resLower = resArray[jRes];
-
-        if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes &&
-            onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
-          nearUpper = resArray[findNearest(lowToUpRatio * resLower, resArray)];
-          stringRes = resLower + nearUpper;
-
-          if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-            nomRatio = resLower / stringRes;
-
-            if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
-              candidates.push(new Candidate(nearUpper, resLower, nomRatio-settings.targetRatio));
-            }
-          }
-        }
-      }
-      break;
-    }
-
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
-        // Test this resVal as an upper resistor.
-        resUpper = resArray[jRes];
-
-        if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes &&
-            onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
-          nearLower = resArray[findNearest(upToLowRatio * resUpper, resArray)];
-          stringRes = nearLower + resUpper;
-
-          if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-            dimLower = settings.tolDim * nearLower;
-            minRatio = dimLower / (dimLower + settings.tolAug * resUpper);
-
-            if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
-              candidates.push(new Candidate(resUpper, nearLower, minRatio-settings.targetRatio));
-            }
-          }
-        }
-      }
-      break;
-    case ratioEnum.MAX:
-      for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
-        // Test this resVal as an upper resistor.
-        resUpper = resArray[jRes];
-
-        if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes &&
-            onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
-          nearLower = resArray[findNearest(upToLowRatio * resUpper, resArray)];
-          stringRes = nearLower + resUpper;
-
-          if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-            augLower = settings.tolAug * nearLower;
-            maxRatio = augLower / (augLower + settings.tolDim * resUpper);
-
-            if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
-              candidates.push(new Candidate(resUpper, nearLower, maxRatio-settings.targetRatio));
-            }
-          }
-        }
-      }
-      break;
-    default:
-      for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
-        // Test this resVal as an upper resistor.
-        resUpper = resArray[jRes];
-
-        if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes &&
-            onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
-          nearLower = resArray[findNearest(upToLowRatio * resUpper, resArray)];
-          stringRes = nearLower + resUpper;
-
-          if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
-            nomRatio = nearLower / stringRes;
-
-            if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
-              candidates.push(new Candidate(resUpper, nearLower, nomRatio-settings.targetRatio));
-            }
-          }
-        }
-      }
-      break;
-    }
-
-    return candidates;
-  };
-}) ();
-
-// Takes the fully-populated candidates array, sorts by lowest
-// difference from the target ratio, collects best matches into
-// groups, and stores them in sortedResults.
-var sortResults = (function(){
-  // Result objects are the best candidates --- those that
-  // will be displayed. All values required by display routine
-  // and spreadsheet generators are stored.
-  function Result(groupNum, resUpper, resLower, minRatio, nomRatio, maxRatio, ratioDiff) {
-    this.groupNum = groupNum;
-    this.resUpper = resUpper;
-    this.resLower = resLower;
-    this.minRatio = minRatio;
-    this.nomRatio = nomRatio;
-    this.maxRatio = maxRatio;
-    this.ratioDiff = ratioDiff;
-  }
-
-  Result.prototype.stringRes = function() {
-    return this.resLower + this.resUpper;
-  };
-
-  // sortResults()
-  return function(candidates) {
-    var groupNumber;
-    var groupLength;
-    var anchorDiff;
-    var candidateGroup;
-    var resultsGroup;
-    var subLength;
-    var anchor_resLower;
-    var matchTolerance;
-    var subGroup;
-    var testIndx;
-    var testUpperRes;
-    var prevUpperRes;
-    var jMember;
+  // Bring in globals with shorter names.
+  var ratioEnum = window.voltDiv.ratioEnum;
+  var resValToString = window.voltDiv.resValToString;
+
+  // Displays the results in a table on the .html page
+  // as well as the spreadsheet download links.
+  window.voltDiv.displayResults = function() {
+    // Bring in globals with shorter names.
+    var settings = window.voltDiv.settings;
+
+    var tableFragment = document.createDocumentFragment();
+    var jResult;
+    var shadeRow;
+    var thisGroup;
     var thisResult;
-    var minRatio;
-    var nomRatio;
-    var maxRatio;
-    var dimLower;
-    var augLower;
-    var dimUpper;
-    var augUpper;
+    var grayDiv_tr;
+    var grayDiv_td;
+    var result_tr;
+    var resultGroup_td;
+    var resultUpper_td;
+    var resultLower_td;
+    var resultString_td;
+    var resultMinRatio_td;
+    var resultNomRatio_td;
+    var resultMaxRatio_td;
+    var resultDiff_td;
+    var title_span;
+    var title_div;
+    var download_span;
+    var clear_span;
+    var ratio_span;
+    var results_table;
 
-    // Clear previous results
-    sortedResults = [];
-    
-    // Sort candidates by closeness to target divider ratio.
-    candidates.sort(function(a,b){return a.absDiff() - b.absDiff();});
+    var header_tr = document.createElement('tr');
+    var group_th = document.createElement('th');
+    var upper_th = document.createElement('th');
+    var lower_th = document.createElement('th');
+    var string_th = document.createElement('th');
+    var minRatio_th = document.createElement('th');
+    var nomRatio_th = document.createElement('th');
+    var maxRatio_th = document.createElement('th');
+    var diffRatio_th = document.createElement('th');
 
-    // Group candidates with similar absolute difference from target divider ratio.
-    groupNumber = 1;
-    while (candidates.length > 0 && groupNumber <= 20) {
-      groupLength = 1;
-      anchorDiff = candidates[0].diff;  
-      while (groupLength < candidates.length &&
-            Math.abs(candidates[groupLength].diff-anchorDiff) < 1e-10) {
-        groupLength++;
+    group_th.textContent = 'Group';
+    upper_th.textContent = 'Upper';
+    lower_th.textContent = 'Lower';
+    string_th.textContent = 'String';
+    minRatio_th.textContent = 'Min\u00A0Ratio';
+    nomRatio_th.textContent = 'Nom\u00A0Ratio';
+    maxRatio_th.textContent = 'Max\u00A0Ratio';
+
+    switch (settings.ratioType) {
+    case ratioEnum.MIN:
+      diffRatio_th.textContent = 'Min\u00A0Ratio\u00A0\u2212\u00A0Target';
+      break;
+    case ratioEnum.MAX:
+      diffRatio_th.textContent = 'Max\u00A0Ratio\u00A0\u2212\u00A0Target';
+      break;
+    default:
+      diffRatio_th.textContent = 'Nom\u00A0Ratio\u00A0\u2212\u00A0Target';
+      break;
+    }
+
+    header_tr.appendChild(group_th);
+    header_tr.appendChild(upper_th);
+    header_tr.appendChild(lower_th);
+    header_tr.appendChild(string_th);
+    header_tr.appendChild(minRatio_th);
+    header_tr.appendChild(nomRatio_th);
+    header_tr.appendChild(maxRatio_th);
+    header_tr.appendChild(diffRatio_th);
+    tableFragment.appendChild(header_tr);
+
+    // Display results, putting a gray divider between groups
+    shadeRow = false;
+    thisGroup = window.voltDiv.sortedResults[0].groupNum;
+
+    for (jResult = 0; jResult < window.voltDiv.sortedResults.length; jResult++) {
+      thisResult = window.voltDiv.sortedResults[jResult];
+
+      if (thisResult.groupNum !== thisGroup) {
+        // Put a gray divider row between groups.
+        shadeRow = false;
+
+        grayDiv_tr = document.createElement('tr');
+        grayDiv_td = document.createElement('td');
+        grayDiv_tr.className = 'grayRow';
+        grayDiv_td.colSpan = '8';
+        grayDiv_tr.appendChild(grayDiv_td);
+        tableFragment.appendChild(grayDiv_tr);
+
+        thisGroup = thisResult.groupNum;
       }
-      
-      // Store unique elements of candidateGroup in resultsGroup
-      candidateGroup = candidates.splice(0, groupLength);
-      candidateGroup.sort(function(a,b){return a.resLower - b.resLower;});
-      resultsGroup = [];
 
-      while (candidateGroup.length > 0) {
-        // Find subgroup with same resLower value.
-        subLength = 1;
-        anchor_resLower = candidateGroup[0].resLower;
-        matchTolerance = 1e-8 * anchor_resLower;
+      // Display this result
+      result_tr = document.createElement('tr');
 
-        while (subLength < candidateGroup.length &&
-              Math.abs(anchor_resLower - candidateGroup[subLength].resLower) < matchTolerance) {
-          subLength++;
-        }
-        subGroup = candidateGroup.splice(0, subLength);
-
-        // Store non-duplicate entries of subGroup in resultsGroup
-        if (subGroup.length === 1) {
-          resultsGroup.push(subGroup[0]);
-        } else if (subGroup.length > 1) {
-          subGroup.sort(function(a,b){return a.resUpper - b.resUpper;});
-          resultsGroup.push(subGroup[0]);
-
-          prevUpperRes = subGroup[0].resUpper;
-          for (testIndx = 1; testIndx < subGroup.length; testIndx++) {
-            testUpperRes = subGroup[testIndx].resUpper;
-            if (Math.abs(testUpperRes - prevUpperRes) > 1e-8 * testUpperRes) {
-              resultsGroup.push(testUpperRes);
-            }
-            prevUpperRes = testUpperRes;
-          }
-        }
+      // Shade every other row within a group
+      if (shadeRow) {
+        result_tr.className = 'shadedRow';
+        shadeRow = false;
+      } else {
+        result_tr.className = 'normalRow';
+        shadeRow = true;
       }
 
-      // Store the results in this group.
-      for (jMember = 0; jMember < resultsGroup.length; jMember++) {
-        thisResult = resultsGroup[jMember];
-        nomRatio = thisResult.resLower / (thisResult.resUpper + thisResult.resLower);
+      resultGroup_td = document.createElement('td');
+      resultUpper_td = document.createElement('td');
+      resultLower_td = document.createElement('td');
+      resultString_td = document.createElement('td');
+      resultMinRatio_td = document.createElement('td');
+      resultNomRatio_td = document.createElement('td');
+      resultMaxRatio_td = document.createElement('td');
+      resultDiff_td = document.createElement('td');
 
-        dimLower = settings.tolDim * thisResult.resLower;
-        augUpper = settings.tolAug * thisResult.resUpper;
-        minRatio = dimLower / (dimLower + augUpper);
+      resultGroup_td.className = 'groupCol';
+      resultGroup_td.textContent = thisResult.groupNum.toString();
+      resultUpper_td.textContent = resValToString(thisResult.resUpper, 3);
+      resultLower_td.textContent = resValToString(thisResult.resLower, 3);
+      resultString_td.textContent = resValToString(thisResult.stringRes, 6);
+      resultMinRatio_td.textContent = thisResult.minRatio.toPrecision(6);
+      resultNomRatio_td.textContent = thisResult.nomRatio.toPrecision(6);
+      resultMaxRatio_td.textContent = thisResult.maxRatio.toPrecision(6);
+      resultDiff_td.className = 'diffCol';
+      resultDiff_td.textContent = thisResult.ratioDiff.toExponential(4);
 
-        augLower = settings.tolAug * thisResult.resLower;
-        dimUpper = settings.tolDim * thisResult.resUpper;
-        maxRatio = augLower / (augLower + dimUpper);
+      result_tr.appendChild(resultGroup_td);
+      result_tr.appendChild(resultUpper_td);
+      result_tr.appendChild(resultLower_td);
+      result_tr.appendChild(resultString_td);
+      result_tr.appendChild(resultMinRatio_td);
+      result_tr.appendChild(resultNomRatio_td);
+      result_tr.appendChild(resultMaxRatio_td);
+      result_tr.appendChild(resultDiff_td);
+      tableFragment.appendChild(result_tr);
+    }
 
-        sortedResults.push(new Result(groupNumber, thisResult.resUpper, thisResult.resLower,
-                                      minRatio, nomRatio, maxRatio, thisResult.diff));
-      }
+    // Display Results Title
+    title_span = document.getElementById('outTitleSpan');
+    title_div = document.getElementById('outTitleDiv');
+    title_span.textContent = 'Results';
+    title_div.style.display = 'block';
 
-      groupNumber++;
+    // Display spreadsheet download links
+    download_span = document.getElementById('downloadSpan');
+    download_span.style.display = 'inline';
+
+    // Display clear link
+    clear_span = document.getElementById('clearSpan');
+    clear_span.style.display = 'inline';
+
+    // Show target divider ratio value if input is an expression
+    if (settings.isExpr) {
+      ratio_span = document.getElementById('ratioSpan');
+      ratio_span.textContent = 'Target Ratio = ' + settings.targetRatio.toPrecision(6);
+      ratio_span.style.display = 'inline';
+    }
+
+    // Display table of results
+    results_table = document.getElementById('resultsTable');
+    results_table.appendChild(tableFragment);
+    results_table.style.display = 'table';
+
+    // Store results and set displayType in sessionStorage
+    try {
+      window.sessionStorage.removeItem('displayType');
+      window.sessionStorage.setItem('sortedResults', JSON.stringify(window.voltDiv.sortedResults));
+      window.sessionStorage.setItem('displayType', 'results');
+    } catch(err) {
+      // Ignore exceptions
     }
   };
 }) ();
 
-// Displays the results in a table on the .html page
-// as well as the spreadsheet download links.
-function displayResults() {
-  var tableFragment = document.createDocumentFragment();
-  var jResult;
-  var shadeRow;
-  var thisGroup;
-  var thisResult;
-  var grayDiv_tr;
-  var grayDiv_td;
-  var result_tr;
-  var resultGroup_td;
-  var resultUpper_td;
-  var resultLower_td;
-  var resultString_td;
-  var resultMinRatio_td;
-  var resultNomRatio_td;
-  var resultMaxRatio_td;
-  var resultDiff_td;
-  var title_span;
-  var title_div;
-  var download_span;
-  var ratio_span;
-  var results_table;
+(function () {
+'use strict';
+  var displayType = null;
+  var sortedString = null;
+  var settingsString = null;
 
-  var header_tr = document.createElement('tr');
-  var group_th = document.createElement('th');
-  var upper_th = document.createElement('th');
-  var lower_th = document.createElement('th');
-  var string_th = document.createElement('th');
-  var minRatio_th = document.createElement('th');
-  var nomRatio_th = document.createElement('th');
-  var maxRatio_th = document.createElement('th');
-  var diffRatio_th = document.createElement('th');
-
-  group_th.textContent = 'Group';
-  upper_th.textContent = 'Upper';
-  lower_th.textContent = 'Lower';
-  string_th.textContent = 'String';
-  minRatio_th.textContent = 'Min\u00A0Ratio';
-  nomRatio_th.textContent = 'Nom\u00A0Ratio';
-  maxRatio_th.textContent = 'Max\u00A0Ratio';
-
-  switch (settings.ratioType) {
-  case ratioEnum.MIN:
-    diffRatio_th.textContent = 'Min\u00A0Ratio\u00A0\u2212\u00A0Target';
-    break;
-  case ratioEnum.MAX:
-    diffRatio_th.textContent = 'Max\u00A0Ratio\u00A0\u2212\u00A0Target';
-    break;
-  default:
-    diffRatio_th.textContent = 'Nom\u00A0Ratio\u00A0\u2212\u00A0Target';
-    break;
+  // Display nothing, resistor values, or previous results based on sessionStorage
+  try {
+    displayType = window.sessionStorage.getItem('displayType');
+  } catch(err) {
+    // Ignore exceptions
   }
 
-  header_tr.appendChild(group_th);
-  header_tr.appendChild(upper_th);
-  header_tr.appendChild(lower_th);
-  header_tr.appendChild(string_th);
-  header_tr.appendChild(minRatio_th);
-  header_tr.appendChild(nomRatio_th);
-  header_tr.appendChild(maxRatio_th);
-  header_tr.appendChild(diffRatio_th);
-  tableFragment.appendChild(header_tr);
+  if (displayType === 'E24') {
+    window.voltDiv.displayResistorValues('E24');
+  } else if (displayType === 'E96') {
+    window.voltDiv.displayResistorValues('E96');
+  } else if (displayType === 'results') {
+    try {
+      sortedString = window.sessionStorage.getItem('sortedResults');
+    } catch(err) {
+      // Ignore exceptions
+    }
 
-  // Display results, putting a gray divider between groups
-  shadeRow = false;
-  thisGroup = sortedResults[0].groupNum;
+    if (sortedString !== null) {
+      try {
+        settingsString = window.sessionStorage.getItem('settings');
+      } catch(err) {
+        // Ignore exceptions
+      }
 
-  for (jResult = 0; jResult < sortedResults.length; jResult++) {
-     thisResult = sortedResults[jResult];
-
-     if (thisResult.groupNum !== thisGroup) {
-       // Put a gray divider row between groups.
-       shadeRow = false;
-
-       grayDiv_tr = document.createElement('tr');
-       grayDiv_td = document.createElement('td');
-       grayDiv_tr.className = 'grayRow';
-       grayDiv_td.colSpan = '8';
-       grayDiv_tr.appendChild(grayDiv_td);
-       tableFragment.appendChild(grayDiv_tr);
-
-       thisGroup = thisResult.groupNum;
-     }
-
-     // Display this result
-     result_tr = document.createElement('tr');
-
-     // Shade every other row within a group
-     if (shadeRow) {
-       result_tr.className = 'shadedRow';
-       shadeRow = false;
-     } else {
-       result_tr.className = 'normalRow';
-       shadeRow = true;
-     }
-
-     resultGroup_td = document.createElement('td');
-     resultUpper_td = document.createElement('td');
-     resultLower_td = document.createElement('td');
-     resultString_td = document.createElement('td');
-     resultMinRatio_td = document.createElement('td');
-     resultNomRatio_td = document.createElement('td');
-     resultMaxRatio_td = document.createElement('td');
-     resultDiff_td = document.createElement('td');
-
-     resultGroup_td.className = 'groupCol';
-     resultGroup_td.textContent = thisResult.groupNum.toString();
-     resultUpper_td.textContent = resValToString(thisResult.resUpper, 3);
-     resultLower_td.textContent = resValToString(thisResult.resLower, 3);
-     resultString_td.textContent = resValToString(thisResult.stringRes(), 6);
-     resultMinRatio_td.textContent = thisResult.minRatio.toPrecision(6);
-     resultNomRatio_td.textContent = thisResult.nomRatio.toPrecision(6);
-     resultMaxRatio_td.textContent = thisResult.maxRatio.toPrecision(6);
-     resultDiff_td.className = 'diffCol';
-     resultDiff_td.textContent = thisResult.ratioDiff.toExponential(4);
-
-     result_tr.appendChild(resultGroup_td);
-     result_tr.appendChild(resultUpper_td);
-     result_tr.appendChild(resultLower_td);
-     result_tr.appendChild(resultString_td);
-     result_tr.appendChild(resultMinRatio_td);
-     result_tr.appendChild(resultNomRatio_td);
-     result_tr.appendChild(resultMaxRatio_td);
-     result_tr.appendChild(resultDiff_td);
-     tableFragment.appendChild(result_tr);
+      if (settingsString !== null) {
+        window.voltDiv.settings = JSON.parse(settingsString);
+        window.voltDiv.sortedResults = JSON.parse(sortedString);
+        window.voltDiv.displayResults();
+      }
+    }
   }
+}) ();
 
-  // Display Results Title
-  title_span = document.getElementById('outTitleSpan');
-  title_div = document.getElementById('outTitleDiv');
-  title_span.textContent = 'Results';
-  title_div.style.display = 'block';
+(function() {
+'use strict';
+  // Bring in globals with shorter names.
+  var ratioEnum = window.voltDiv.ratioEnum;
+  var seriesEnum = window.voltDiv.seriesEnum;
 
-  // Display spreadsheet download links
-  download_span = document.getElementById('downloadSpan');
-  download_span.style.display = 'inline';
+  // Constructs a .csv spreadsheet of the settings and results.
+  // Returns an appropriate Blob.
+  var generate_csv = (function() {
+    // Converts num to a string and adds a leading 0 if num < 10 and num >= 0
+    function zeroPad(num) {
+      if (num < 10 && num >= 0) {
+        return '0' + num.toString();
+      }
+      return num.toString();
+    }
 
-  // Show target divider ratio value if input is an expression
-  if (settings.isExpr) {
-    ratio_span = document.getElementById('ratioSpan');
-    ratio_span.textContent = 'Target Ratio = ' + settings.targetRatio.toPrecision(6);
-    ratio_span.style.display = 'inline';
-  }
+    // generate_csv()
+    return function () {
+      // Bring in globals with shorter names.
+      var settings = window.voltDiv.settings;
 
-  // Display table of results
-  results_table = document.getElementById('resultsTable');
-  results_table.appendChild(tableFragment);
-  results_table.style.display = 'table';
-}
+      var csvString = '';
+      var thisMoment;
+      var jResult;
+      var thisResult;
+      var csvBlob;
 
-// Evaluates any valid four-function calculator expression
-// to a single value. Accepts parentheses and unary minus.
-var evalExpression = (function() {
+      if (settings.isExpr) {
+        // Store the original target ratio expression followed by a blank row
+        csvString += 'Target Ratio Expression: ,' + settings.ratioExpr + ',,,,,,\n,,,,,,,\n';
+      }
+
+      // These two rows store the settings
+      csvString += 'Target Ratio,Target Type,Res Tolerance,Min String Res,Max String Res,Res Series,Date,Time\n' +
+        settings.targetRatio.toPrecision(17) + ',';
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        csvString += 'Min Ratio,';
+        break;
+      case ratioEnum.MAX:
+        csvString += 'Max Ratio,';
+        break;
+      default:
+        csvString += 'Nom Ratio,';
+        break;
+      }
+
+      csvString += settings.resTolerance.toString() + '%,' +
+        settings.minStringRes.toPrecision(9) + ',' +
+        settings.maxStringRes.toPrecision(9) + ',';
+
+      switch (settings.resSeries) {
+      case seriesEnum.E24:
+        csvString += 'E24,';
+        break;
+      case seriesEnum.E96:
+        csvString += 'E96,';
+        break;
+      default:
+        csvString += 'E24 and E96,';
+        break;
+      }
+
+      // Store the date and time as strings, and
+      // add a blank row between settings and results
+      thisMoment = new Date();
+      csvString += thisMoment.getFullYear().toString() + '-' + zeroPad(thisMoment.getMonth() + 1) + '-' + zeroPad(thisMoment.getDate()) + ',' +
+        zeroPad(thisMoment.getHours()) + ':' + zeroPad(thisMoment.getMinutes()) + ':' + zeroPad(thisMoment.getSeconds()) + '\n' +
+        ',,,,,,,\n';
+
+      // This row is the results header
+      csvString += 'Group,Upper,Lower,String,Min Ratio,Nom Ratio,Max Ratio,';
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        csvString += 'Min Ratio - Target';
+        break;
+      case ratioEnum.MAX:
+        csvString += 'Max Ratio - Target';
+        break;
+      default:
+        csvString += 'Nom Ratio - Target';
+        break;
+      }
+
+      for (jResult = 0; jResult < window.voltDiv.sortedResults.length; jResult++) {
+        thisResult = window.voltDiv.sortedResults[jResult];
+
+        // Line break for header row or previous result row.
+        // Final result row has no line break.
+        csvString += '\n' + thisResult.groupNum.toString() + ',' + thisResult.resUpper.toPrecision(7) + ',' +
+          thisResult.resLower.toPrecision(7) + ',' + thisResult.stringRes.toPrecision(9) + ',' +
+          thisResult.minRatio.toPrecision(17) + ',' + thisResult.nomRatio.toPrecision(17) + ',' +
+          thisResult.maxRatio.toPrecision(17) + ',' + thisResult.ratioDiff.toExponential(17);
+      }
+
+      csvBlob = new Blob([csvString], {type: 'text/csv'});
+      return csvBlob;
+    };
+  }) ();
+
+  // The following function comes from a Stack Overflow post
+  // https://stackoverflow.com/a/33542499
+  // by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
+  // Retrieved 2018-03-31 and changed slightly to fit this program.
+  // Stack Overflow code is distributed under the CC BY-SA 3.0 license
+  // https://creativecommons.org/licenses/by-sa/3.0/
+  window.voltDiv.download_csv = function() {
+    var csvBlob = generate_csv();
+    var filename = 'results.csv';
+    var csvAnchor;
+    var blobURL;
+
+    if (window.navigator.msSaveOrOpenBlob) {
+      // Internet Explorer
+      window.navigator.msSaveBlob(csvBlob, filename);
+    } else {
+      csvAnchor = document.createElement('a');
+      blobURL = URL.createObjectURL(csvBlob);
+      csvAnchor.href = blobURL;
+      csvAnchor.download = filename;
+      document.body.appendChild(csvAnchor);
+      csvAnchor.click();
+      document.body.removeChild(csvAnchor);
+      URL.revokeObjectURL(blobURL);
+    }
+  };
+}) ();
+
+(function () {
+'use strict';
+  // Constructor for object that simplifies the creation of
+  // ZIP files from strings. fileType is for type of Blob
+  // returned by ZipBuilder.compile(). modDate is the file
+  // modification time Date object.
+  window.voltDiv.ZipBuilder = (function(){
+    // Returns DOS time and date in four-byte little endian format
+    // given a JavaScript date.
+    function dosTimeDate(aDate) {
+      var dosTime = new Uint16Array(1);
+      var dosDate = new Uint16Array(1);
+      var timeDate = new Uint8Array(4);
+
+      // I love this so much. They didn't have 6 bits for seconds,
+      // so the DOS timestamp stores 2 second intervals.
+      dosTime = Math.floor(aDate.getSeconds() / 2);
+      dosTime |= aDate.getMinutes() << 5;
+      dosTime |= aDate.getHours() << 11;
+      timeDate[0] = dosTime & 0x00FF;
+      timeDate[1] = (dosTime & 0xFF00) >>> 8;
+      
+      dosDate = new Uint16Array(1);
+      dosDate = aDate.getDate();
+      dosDate |= (aDate.getMonth() + 1) << 5;
+      dosDate |= (aDate.getFullYear() - 1980) << 9;
+      timeDate[2] = dosDate & 0x00FF;
+      timeDate[3] = (dosDate & 0xFF00) >>> 8;
+
+      return timeDate;
+    }
+
+    // ZipBuilder()
+    return function(fileType, modDate) {
+      this.content_ar = [];
+      this.directory_ar = [];
+      this.nextOffset = 0;
+      this.dirSize = 0;
+      this.timeDate = dosTimeDate(modDate);
+      this.fileType = fileType;
+    };
+  }) ();
+
+  // Adds a file to the ZIP archive.
+  // filename is relative path of file in ZIP archive as a string
+  // contentString is file contents
+  window.voltDiv.ZipBuilder.prototype.addFile = (function() {
+    // Converts a utf16 javascript string to a utf8 Unit8Array.
+    var utf16_to_utf8 = (function() {
+      // Returns length in bytes of equivalent utf8 string given a utf16 string input.
+      function utf8len(utf16str) {
+        var len = 0;
+        var j;
+        var charCode;
+        var codeNext;
+
+        for (j = 0; j < utf16str.length-1; j++) {
+          charCode = utf16str.charCodeAt(j);
+          if (charCode <= 127) {
+            len++;
+          } else if (charCode <= 2047) {
+            len += 2;
+          } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+            codeNext = utf16str.charCodeAt(j+1);
+            if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
+              len += 4;
+              j++;
+            } else {
+              len += 3;
+            }
+          } else {
+            len += 3;
+          }
+        }
+
+        if (j < utf16str.length) {
+          charCode = utf16str.charCodeAt(j);
+          if (charCode <= 127) {
+            len++;
+          } else if (charCode <= 2047) {
+            len += 2;
+          } else {
+            len += 3;
+          }
+        }
+
+        return len;
+      }
+
+      // utf16_to_utf8()
+      return function(utf16str) {
+        var outArray = new Uint8Array(utf8len(utf16str));
+        var k = 0;
+        var j;
+        var charCode;
+        var codeNext;
+        var code32;
+
+        for (j = 0; j < utf16str.length-1; j++) {
+          charCode = utf16str.charCodeAt(j);
+          if (charCode <= 127) {
+            outArray[k] = 0x7F & charCode;
+            k++;
+          } else if (charCode <= 2047) {
+            outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
+            k++;
+            outArray[k] = 0x80 | (0x3F & charCode);
+            k++;
+          } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+            codeNext = utf16str.charCodeAt(j+1);
+            if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
+              // We have a surrogate pair
+              code32 = ((charCode - 0xD800) << 10) + (codeNext - 0xDC00) + 0x10000;
+              outArray[k] = 0xF0 | (0x07 & (code32 >>> 18));
+              k++;
+              outArray[k] = 0x80 | (0x3F & (code32 >>> 12));
+              k++;
+              outArray[k] = 0x80 | (0x3F & (code32 >>> 6));
+              k++;
+              outArray[k] = 0x80 | (0x3F & code32);
+              k++;
+
+              j++;
+            } else {
+              outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+              k++;
+              outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+              k++;
+              outArray[k] = 0x80 | (0x3F & charCode);
+              k++;
+            }
+          } else {
+            outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+            k++;
+            outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+            k++;
+            outArray[k] = 0x80 | (0x3F & charCode);
+            k++;
+          }
+        }
+
+        if (j < utf16str.length) {
+          charCode = utf16str.charCodeAt(j);
+          if (charCode <= 127) {
+            outArray[k] = 0x7F & charCode;
+            k++;
+          } else if (charCode <= 2047) {
+            outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
+            k++;
+            outArray[k] = 0x80 | (0x3F & charCode);
+            k++;
+          } else {
+            outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
+            k++;
+            outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
+            k++;
+            outArray[k] = 0x80 | (0x3F & charCode);
+            k++;
+          }
+        }
+
+        return outArray;
+      };
+    }) ();
+
+    // Calculates the CRC32 of a Uint8Array. Same version of CRC32 as
+    // used by ZIP.
+    var crc32 = (function() {
+      // Table to speed up CRC32 calculation
+      var crc32table = new Uint32Array([0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 
+        0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7, 0x136C9856, 0x646BA8C0, 
+        0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5, 0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B, 0x35B5A8FA, 
+        0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59, 0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F, 
+        0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D, 0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 
+        0xE8B8D433, 0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01, 0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 
+        0x8208F4C1, 0xF50FC457, 0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65, 0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 
+        0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB, 0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9, 0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 
+        0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F, 0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD, 0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 
+        0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683, 0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1, 0xF00F9344, 0x8708A3D2, 
+        0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7, 0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5, 0xD6D6A3E8, 
+        0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B, 0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79, 
+        0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F, 0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 
+        0x5BDEAE1D, 0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713, 0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 
+        0x7CDCEFB7, 0x0BDBDF21, 0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777, 0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 
+        0xF862AE69, 0x616BFFD3, 0x166CCF45, 0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB, 0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 
+        0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9, 0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF, 0xB3667A2E, 0xC4614AB8, 0x5D681B02, 
+        0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D]);
+
+      // crc32()
+      return function (uint8ar) {
+        var crcreg = new Uint32Array([0xFFFFFFFF]);
+        var indx = new Uint32Array([0]);
+        var j;
+        for (j = 0; j < uint8ar.length; j++) {
+          indx[0] = 0x000000FF & (crcreg[0] ^ uint8ar[j]);
+          crcreg[0] >>>= 8;
+          crcreg[0] ^= crc32table[indx[0]];
+        }
+        crcreg[0] ^= 0xFFFFFFFF;
+        return crcreg[0];
+      };
+    }) ();
+
+    // Generate ZIP local file header from utf8 Uint8Array filename,
+    // numeric file size in bytes, numeric crc32, and 4 byte Uint8Array
+    // little-endian dos time and date (in that order)
+    function local_header(filename, filesize, file_crc, timeDate) {
+      var header_len = 30 + filename.length;
+      var headArray = new Uint8Array(header_len);
+      headArray.set([0x50, 0x4b, 0x03, 0x04, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
+      headArray.set(timeDate, 10);
+      headArray[14] = file_crc & 0x000000FF;
+      headArray[15] = (file_crc & 0x0000FF00) >>> 8;
+      headArray[16] = (file_crc & 0x00FF0000) >>> 16;
+      headArray[17] = (file_crc & 0xFF000000) >>> 24;
+      headArray[18] = filesize & 0x000000FF;
+      headArray[19] = (filesize & 0x0000FF00) >>> 8;
+      headArray[20] = (filesize & 0x00FF0000) >>> 16;
+      headArray[21] = (filesize & 0xFF000000) >>> 24;
+
+      // Compressed file size and uncompressed file size are equal
+      headArray.set(headArray.subarray(18,22), 22);
+      headArray[26] = filename.length & 0x00FF;
+      headArray[27] = (filename.length & 0xFF00) >>> 8;
+      headArray.set([0x00, 0x00], 28);
+      headArray.set(filename, 30);
+      return headArray;
+    }
+
+    // Generate ZIP central directory header from utf8 Uint8Array filename,
+    // Uint8Array local_header, and numeric offset of file local header
+    // from start of ZIP archive in bytes
+    function dir_header(filename, localHeader, offset) {
+      var headArray = new Uint8Array(46 + filename.length);
+      headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+      // Copy timeDate, file_crc, file sizes, and filename length
+      // from existing local header
+      headArray.set(localHeader.subarray(10,28), 12);
+      headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
+      headArray[42] = offset & 0x000000FF;
+      headArray[43] = (offset & 0x0000FF00) >>> 8;
+      headArray[44] = (offset & 0x00FF0000) >>> 16;
+      headArray[45] = (offset & 0xFF000000) >>> 24;
+      headArray.set(filename, 46);
+      return headArray;
+    }
+
+    // ZipBuilder.addFile()
+    return function(filename, contentString) {
+      var content_utf8 = utf16_to_utf8(contentString);
+      var filename_utf8 = utf16_to_utf8(filename);
+      var localHeader = local_header(filename_utf8, content_utf8.length, crc32(content_utf8), this.timeDate);
+      var dirHeader = dir_header(filename_utf8, localHeader, this.nextOffset);
+      this.nextOffset += localHeader.length + content_utf8.length;
+      this.dirSize += dirHeader.length;
+      this.content_ar.push(localHeader);
+      this.content_ar.push(content_utf8);
+      this.directory_ar.push(dirHeader);
+    };
+  }) ();
+
+  // Compiles the ZIP archive and returns it as a Blob.
+  // Does not alter the ZipBuilder internal state; may
+  // be called multiple times.
+  window.voltDiv.ZipBuilder.prototype.compile = (function() {
+    // Generate a ZIP end of central directory record from
+    // number of entries in central directory, size of central directory in
+    // bytes, and offset of central directory from start of ZIP file.
+    function end_cen_dir(num_entries, dir_size, dir_offset) {
+      var record_len = 22;
+      var recordArray = new Uint8Array(record_len);
+
+      recordArray.set([0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00]);
+
+      recordArray[8] = num_entries & 0x00FF;
+      recordArray[9] = (num_entries & 0xFF00) >>> 8;
+
+      recordArray.set(recordArray.subarray(8,10), 10);
+
+      recordArray[12] = dir_size & 0x000000FF;
+      recordArray[13] = (dir_size & 0x0000FF00) >>> 8;
+      recordArray[14] = (dir_size & 0x00FF0000) >>> 16;
+      recordArray[15] = (dir_size & 0xFF000000) >>> 24;
+
+      recordArray[16] = dir_offset & 0x000000FF;
+      recordArray[17] = (dir_offset & 0x0000FF00) >>> 8;
+      recordArray[18] = (dir_offset & 0x00FF0000) >>> 16;
+      recordArray[19] = (dir_offset & 0xFF000000) >>> 24;
+
+      recordArray.set([0x00, 0x00], 20);
+
+      return recordArray;
+    }
+
+    // ZipBuilder.compile()
+    return function() {
+      var zipBlob;
+      var endRecord;
+
+      if (this.nextOffset < 1) {
+        // There is no data to return.
+        zipBlob = new Blob();
+        return zipBlob;
+      }
+
+      endRecord = end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset);
+      zipBlob = new Blob(this.content_ar.concat(this.directory_ar, [endRecord]), {type : this.fileType});
+      return zipBlob;
+    };
+  }) ();
+}) ();
+
+(function() {
+'use strict';
+  // Bring in globals with shorter names.
+  var ratioEnum = window.voltDiv.ratioEnum;
+  var seriesEnum = window.voltDiv.seriesEnum;
+
+  // Generates an Office OpenDocument spreadsheet of the results.
+  // Returns an appropriate Blob.
+  var generate_xlsx = (function() {
+    // Converts num to a string and adds a leading 0 if num < 10 and num >= 0
+    function zeroPad(num) {
+      if (num < 10 && num >= 0) {
+        return '0' + num.toString();
+      }
+      return num.toString();
+    }
+
+    // generate_xlsx()
+    return function () {
+      // Bring in globals with shorter names.
+      var settings = window.voltDiv.settings;
+
+      // Content string variables for files in ZIP archive.
+      var content_types_str;
+      var rels_str;
+      var app_str;
+      var core_str;
+      var styles_str;
+      var workbook_str;
+      var wb_rels_str;
+      var sheet1_str;
+
+      // Other helper variables.
+      var thisMoment = new Date();
+      var isoDate;
+      var numRows;
+      var settingsRow;
+      var headerRow;
+      var jResult;
+      var thisResult;
+      var rowNum;
+      var expString;
+
+      var xlsxZip = new window.voltDiv.ZipBuilder('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', thisMoment);
+
+      content_types_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+        '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+        '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
+        '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
+        '</Types>';
+      xlsxZip.addFile('[Content_Types].xml', content_types_str);
+
+      rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>' +
+        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+        '</Relationships>';
+      xlsxZip.addFile('_rels/.rels', rels_str);
+
+      app_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
+        '<Application>Voltage Divider Calculator</Application><AppVersion>1.12</AppVersion><DocSecurity>0</DocSecurity>' +
+        '<ScaleCrop>false</ScaleCrop><HeadingPairs><vt:vector size="2" baseType="variant">' +
+        '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
+        '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
+        '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged></Properties>';
+      xlsxZip.addFile('docProps/app.xml', app_str);
+
+      isoDate = thisMoment.toISOString().substr(0, 19) + 'Z';
+      core_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+        '<dc:creator/><cp:lastModifiedBy/>' +
+        '<dcterms:created xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:created>' +
+        '<dcterms:modified xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:modified>' +
+        '</cp:coreProperties>';
+      xlsxZip.addFile('docProps/core.xml', core_str);
+
+      styles_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
+        '<fonts count="1"><font><sz val="12"/><color rgb="FF000000"/><name val="Calibri"/>' +
+        '<family val="2"/><scheme val="minor"/></font></fonts><fills count="1"><fill>' +
+        '<patternFill patternType="none"/></fill></fills><borders count="1"><border>' +
+        '<left/><right/><top/><bottom/><diagonal/></border></borders>' +
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' +
+        '</cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+        '<xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+        '<xf numFmtId="11" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>';
+
+      if (settings.isExpr) {
+        styles_str += '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="right"/></xf>';
+      }
+
+      styles_str += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
+        '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
+      xlsxZip.addFile('xl/styles.xml', styles_str);
+
+      workbook_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
+        '<sheets><sheet name="results" sheetId="1" r:id="rId1"/></sheets>' +
+        '<calcPr fullPrecision="1"/></workbook>';
+      xlsxZip.addFile('xl/workbook.xml', workbook_str);
+
+      wb_rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+        '</Relationships>';
+      xlsxZip.addFile('xl/_rels/workbook.xml.rels', wb_rels_str);
+
+      numRows = 4 + window.voltDiv.sortedResults.length;
+      settingsRow = 1;
+      headerRow = 4;
+
+      if (settings.isExpr) {
+        numRows += 2;
+        settingsRow += 2;
+        headerRow += 2;
+      }
+
+      sheet1_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
+        '<dimension ref="A1:H' + numRows + '"/><sheetViews><sheetView tabSelected="1" workbookViewId="0"/></sheetViews>' +
+        '<sheetFormatPr defaultRowHeight="17"/><cols>' +
+        '<col min="1" max="7" width="15" customWidth="1"/>' +
+        '<col min="8" max="8" width="18" customWidth="1"/></cols>' +
+        '<sheetData>';
+          
+      if (settings.isExpr) {
+        sheet1_str += '<row r="1" spans="1:8">' +
+          '<c r="A1" s="3" t="inlineStr"><is><t>Target Ratio Expression:\u2002</t></is></c>' +
+          '<c r="B1" s="3"/>' + 
+          '<c r="C1" t="inlineStr"><is><t>' + settings.ratioExpr + '</t></is></c>' +
+          '<c r="D1"/><c r="E1"/><c r="F1"/><c r="G1"/><c r="H1"/></row>';
+      }
+
+      sheet1_str += '<row r="' + settingsRow + '" spans="1:8">' +
+        '<c r="A' + settingsRow + '" t="inlineStr"><is><t>Target Ratio</t></is></c>' +
+        '<c r="B' + settingsRow + '" t="inlineStr"><is><t>Target Type</t></is></c>' +
+        '<c r="C' + settingsRow + '" t="inlineStr"><is><t>Res Tolerance</t></is></c>' +
+        '<c r="D' + settingsRow + '" t="inlineStr"><is><t>Min String Res</t></is></c>' +
+        '<c r="E' + settingsRow + '" t="inlineStr"><is><t>Max String Res</t></is></c>' +
+        '<c r="F' + settingsRow + '" t="inlineStr"><is><t>Res Series</t></is></c>' +
+        '<c r="G' + settingsRow + '" t="inlineStr"><is><t>Date</t></is></c>' +
+        '<c r="H' + settingsRow + '" t="inlineStr"><is><t>Time</t></is></c></row>' +
+        '<row r="' + (settingsRow + 1) + '" spans="1:8">' +
+        '<c r="A' + (settingsRow + 1) + '"><v>' + settings.targetRatio.toPrecision(17) + '</v></c>' +
+        '<c r="B' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        sheet1_str += 'Min Ratio';
+        break;
+      case ratioEnum.MAX:
+        sheet1_str += 'Max Ratio';
+        break;
+      default:
+        sheet1_str += 'Nom Ratio';
+        break;
+      }
+
+      sheet1_str += '</t></is></c>' +
+        '<c r="C' + (settingsRow + 1) + '" s="1"><v>' + (0.01 * settings.resTolerance).toString() + '</v></c>' +
+        '<c r="D' + (settingsRow + 1) + '"><v>' + settings.minStringRes.toPrecision(9) + '</v></c>' +
+        '<c r="E' + (settingsRow + 1) + '"><v>' + settings.maxStringRes.toPrecision(9) + '</v></c>' +
+        '<c r="F' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
+
+      switch (settings.resSeries) {
+      case seriesEnum.E24:
+        sheet1_str += 'E24';
+        break;
+      case seriesEnum.E96:
+        sheet1_str += 'E96';
+        break;
+      default:
+        sheet1_str += 'E24 and E96';
+        break;
+      }
+
+      sheet1_str += '</t></is></c><c r="G' + (settingsRow + 1) + '" t="inlineStr"><is><t>' + 
+        thisMoment.getFullYear().toString() + '-' + zeroPad(thisMoment.getMonth() + 1) + '-' + zeroPad(thisMoment.getDate()) +
+        '</t></is></c><c r="H' + (settingsRow + 1) + '" t="inlineStr"><is><t>' +
+        zeroPad(thisMoment.getHours()) + ':' + zeroPad(thisMoment.getMinutes()) + ':' + zeroPad(thisMoment.getSeconds()) +
+        '</t></is></c></row><row r="' + headerRow + '" spans="1:8">' +
+        '<c r="A' + headerRow + '" t="inlineStr"><is><t>Group</t></is></c>' +
+        '<c r="B' + headerRow + '" t="inlineStr"><is><t>Upper</t></is></c>' +
+        '<c r="C' + headerRow + '" t="inlineStr"><is><t>Lower</t></is></c>' +
+        '<c r="D' + headerRow + '" t="inlineStr"><is><t>String</t></is></c>' +
+        '<c r="E' + headerRow + '" t="inlineStr"><is><t>Min Ratio</t></is></c>' +
+        '<c r="F' + headerRow + '" t="inlineStr"><is><t>Nom Ratio</t></is></c>' +
+        '<c r="G' + headerRow + '" t="inlineStr"><is><t>Max Ratio</t></is></c>' +
+        '<c r="H' + headerRow + '" t="inlineStr"><is><t>';
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        sheet1_str += 'Min Ratio \u2212 Target';
+        break;
+      case ratioEnum.MAX:
+        sheet1_str += 'Max Ratio \u2212 Target';
+        break;
+      default:
+        sheet1_str += 'Nom Ratio \u2212 Target';
+        break;
+      }
+
+      sheet1_str += '</t></is></c></row>';
+
+      for (jResult = 0; jResult < window.voltDiv.sortedResults.length; jResult++) {
+        thisResult = window.voltDiv.sortedResults[jResult];
+        rowNum = jResult + headerRow + 1;
+
+        sheet1_str += '<row r="' + rowNum + '" spans="1:8">' +
+          '<c r="A' + rowNum + '"><v>' + thisResult.groupNum.toString() + '</v></c>' +
+          '<c r="B' + rowNum + '"><v>' + thisResult.resUpper.toPrecision(7) + '</v></c>' +
+          '<c r="C' + rowNum + '"><v>' + thisResult.resLower.toPrecision(7) + '</v></c>' +
+          '<c r="D' + rowNum + '"><v>' + thisResult.stringRes.toPrecision(9) + '</v></c>' +
+          '<c r="E' + rowNum + '"><v>' + thisResult.minRatio.toPrecision(17) + '</v></c>' +
+          '<c r="F' + rowNum + '"><v>' + thisResult.nomRatio.toPrecision(17) + '</v></c>' +
+          '<c r="G' + rowNum + '"><v>' + thisResult.maxRatio.toPrecision(17) + '</v></c>';
+
+        if (Math.abs(thisResult.ratioDiff) < 3e-308) {
+          expString = '0.00';
+        } else {
+          expString = thisResult.ratioDiff.toExponential(17).toUpperCase();
+        }
+
+        sheet1_str += '<c r="H' + rowNum + '" s="2"><v>' + expString + '</v></c></row>';
+      }
+
+      sheet1_str += '</sheetData>';
+      if (settings.isExpr) {
+        sheet1_str += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
+      }
+      sheet1_str += '</worksheet>';
+      xlsxZip.addFile('xl/worksheets/sheet1.xml', sheet1_str);
+
+      return xlsxZip.compile();
+    };
+  }) ();
+
+  // The following function comes from a Stack Overflow post
+  // https://stackoverflow.com/a/33542499
+  // by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
+  // Retrieved 2018-03-31 and changed slightly to fit this program.
+  // Stack Overflow code is distributed under the CC BY-SA 3.0 license
+  // https://creativecommons.org/licenses/by-sa/3.0/
+  window.voltDiv.download_xlsx = function () {
+    var xlsxBlob = generate_xlsx();
+    var filename = 'results.xlsx';
+    var xlsxAnchor;
+    var blobURL;
+
+    if (window.navigator.msSaveOrOpenBlob) {
+      // Internet Explorer
+      window.navigator.msSaveBlob(xlsxBlob, filename);
+    } else {
+      xlsxAnchor = document.createElement('a');
+      blobURL = URL.createObjectURL(xlsxBlob);
+      xlsxAnchor.href = blobURL;
+      xlsxAnchor.download = filename;
+      document.body.appendChild(xlsxAnchor);
+      xlsxAnchor.click();
+      document.body.removeChild(xlsxAnchor);
+      URL.revokeObjectURL(blobURL);
+    }
+  };
+}) ();
+
+(function() {
+'use strict';
   // "enum" variable storing operand / operator type during four-function
   // math expression evaluation. NEG is unary minus
   var typeEnum = Object.freeze({OPERAND:1, ADD:2, SUB:3, NEG:4, MUL:5, DIV:6, L_PAREN:7, R_PAREN:8});
@@ -1158,7 +1816,8 @@ var evalExpression = (function() {
   // Operator precedence. typeEnum value is array index.
   var precedence = Object.freeze([0, 0, 1, 1, 3, 2, 2, 4, 4]);
 
-  // Used for return of evalExpression
+  // Constructor for EvalOut objects.
+  // Used for return of evalExpression.
   function EvalOut(isExpr, expr, isValid, errMesg, value) {
     this.isExpr = isExpr;
     this.expr = expr;
@@ -1167,14 +1826,16 @@ var evalExpression = (function() {
     this.value = value;
   }
 
+  // Constructor for ParsedVal objects.
   // Used to store operators and operands (tokens)
-  // parsed inside evalExpression
+  // parsed inside evalExpression.
   function ParsedVal(opType, value) {
     this.opType = opType;
     this.value = value;
   }
 
-  // Used for return of shuntingYard
+  // Constructor for YardOut objects.
+  // Used for return of shuntingYard.
   function YardOut(value, nSkip) {
     this.value = value;
     this.nSkip = nSkip;
@@ -1277,8 +1938,9 @@ var evalExpression = (function() {
     return yardRet;
   }
 
-  // evalExpression()
-  return function(inputStr) {
+  // Evaluates any valid four-function calculator expression
+  // to a single value. Accepts parentheses and unary minus.
+  window.voltDiv.evalExpression = function(inputStr) {
     // input is inputStr with all space characters removed
     var input = inputStr.replace(/\s/g, '');
     var tokens = [];
@@ -1440,18 +2102,396 @@ var evalExpression = (function() {
   };
 }) ();
 
-// Focus divider ratio input on load
-window.onload = function () {
-  document.getElementById('dividerRatio').focus();
-};
+(function() {
+'use strict';
+  // Bring in globals with shorter names.
+  var E24 = window.voltDiv.E24;
+  var E96 = window.voltDiv.E96;
+  var E24E96 = window.voltDiv.E24E96;
+  var multipliers = window.voltDiv.multipliers;
+  var seriesEnum = window.voltDiv.seriesEnum;
+  var ratioEnum = window.voltDiv.ratioEnum;
+  var resValToString = window.voltDiv.resValToString;
 
-// Store all globals in this object
-window.voltDiv = {};
+  // Find potential voltage divider solutions near the target ratio
+  // that satisfy all constraints, and store them in candidates.
+  var populate_candidates = (function(){
+    // Constructor for Candidate objects that store potential
+    // voltage divider solutions
+    function Candidate(resUpper, resLower, diff) {
+      this.resUpper = resUpper;
+      this.resLower = resLower;
+      this.diff = diff;
+    }
 
-// Parses user input, solves for resistance values most closely
-// meeting user's divider specification, and outputs results
-// or error messages.
-window.voltDiv.solveDivider = (function() {
+    Candidate.prototype.absDiff = function() {
+      return Math.abs(this.diff);
+    };
+
+    // Returns the index in resArray of the value nearest to resVal.
+    function findNearest(resVal, resArray) {
+      // Perform a binary search; resArray must be sorted in ascending order.
+      var upperBound = resArray.length-1;
+      var lowerBound = 0;
+      var intvlLen = upperBound-lowerBound+1;
+      var midPoint;
+
+      while (intvlLen > 2) {
+        midPoint = Math.round(0.5*(upperBound+lowerBound));
+        if (resVal <= resArray[midPoint]) {
+          upperBound = midPoint;
+          intvlLen = upperBound-lowerBound+1;
+        } else {
+          lowerBound = midPoint;
+          intvlLen = upperBound-lowerBound+1;
+        }
+      }
+
+      if (Math.abs(resVal - resArray[lowerBound]) < Math.abs(resVal - resArray[upperBound])) {
+        return lowerBound;
+      }
+      return upperBound;
+    }
+    
+    // populate_candidates()
+    return function(resArray, settings) {
+      var candidates = [];
+      var jRes;
+      var minRatio;
+      var nomRatio;
+      var maxRatio;
+      var stringRes;
+      var dimLower;
+      var augLower;
+      var resLower;
+      var nearUpper;
+      var resUpper;
+      var nearLower;
+      
+      var lowToUpRatio;
+      var lowToUpRatioMin;
+      var lowToUpRatioMax;
+      var upToLowRatio;
+      var upToLowRatioMin;
+      var upToLowRatioMax;
+      var onePlus_lowToUpRatioMax;
+      var onePlus_lowToUpRatioMin;
+      var onePlus_upToLowRatioMax;
+      var onePlus_upToLowRatioMin;
+      
+      var lowerStartRes;
+      var lowerStartIndex;
+      var lowerEndRes;
+      var lowerEndIndex;
+      var upperStartRes;
+      var upperStartIndex;
+      var upperEndRes;
+      var upperEndIndex;
+
+      // Use resTolerance to create ratio conversion constants from lower
+      // to upper resistors and vice versa
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        lowToUpRatio = settings.tolDim * (1.0-settings.targetRatio) / (settings.targetRatio * settings.tolAug);
+        lowToUpRatioMin = settings.tolDim * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * settings.tolAug);
+        lowToUpRatioMax = settings.tolDim * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * settings.tolAug);
+        break;
+      case ratioEnum.MAX:
+        lowToUpRatio = settings.tolAug * (1.0-settings.targetRatio) / (settings.targetRatio * settings.tolDim);
+        lowToUpRatioMin = settings.tolAug * (1.0-settings.ratioThresholdHigh) / (settings.ratioThresholdHigh * settings.tolDim);
+        lowToUpRatioMax = settings.tolAug * (1.0-settings.ratioThresholdLow) / (settings.ratioThresholdLow * settings.tolDim);
+        break;
+      default:
+        lowToUpRatio = (1.0-settings.targetRatio) / settings.targetRatio;
+        lowToUpRatioMin = (1.0-settings.ratioThresholdHigh) / settings.ratioThresholdHigh;
+        lowToUpRatioMax = (1.0-settings.ratioThresholdLow) / settings.ratioThresholdLow;
+        break;
+      }
+
+      upToLowRatio = 1.0 / lowToUpRatio;
+      upToLowRatioMin = 1.0 / lowToUpRatioMax;
+      upToLowRatioMax = 1.0 / lowToUpRatioMin;
+      onePlus_lowToUpRatioMax = 1.0 + lowToUpRatioMax;
+      onePlus_lowToUpRatioMin = 1.0 + lowToUpRatioMin;
+      onePlus_upToLowRatioMax = 1.0 + upToLowRatioMax;
+      onePlus_upToLowRatioMin = 1.0 + upToLowRatioMin;
+
+      // Bound the candidate search range based on min and max
+      // string resistance.
+      lowerStartRes = settings.minStringRes / onePlus_lowToUpRatioMax;
+      lowerStartIndex = findNearest(lowerStartRes, resArray);
+      while (lowerStartIndex > 0 && resArray[lowerStartIndex] > lowerStartRes) {
+        lowerStartIndex--;
+      }
+
+      lowerEndRes = settings.maxStringRes / onePlus_lowToUpRatioMin;
+      lowerEndIndex = Math.max(1, findNearest(lowerEndRes, resArray));
+      while (lowerEndIndex < resArray.length && resArray[lowerEndIndex-1] < lowerEndRes) {
+        lowerEndIndex++;
+      }
+
+      upperStartRes = settings.minStringRes / onePlus_upToLowRatioMax;
+      upperStartIndex = findNearest(upperStartRes, resArray);
+      while (upperStartIndex > 0 && resArray[upperStartIndex] > upperStartRes) {
+        upperStartIndex--;
+      }
+
+      upperEndRes = settings.maxStringRes / onePlus_upToLowRatioMin;
+      upperEndIndex = Math.max(1, findNearest(upperEndRes, resArray));
+      while (upperEndIndex < resArray.length && resArray[upperEndIndex-1] < upperEndRes) {
+        upperEndIndex++;
+      }
+
+      // Done with preliminaries. Populate the candidates array.
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
+          // Test this resVal as a lower resistor.
+          resLower = resArray[jRes];
+
+          if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes &&
+              onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
+            nearUpper = resArray[findNearest(lowToUpRatio * resLower, resArray)];
+            stringRes = resLower + nearUpper;
+
+            if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+              dimLower = settings.tolDim * resLower;
+              minRatio = dimLower / (dimLower + settings.tolAug * nearUpper);
+
+              if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
+                candidates.push(new Candidate(nearUpper, resLower, minRatio-settings.targetRatio));
+              }
+            }
+          }
+        }
+        break;
+      case ratioEnum.MAX:
+        for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
+          // Test this resVal as a lower resistor.
+          resLower = resArray[jRes];
+
+          if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes &&
+              onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
+            nearUpper = resArray[findNearest(lowToUpRatio * resLower, resArray)];
+            stringRes = resLower + nearUpper;
+
+            if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+              augLower = settings.tolAug * resLower;
+              maxRatio = augLower / (augLower + settings.tolDim * nearUpper);
+
+              if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
+                candidates.push(new Candidate(nearUpper, resLower, maxRatio-settings.targetRatio));
+              }
+            }
+          }
+        }
+        break;
+      default:
+        for (jRes = lowerStartIndex; jRes < lowerEndIndex; jRes++) {
+          // Test this resVal as a lower resistor.
+          resLower = resArray[jRes];
+
+          if (onePlus_lowToUpRatioMax * resLower >= settings.minStringRes &&
+              onePlus_lowToUpRatioMin * resLower <= settings.maxStringRes) {
+            nearUpper = resArray[findNearest(lowToUpRatio * resLower, resArray)];
+            stringRes = resLower + nearUpper;
+
+            if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+              nomRatio = resLower / stringRes;
+
+              if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
+                candidates.push(new Candidate(nearUpper, resLower, nomRatio-settings.targetRatio));
+              }
+            }
+          }
+        }
+        break;
+      }
+
+      switch (settings.ratioType) {
+      case ratioEnum.MIN:
+        for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
+          // Test this resVal as an upper resistor.
+          resUpper = resArray[jRes];
+
+          if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes &&
+              onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
+            nearLower = resArray[findNearest(upToLowRatio * resUpper, resArray)];
+            stringRes = nearLower + resUpper;
+
+            if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+              dimLower = settings.tolDim * nearLower;
+              minRatio = dimLower / (dimLower + settings.tolAug * resUpper);
+
+              if (minRatio >= settings.ratioThresholdLow && minRatio <= settings.ratioThresholdHigh) {
+                candidates.push(new Candidate(resUpper, nearLower, minRatio-settings.targetRatio));
+              }
+            }
+          }
+        }
+        break;
+      case ratioEnum.MAX:
+        for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
+          // Test this resVal as an upper resistor.
+          resUpper = resArray[jRes];
+
+          if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes &&
+              onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
+            nearLower = resArray[findNearest(upToLowRatio * resUpper, resArray)];
+            stringRes = nearLower + resUpper;
+
+            if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+              augLower = settings.tolAug * nearLower;
+              maxRatio = augLower / (augLower + settings.tolDim * resUpper);
+
+              if (maxRatio >= settings.ratioThresholdLow && maxRatio <= settings.ratioThresholdHigh) {
+                candidates.push(new Candidate(resUpper, nearLower, maxRatio-settings.targetRatio));
+              }
+            }
+          }
+        }
+        break;
+      default:
+        for (jRes = upperStartIndex; jRes < upperEndIndex; jRes++) {
+          // Test this resVal as an upper resistor.
+          resUpper = resArray[jRes];
+
+          if (onePlus_upToLowRatioMax * resUpper >= settings.minStringRes &&
+              onePlus_upToLowRatioMin * resUpper <= settings.maxStringRes) {
+            nearLower = resArray[findNearest(upToLowRatio * resUpper, resArray)];
+            stringRes = nearLower + resUpper;
+
+            if (stringRes >= settings.minStringRes && stringRes <= settings.maxStringRes) {
+              nomRatio = nearLower / stringRes;
+
+              if (nomRatio >= settings.ratioThresholdLow && nomRatio <= settings.ratioThresholdHigh) {
+                candidates.push(new Candidate(resUpper, nearLower, nomRatio-settings.targetRatio));
+              }
+            }
+          }
+        }
+        break;
+      }
+
+      return candidates;
+    };
+  }) ();
+
+  // Takes the fully-populated candidates array, sorts by lowest
+  // difference from the target ratio, collects best matches into
+  // groups, and stores them in sortedResults.
+  var sortResults = (function(){
+    // Result objects are the best candidates --- those that
+    // will be displayed. All values required by display routine
+    // and spreadsheet generators are stored.
+    function Result(groupNum, resUpper, resLower, minRatio, nomRatio, maxRatio, ratioDiff) {
+      this.groupNum = groupNum;
+      this.resUpper = resUpper;
+      this.resLower = resLower;
+      this.stringRes = resUpper + resLower;
+      this.minRatio = minRatio;
+      this.nomRatio = nomRatio;
+      this.maxRatio = maxRatio;
+      this.ratioDiff = ratioDiff;
+    }
+
+    // sortResults()
+    return function(candidates, settings) {
+      var groupNumber;
+      var groupLength;
+      var anchorDiff;
+      var candidateGroup;
+      var resultsGroup;
+      var subLength;
+      var anchor_resLower;
+      var matchTolerance;
+      var subGroup;
+      var testIndx;
+      var testUpperRes;
+      var prevUpperRes;
+      var jMember;
+      var thisResult;
+      var minRatio;
+      var nomRatio;
+      var maxRatio;
+      var dimLower;
+      var augLower;
+      var dimUpper;
+      var augUpper;
+      var sortedResults = [];
+      
+      // Sort candidates by closeness to target divider ratio.
+      candidates.sort(function(a,b){return a.absDiff() - b.absDiff();});
+
+      // Group candidates with similar absolute difference from target divider ratio.
+      groupNumber = 1;
+      while (candidates.length > 0 && groupNumber <= 20) {
+        groupLength = 1;
+        anchorDiff = candidates[0].diff;  
+        while (groupLength < candidates.length &&
+              Math.abs(candidates[groupLength].diff-anchorDiff) < 1e-10) {
+          groupLength++;
+        }
+        
+        // Store unique elements of candidateGroup in resultsGroup
+        candidateGroup = candidates.splice(0, groupLength);
+        candidateGroup.sort(function(a,b){return a.resLower - b.resLower;});
+        resultsGroup = [];
+
+        while (candidateGroup.length > 0) {
+          // Find subgroup with same resLower value.
+          subLength = 1;
+          anchor_resLower = candidateGroup[0].resLower;
+          matchTolerance = 1e-8 * anchor_resLower;
+
+          while (subLength < candidateGroup.length &&
+                Math.abs(anchor_resLower - candidateGroup[subLength].resLower) < matchTolerance) {
+            subLength++;
+          }
+          subGroup = candidateGroup.splice(0, subLength);
+
+          // Store non-duplicate entries of subGroup in resultsGroup
+          if (subGroup.length === 1) {
+            resultsGroup.push(subGroup[0]);
+          } else if (subGroup.length > 1) {
+            subGroup.sort(function(a,b){return a.resUpper - b.resUpper;});
+            resultsGroup.push(subGroup[0]);
+
+            prevUpperRes = subGroup[0].resUpper;
+            for (testIndx = 1; testIndx < subGroup.length; testIndx++) {
+              testUpperRes = subGroup[testIndx].resUpper;
+              if (Math.abs(testUpperRes - prevUpperRes) > 1e-8 * testUpperRes) {
+                resultsGroup.push(testUpperRes);
+              }
+              prevUpperRes = testUpperRes;
+            }
+          }
+        }
+
+        // Store the results in this group.
+        for (jMember = 0; jMember < resultsGroup.length; jMember++) {
+          thisResult = resultsGroup[jMember];
+          nomRatio = thisResult.resLower / (thisResult.resUpper + thisResult.resLower);
+
+          dimLower = settings.tolDim * thisResult.resLower;
+          augUpper = settings.tolAug * thisResult.resUpper;
+          minRatio = dimLower / (dimLower + augUpper);
+
+          augLower = settings.tolAug * thisResult.resLower;
+          dimUpper = settings.tolDim * thisResult.resUpper;
+          maxRatio = augLower / (augLower + dimUpper);
+
+          sortedResults.push(new Result(groupNumber, thisResult.resUpper, thisResult.resLower,
+                                        minRatio, nomRatio, maxRatio, thisResult.diff));
+        }
+
+        groupNumber++;
+      }
+
+      return sortedResults;
+    };
+  }) ();
+
   // Constructor for Settings object that stores user input settings
   function Settings() {
     this.targetRatio = NaN;
@@ -1463,9 +2503,12 @@ window.voltDiv.solveDivider = (function() {
     this.resTolerance = NaN;
     this.tolAug = NaN;
     this.tolDim = NaN;
+    this.resTolExpr = '';
     this.resSeries = seriesEnum.E24E96;
     this.minStringRes = NaN;
     this.maxStringRes = NaN;
+    this.minStringExpr = '';
+    this.maxStringExpr = '';
   }
 
   // Returns a new string that is inStr without leading/trailing whitespace.
@@ -1536,8 +2579,61 @@ window.voltDiv.solveDivider = (function() {
     return output;
   }
 
-  // solveDivider()
-  return function () {
+  function saveSettings() {
+    // Store settings in sessionStorage
+    try {
+      window.sessionStorage.setItem('settings', JSON.stringify(window.voltDiv.settings));
+    } catch(err) {
+      // Ignore exceptions
+    }
+  }
+
+  // Returns an array of all valid individual resistance values, 
+  // stored in ascending order.
+  function initialize_resArray(settings) {
+    var resArray = [];
+    var jMult;
+    var multiplier;
+    var jVal;
+
+    switch (settings.resSeries) {
+    case seriesEnum.E24:
+      for (jMult = 0; jMult < multipliers.length; jMult++) {
+        multiplier = multipliers[jMult];
+
+        for (jVal = 0; jVal < E24.length; jVal++) {
+          resArray.push(multiplier*E24[jVal]);
+        }
+      }
+      break;
+    case seriesEnum.E96:
+      for (jMult = 0; jMult < multipliers.length; jMult++) {
+        multiplier = multipliers[jMult];
+
+        for (jVal = 0; jVal < E96.length; jVal++) {
+          resArray.push(multiplier*E96[jVal]);
+        }
+      }
+      break;
+    default:
+      for (jMult = 0; jMult < multipliers.length; jMult++) {
+        multiplier = multipliers[jMult];
+
+        for (jVal = 0; jVal < E24E96.length; jVal++) {
+          resArray.push(multiplier*E24E96[jVal]);
+        }
+      }
+      break;
+    }
+
+    Object.freeze(resArray);
+    return resArray;
+  }
+
+  // Parses user input, solves for resistance values most closely
+  // meeting user's divider specification, and outputs results
+  // or error messages.
+  window.voltDiv.solveDivider = function () {
     var title_div;
     var error_div;
     var resArray;
@@ -1552,21 +2648,24 @@ window.voltDiv.solveDivider = (function() {
     var minResistance;
     var parserOutput = new ParsedInput(0.0, false);
 
-    clearResults();
+    window.voltDiv.clearResults();
 
-    settings = new Settings();
+    if (window.voltDiv.settings === null) {
+      window.voltDiv.settings = new Settings();
+    }
 
     // Figure out whether to use E24 values, E96 values, or both.
     if (document.getElementById('resSeriesE24').checked) {
-      settings.resSeries = seriesEnum.E24;
+      window.voltDiv.settings.resSeries = seriesEnum.E24;
     } else if (document.getElementById('resSeriesE96').checked) {
-      settings.resSeries = seriesEnum.E96;
+      window.voltDiv.settings.resSeries = seriesEnum.E96;
     } else {
-      settings.resSeries = seriesEnum.E24E96;
+      window.voltDiv.settings.resSeries = seriesEnum.E24E96;
     }
+    saveSettings();
 
     // Fill in resArray based on selected resistor series
-    resArray = initialize_resArray(settings.resSeries);
+    resArray = initialize_resArray(window.voltDiv.settings);
 
     // Parse & validate desired divider ratio input.
     ratioElem = document.getElementById('dividerRatio');
@@ -1580,24 +2679,25 @@ window.voltDiv.solveDivider = (function() {
       return;
     }
 
-    ratioEval = evalExpression(ratioElem.value);
+    window.voltDiv.settings.ratioExpr = trimString(ratioElem.value);
+    saveSettings();
+    ratioEval = window.voltDiv.evalExpression(ratioElem.value);
     ratioOK = ratioEval.isValid;
 
     if (ratioOK === true) {
-      settings.targetRatio = ratioEval.value;
+      window.voltDiv.settings.targetRatio = ratioEval.value;
 
-      if (isNaN(settings.targetRatio) || 
-          settings.targetRatio < 1.0e-9 || 
-          settings.targetRatio > 1.0 - 1.0e-9) {
+      if (isNaN(window.voltDiv.settings.targetRatio) || 
+          window.voltDiv.settings.targetRatio < 1.0e-9 || 
+          window.voltDiv.settings.targetRatio > 1.0 - 1.0e-9) {
         ratioOK = false;
       } else {
-        settings.isExpr = ratioEval.isExpr;
-        settings.ratioExpr = ratioEval.expr;
+        window.voltDiv.settings.isExpr = ratioEval.isExpr;
 
         // Set a range on acceptable ratios to limit the number of candidate
         // divider solutions.
-        settings.ratioThresholdLow = Math.max(1.0e-9, settings.targetRatio-0.005);
-        settings.ratioThresholdHigh = Math.min(settings.targetRatio+0.005, 1.0 - 1.0e-9);
+        window.voltDiv.settings.ratioThresholdLow = Math.max(1.0e-9, window.voltDiv.settings.targetRatio-0.005);
+        window.voltDiv.settings.ratioThresholdHigh = Math.min(window.voltDiv.settings.targetRatio+0.005, 1.0 - 1.0e-9);
       }
     } 
     
@@ -1623,12 +2723,13 @@ window.voltDiv.solveDivider = (function() {
 
     // Figure out whether the target ratio is a minimum, maximum, or nominal ratio.
     if (document.getElementById('ratioTypeMin').checked) {
-      settings.ratioType = ratioEnum.MIN;
+      window.voltDiv.settings.ratioType = ratioEnum.MIN;
     } else if (document.getElementById('ratioTypeMax').checked) {
-      settings.ratioType = ratioEnum.MAX;
+      window.voltDiv.settings.ratioType = ratioEnum.MAX;
     } else {
-      settings.ratioType = ratioEnum.NOM;
+      window.voltDiv.settings.ratioType = ratioEnum.NOM;
     }
+    saveSettings();
 
     // Parse & validate resistor tolerance input.
     resTolElem = document.getElementById('resTolerance');
@@ -1642,13 +2743,15 @@ window.voltDiv.solveDivider = (function() {
       return;
     }
 
+    window.voltDiv.settings.resTolExpr = trimString(resTolElem.value);
+    saveSettings();
     parserOutput = parseTolerance(resTolElem.value);
     if (parserOutput.isValid === true) {
-      settings.resTolerance = parserOutput.value;
+      window.voltDiv.settings.resTolerance = parserOutput.value;
       // These multiplication factors are used in min and
       // max ratio calculations.
-      settings.tolAug = 1.0 + settings.resTolerance/100.0;
-      settings.tolDim = 1.0 - settings.resTolerance/100.0;
+      window.voltDiv.settings.tolAug = 1.0 + window.voltDiv.settings.resTolerance/100.0;
+      window.voltDiv.settings.tolDim = 1.0 - window.voltDiv.settings.resTolerance/100.0;
     } else {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -1671,9 +2774,11 @@ window.voltDiv.solveDivider = (function() {
       return;
     }
 
+    window.voltDiv.settings.minStringExpr = trimString(minStringElem.value);
+    saveSettings();
     parserOutput = parseResistance(minStringElem.value);
     if (parserOutput.isValid === true) {
-      settings.minStringRes = parserOutput.value;
+      window.voltDiv.settings.minStringRes = parserOutput.value;
     } else {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -1686,12 +2791,12 @@ window.voltDiv.solveDivider = (function() {
     }
 
     maxResistance = resArray[resArray.length-1];
-    if (settings.minStringRes > 2.0 * maxResistance) {
+    if (window.voltDiv.settings.minStringRes > 2.0 * maxResistance) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
 
       error_div = document.getElementById('errorDiv');
-      error_div.textContent = 'Min String Resistance was set to ' + resValToString(settings.minStringRes, 3) +
+      error_div.textContent = 'Min String Resistance was set to ' + resValToString(window.voltDiv.settings.minStringRes, 3) +
         ', which will yield no results. The largest resistor value in the chosen series is ' +
         resValToString(maxResistance, 3) + ' so the largest string resistance is ' + 
         resValToString(2.0 * maxResistance, 4) + '.';
@@ -1711,9 +2816,11 @@ window.voltDiv.solveDivider = (function() {
       return;
     }
 
+    window.voltDiv.settings.maxStringExpr = trimString(maxStringElem.value);
+    saveSettings();
     parserOutput = parseResistance(maxStringElem.value);
     if (parserOutput.isValid === true) {
-      settings.maxStringRes = parserOutput.value;
+      window.voltDiv.settings.maxStringRes = parserOutput.value;
     } else {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -1726,12 +2833,12 @@ window.voltDiv.solveDivider = (function() {
     }
 
     minResistance = resArray[0];
-    if (settings.maxStringRes < 2.0 * minResistance) {
+    if (window.voltDiv.settings.maxStringRes < 2.0 * minResistance) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
 
       error_div = document.getElementById('errorDiv');
-      error_div.textContent = 'Max String Resistance was set to ' + resValToString(settings.maxStringRes, 3) +
+      error_div.textContent = 'Max String Resistance was set to ' + resValToString(window.voltDiv.settings.maxStringRes, 3) +
         ', which will yield no results. The smallest resistor value in the chosen series is ' +
         resValToString(minResistance, 3) + ' so the smallest string resistance is ' + 
         resValToString(2.0 * minResistance, 4) + '.';
@@ -1739,7 +2846,7 @@ window.voltDiv.solveDivider = (function() {
       return;
     }
 
-    if (settings.maxStringRes <= settings.minStringRes) {
+    if (window.voltDiv.settings.maxStringRes <= window.voltDiv.settings.minStringRes) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
 
@@ -1750,823 +2857,22 @@ window.voltDiv.solveDivider = (function() {
     }
 
     // Find all reasonable voltage divider solutions
-    candidates = populate_candidates(resArray);
+    candidates = populate_candidates(resArray, window.voltDiv.settings);
     if (candidates.length < 1) {
       // No results were found.
       // Show a message in the results table that details all of
       // the user input settings.
-      displayDiagnostics();
+      window.voltDiv.displayDiagnostics();
       return;
     }
 
     // There are results. Sort them into groups with similar difference
     // from target ratio and keep the best ones.
-    sortResults(candidates);
+    window.voltDiv.sortedResults = sortResults(candidates, window.voltDiv.settings);
 
     // Display the best results.
-    displayResults();
+    window.voltDiv.displayResults();
   };
-}) ();
-
-// Toggles display of equations and schematic
-window.voltDiv.toggleMath = function() {
-  var eqsDiv = document.getElementById('eqsDiv');
-  var eqsTitle = document.getElementById('eqsTitle');
-  var toggleAnchor = document.getElementById('toggleMath');
-
-  if (eqsDiv.style.display === 'none')
-  {
-    toggleAnchor.innerHTML = 'hide';
-    eqsDiv.style.display = 'inline-block';
-    eqsTitle.style.marginBottom = '10pt';
-  }
-  else
-  {
-    toggleAnchor.innerHTML = 'show';
-    eqsDiv.style.display = 'none';
-    eqsTitle.style.marginBottom = '0px';
-  }
-};
-
-// Display E24 series resistor values
-window.voltDiv.displayResistorValues = (function() {
-  // Displays human-readable resistance values in ohms,
-  // kilo ohms or megohms, rounded to the nearest digit.
-  function resistanceString(resistance) {
-    if (resistance >= 1.0e6) {
-      return Math.round(1.0e-6*resistance) + 'M\u03A9';
-    } else if (resistance >= 1.0e3) {
-      return Math.round(1.0e-3*resistance) + 'k\u03A9';
-    }
-    return Math.round(resistance) + '\u03A9';
-  }
-  
-  // displayResistorValues()
-  return function(series) {
-    var tableFragment = document.createDocumentFragment();
-    var jMult;
-    var multiplier;
-    var jVal;
-    var headerRow;
-    var decade_td;
-    var valuesRow;
-    var values_td;
-    var title_span;
-    var title_div;
-    var results_table;
-
-    // Make sure input is valid before continuing
-    if (series !== 'E24' && series !== 'E96') {
-      return;
-    }
-
-    clearResults();
-
-    for (jMult = 0; jMult < multipliers.length; jMult++) {
-      multiplier = multipliers[jMult];
-
-      headerRow = document.createElement('tr');
-      headerRow.className = 'shadedRow';
-
-      decade_td = document.createElement('td');
-      decade_td.setAttribute('style', 'text-align:center; font-weight: bold');
-      decade_td.textContent = resistanceString(multiplier) + ' decade';
-      headerRow.appendChild(decade_td);
-      tableFragment.appendChild(headerRow);
-
-      valuesRow = document.createElement('tr');
-      values_td = document.createElement('td');
-      values_td.style.lineHeight = '1.5';
-
-      if (series === 'E24') {
-        for (jVal = 0; jVal < E24.length-1; jVal++) {
-          values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[jVal], 3));
-          if ((jVal + 1) % 6 === 0) {
-            values_td.insertAdjacentHTML('beforeend', '<br/>');
-          } else {
-            values_td.insertAdjacentText('beforeend', '\u2002');
-          }
-        }
-
-        values_td.insertAdjacentText('beforeend', resValToString(multiplier*E24[E24.length-1], 3));
-      } else if (series === 'E96') {
-        for (jVal = 0; jVal < E96.length-1; jVal++) {
-          values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[jVal], 3));
-          if ((jVal + 1) % 8 === 0) {
-            values_td.insertAdjacentHTML('beforeend', '<br/>');
-          } else {
-            values_td.insertAdjacentText('beforeend', '\u2002');
-          }
-        }
-
-        values_td.insertAdjacentText('beforeend', resValToString(multiplier*E96[E96.length-1], 3));
-      }
-
-      valuesRow.appendChild(values_td);
-      tableFragment.appendChild(valuesRow);
-    }
-
-    // Display title
-    title_span = document.getElementById('outTitleSpan');
-    title_span.textContent = 'EIA ' + series + ' Series Resistor Values';
-
-    title_div = document.getElementById('outTitleDiv');
-    title_div.style.display='block';
-
-    // Display table of resistor values
-    results_table = document.getElementById('resultsTable');
-    results_table.appendChild(tableFragment);
-    results_table.style.display='table';
-  };
-}) ();
-
-// Converts num to a string and adds a leading 0 if num < 10 and num >= 0
-function zeroPad(num) {
-  if (num < 10 && num >= 0) {
-    return '0' + num.toString();
-  }
-  return num.toString();
-}
-
-window.voltDiv.download_csv = (function() {
-  // Constructs a .csv spreadsheet of the settings and results.
-  // Returns an appropriate Blob.
-  function generate_csv() {
-    var csvString = '';
-    var thisMoment;
-    var jResult;
-    var thisResult;
-    var csvBlob;
-
-    if (settings.isExpr) {
-      // Store the original target ratio expression followed by a blank row
-      csvString += 'Target Ratio Expression: ,' + settings.ratioExpr + ',,,,,,\n,,,,,,,\n';
-    }
-
-    // These two rows store the settings
-    csvString += 'Target Ratio,Target Type,Res Tolerance,Min String Res,Max String Res,Res Series,Date,Time\n' +
-      settings.targetRatio.toPrecision(17) + ',';
-
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      csvString += 'Min Ratio,';
-      break;
-    case ratioEnum.MAX:
-      csvString += 'Max Ratio,';
-      break;
-    default:
-      csvString += 'Nom Ratio,';
-      break;
-    }
-
-    csvString += settings.resTolerance.toString() + '%,' +
-      settings.minStringRes.toPrecision(9) + ',' +
-      settings.maxStringRes.toPrecision(9) + ',';
-
-    switch (settings.resSeries) {
-    case seriesEnum.E24:
-      csvString += 'E24,';
-      break;
-    case seriesEnum.E96:
-      csvString += 'E96,';
-      break;
-    default:
-      csvString += 'E24 and E96,';
-      break;
-    }
-
-    // Store the date and time as strings, and
-    // add a blank row between settings and results
-    thisMoment = new Date();
-    csvString += thisMoment.getFullYear().toString() + '-' + zeroPad(thisMoment.getMonth() + 1) + '-' + zeroPad(thisMoment.getDate()) + ',' +
-      zeroPad(thisMoment.getHours()) + ':' + zeroPad(thisMoment.getMinutes()) + ':' + zeroPad(thisMoment.getSeconds()) + '\n' +
-      ',,,,,,,\n';
-
-    // This row is the results header
-    csvString += 'Group,Upper,Lower,String,Min Ratio,Nom Ratio,Max Ratio,';
-
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      csvString += 'Min Ratio - Target';
-      break;
-    case ratioEnum.MAX:
-      csvString += 'Max Ratio - Target';
-      break;
-    default:
-      csvString += 'Nom Ratio - Target';
-      break;
-    }
-
-    for (jResult = 0; jResult < sortedResults.length; jResult++) {
-      thisResult = sortedResults[jResult];
-
-      // Line break for header row or previous result row.
-      // Final result row has no line break.
-      csvString += '\n' + thisResult.groupNum.toString() + ',' + thisResult.resUpper.toPrecision(7) + ',' +
-        thisResult.resLower.toPrecision(7) + ',' + thisResult.stringRes().toPrecision(9) + ',' +
-        thisResult.minRatio.toPrecision(17) + ',' + thisResult.nomRatio.toPrecision(17) + ',' +
-        thisResult.maxRatio.toPrecision(17) + ',' + thisResult.ratioDiff.toExponential(17);
-    }
-
-    csvBlob = new Blob([csvString], {type: 'text/csv'});
-    return csvBlob;
-  }
-
-  // The following function comes from a Stack Overflow post
-  // https://stackoverflow.com/a/33542499
-  // by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
-  // Retrieved 2018-03-31 and changed slightly to fit this program.
-  // Stack Overflow code is distributed under the CC BY-SA 3.0 license
-  // https://creativecommons.org/licenses/by-sa/3.0/
-  // download_csv()
-  return function() {
-    var csvBlob = generate_csv();
-    var filename = 'results.csv';
-    var csvAnchor;
-    var blobURL;
-
-    if (window.navigator.msSaveOrOpenBlob) {
-      // Internet Explorer
-      window.navigator.msSaveBlob(csvBlob, filename);
-    } else {
-      csvAnchor = document.createElement('a');
-      blobURL = URL.createObjectURL(csvBlob);
-      csvAnchor.href = blobURL;
-      csvAnchor.download = filename;
-      document.body.appendChild(csvAnchor);
-      csvAnchor.click();
-      document.body.removeChild(csvAnchor);
-      URL.revokeObjectURL(blobURL);
-    }
-  };
-}) ();
-
-// Constructor for object that simplifies the creation of
-// ZIP files from strings. fileType is for type of Blob
-// returned by ZipBuilder.compile(). modDate is the file
-// modification time Date object.
-var ZipBuilder = (function(){
-  // Returns DOS time and date in four-byte little endian format
-  // given a JavaScript date.
-  function dosTimeDate(aDate) {
-    var dosTime = new Uint16Array(1);
-    var dosDate = new Uint16Array(1);
-    var timeDate = new Uint8Array(4);
-
-    // I love this so much. They didn't have 6 bits for seconds,
-    // so the DOS timestamp stores 2 second intervals.
-    dosTime = Math.floor(aDate.getSeconds() / 2);
-    dosTime |= aDate.getMinutes() << 5;
-    dosTime |= aDate.getHours() << 11;
-    timeDate[0] = dosTime & 0x00FF;
-    timeDate[1] = (dosTime & 0xFF00) >>> 8;
-    
-    dosDate = new Uint16Array(1);
-    dosDate = aDate.getDate();
-    dosDate |= (aDate.getMonth() + 1) << 5;
-    dosDate |= (aDate.getFullYear() - 1980) << 9;
-    timeDate[2] = dosDate & 0x00FF;
-    timeDate[3] = (dosDate & 0xFF00) >>> 8;
-
-    return timeDate;
-  }
-
-  // ZipBuilder()
-  return function(fileType, modDate) {
-    this.content_ar = [];
-    this.directory_ar = [];
-    this.nextOffset = 0;
-    this.dirSize = 0;
-    this.timeDate = dosTimeDate(modDate);
-    this.fileType = fileType;
-  };
-}) ();
-
-// Adds a file to the ZIP archive.
-// filename is relative path of file in ZIP archive as a string
-// contentString is file contents
-ZipBuilder.prototype.addFile = (function() {
-  // Converts a utf16 javascript string to a utf8 Unit8Array.
-  var utf16_to_utf8 = (function() {
-    // Returns length in bytes of equivalent utf8 string given a utf16 string input.
-    function utf8len(utf16str) {
-      var len = 0;
-      var j;
-      var charCode;
-      var codeNext;
-
-      for (j = 0; j < utf16str.length-1; j++) {
-        charCode = utf16str.charCodeAt(j);
-        if (charCode <= 127) {
-          len++;
-        } else if (charCode <= 2047) {
-          len += 2;
-        } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-          codeNext = utf16str.charCodeAt(j+1);
-          if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
-            len += 4;
-            j++;
-          } else {
-            len += 3;
-          }
-        } else {
-          len += 3;
-        }
-      }
-
-      if (j < utf16str.length) {
-        charCode = utf16str.charCodeAt(j);
-        if (charCode <= 127) {
-          len++;
-        } else if (charCode <= 2047) {
-          len += 2;
-        } else {
-          len += 3;
-        }
-      }
-
-      return len;
-    }
-
-    // utf16_to_utf8()
-    return function(utf16str) {
-      var outArray = new Uint8Array(utf8len(utf16str));
-      var k = 0;
-      var j;
-      var charCode;
-      var codeNext;
-      var code32;
-
-      for (j = 0; j < utf16str.length-1; j++) {
-        charCode = utf16str.charCodeAt(j);
-        if (charCode <= 127) {
-          outArray[k] = 0x7F & charCode;
-          k++;
-        } else if (charCode <= 2047) {
-          outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
-          k++;
-          outArray[k] = 0x80 | (0x3F & charCode);
-          k++;
-        } else if (charCode >= 0xD800 && charCode <= 0xDBFF) {
-          codeNext = utf16str.charCodeAt(j+1);
-          if (codeNext >= 0xDC00 && codeNext <= 0xDFFF) {
-            // We have a surrogate pair
-            code32 = ((charCode - 0xD800) << 10) + (codeNext - 0xDC00) + 0x10000;
-            outArray[k] = 0xF0 | (0x07 & (code32 >>> 18));
-            k++;
-            outArray[k] = 0x80 | (0x3F & (code32 >>> 12));
-            k++;
-            outArray[k] = 0x80 | (0x3F & (code32 >>> 6));
-            k++;
-            outArray[k] = 0x80 | (0x3F & code32);
-            k++;
-
-            j++;
-          } else {
-            outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
-            k++;
-            outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
-            k++;
-            outArray[k] = 0x80 | (0x3F & charCode);
-            k++;
-          }
-        } else {
-          outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
-          k++;
-          outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
-          k++;
-          outArray[k] = 0x80 | (0x3F & charCode);
-          k++;
-        }
-      }
-
-      if (j < utf16str.length) {
-        charCode = utf16str.charCodeAt(j);
-        if (charCode <= 127) {
-          outArray[k] = 0x7F & charCode;
-          k++;
-        } else if (charCode <= 2047) {
-          outArray[k] = 0xC0 | (0x1F & (charCode >>> 6));
-          k++;
-          outArray[k] = 0x80 | (0x3F & charCode);
-          k++;
-        } else {
-          outArray[k] = 0xE0 | (0x0F & (charCode >>> 12));
-          k++;
-          outArray[k] = 0x80 | (0x3F & (charCode >>> 6));
-          k++;
-          outArray[k] = 0x80 | (0x3F & charCode);
-          k++;
-        }
-      }
-
-      return outArray;
-    };
-  }) ();
-
-  // Calculates the CRC32 of a Uint8Array. Same version of CRC32 as
-  // used by ZIP.
-  var crc32 = (function() {
-    // Table to speed up CRC32 calculation
-    var crc32table = new Uint32Array([0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 
-      0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7, 0x136C9856, 0x646BA8C0, 
-      0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5, 0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B, 0x35B5A8FA, 
-      0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59, 0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F, 
-      0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D, 0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 
-      0xE8B8D433, 0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01, 0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 
-      0x8208F4C1, 0xF50FC457, 0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65, 0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 
-      0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB, 0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9, 0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 
-      0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F, 0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD, 0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 
-      0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683, 0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1, 0xF00F9344, 0x8708A3D2, 
-      0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7, 0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5, 0xD6D6A3E8, 
-      0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B, 0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79, 
-      0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F, 0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 
-      0x5BDEAE1D, 0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713, 0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 
-      0x7CDCEFB7, 0x0BDBDF21, 0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777, 0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 
-      0xF862AE69, 0x616BFFD3, 0x166CCF45, 0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB, 0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 
-      0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9, 0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF, 0xB3667A2E, 0xC4614AB8, 0x5D681B02, 
-      0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D]);
-
-    // crc32()
-    return function (uint8ar) {
-      var crcreg = new Uint32Array([0xFFFFFFFF]);
-      var indx = new Uint32Array([0]);
-      var j;
-      for (j = 0; j < uint8ar.length; j++) {
-        indx[0] = 0x000000FF & (crcreg[0] ^ uint8ar[j]);
-        crcreg[0] >>>= 8;
-        crcreg[0] ^= crc32table[indx[0]];
-      }
-      crcreg[0] ^= 0xFFFFFFFF;
-      return crcreg[0];
-    };
-  }) ();
-
-  // Generate ZIP local file header from utf8 Uint8Array filename,
-  // numeric file size in bytes, numeric crc32, and 4 byte Uint8Array
-  // little-endian dos time and date (in that order)
-  function local_header(filename, filesize, file_crc, timeDate) {
-    var header_len = 30 + filename.length;
-    var headArray = new Uint8Array(header_len);
-    headArray.set([0x50, 0x4b, 0x03, 0x04, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
-    headArray.set(timeDate, 10);
-    headArray[14] = file_crc & 0x000000FF;
-    headArray[15] = (file_crc & 0x0000FF00) >>> 8;
-    headArray[16] = (file_crc & 0x00FF0000) >>> 16;
-    headArray[17] = (file_crc & 0xFF000000) >>> 24;
-    headArray[18] = filesize & 0x000000FF;
-    headArray[19] = (filesize & 0x0000FF00) >>> 8;
-    headArray[20] = (filesize & 0x00FF0000) >>> 16;
-    headArray[21] = (filesize & 0xFF000000) >>> 24;
-
-    // Compressed file size and uncompressed file size are equal
-    headArray.set(headArray.subarray(18,22), 22);
-    headArray[26] = filename.length & 0x00FF;
-    headArray[27] = (filename.length & 0xFF00) >>> 8;
-    headArray.set([0x00, 0x00], 28);
-    headArray.set(filename, 30);
-    return headArray;
-  }
-
-  // Generate ZIP central directory header from utf8 Uint8Array filename,
-  // Uint8Array local_header, and numeric offset of file local header
-  // from start of ZIP archive in bytes
-  function dir_header(filename, localHeader, offset) {
-    var headArray = new Uint8Array(46 + filename.length);
-    headArray.set([0x50, 0x4b, 0x01, 0x02, 0x0A, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-    // Copy timeDate, file_crc, file sizes, and filename length
-    // from existing local header
-    headArray.set(localHeader.subarray(10,28), 12);
-    headArray.set([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 30);
-    headArray[42] = offset & 0x000000FF;
-    headArray[43] = (offset & 0x0000FF00) >>> 8;
-    headArray[44] = (offset & 0x00FF0000) >>> 16;
-    headArray[45] = (offset & 0xFF000000) >>> 24;
-    headArray.set(filename, 46);
-    return headArray;
-  }
-
-  // ZipBuilder.addFile()
-  return function(filename, contentString) {
-    var content_utf8 = utf16_to_utf8(contentString);
-    var filename_utf8 = utf16_to_utf8(filename);
-    var localHeader = local_header(filename_utf8, content_utf8.length, crc32(content_utf8), this.timeDate);
-    var dirHeader = dir_header(filename_utf8, localHeader, this.nextOffset);
-    this.nextOffset += localHeader.length + content_utf8.length;
-    this.dirSize += dirHeader.length;
-    this.content_ar.push(localHeader);
-    this.content_ar.push(content_utf8);
-    this.directory_ar.push(dirHeader);
-  };
-}) ();
-
-// Compiles the ZIP archive and returns it as a Blob.
-// Does not alter the ZipBuilder internal state; may
-// be called multiple times.
-ZipBuilder.prototype.compile = (function() {
-  // Generate a ZIP end of central directory record from
-  // number of entries in central directory, size of central directory in
-  // bytes, and offset of central directory from start of ZIP file.
-  function end_cen_dir(num_entries, dir_size, dir_offset) {
-    var record_len = 22;
-    var recordArray = new Uint8Array(record_len);
-
-    recordArray.set([0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00]);
-
-    recordArray[8] = num_entries & 0x00FF;
-    recordArray[9] = (num_entries & 0xFF00) >>> 8;
-
-    recordArray.set(recordArray.subarray(8,10), 10);
-
-    recordArray[12] = dir_size & 0x000000FF;
-    recordArray[13] = (dir_size & 0x0000FF00) >>> 8;
-    recordArray[14] = (dir_size & 0x00FF0000) >>> 16;
-    recordArray[15] = (dir_size & 0xFF000000) >>> 24;
-
-    recordArray[16] = dir_offset & 0x000000FF;
-    recordArray[17] = (dir_offset & 0x0000FF00) >>> 8;
-    recordArray[18] = (dir_offset & 0x00FF0000) >>> 16;
-    recordArray[19] = (dir_offset & 0xFF000000) >>> 24;
-
-    recordArray.set([0x00, 0x00], 20);
-
-    return recordArray;
-  }
-
-  // ZipBuilder.compile()
-  return function() {
-    var zipBlob;
-    var endRecord;
-
-    if (this.nextOffset < 1) {
-      // There is no data to return.
-      zipBlob = new Blob();
-      return zipBlob;
-    }
-
-    endRecord = end_cen_dir(this.directory_ar.length, this.dirSize, this.nextOffset);
-    zipBlob = new Blob(this.content_ar.concat(this.directory_ar, [endRecord]), {type : this.fileType});
-    return zipBlob;
-  };
-}) ();
-
-window.voltDiv.download_xlsx = (function() {
-  // Generates an Office OpenDocument spreadsheet of the results.
-  // Returns an appropriate Blob.
-  function generate_xlsx() {
-    // Content string variables for files in ZIP archive.
-    var content_types_str;
-    var rels_str;
-    var app_str;
-    var core_str;
-    var styles_str;
-    var workbook_str;
-    var wb_rels_str;
-    var sheet1_str;
-
-    // Other helper variables.
-    var thisMoment = new Date();
-    var isoDate;
-    var numRows;
-    var settingsRow;
-    var headerRow;
-    var jResult;
-    var thisResult;
-    var rowNum;
-    var expString;
-
-    var xlsxZip = new ZipBuilder('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', thisMoment);
-
-    content_types_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-      '<Default Extension="xml" ContentType="application/xml"/>' +
-      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
-      '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
-      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
-      '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
-      '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
-      '</Types>';
-    xlsxZip.addFile('[Content_Types].xml', content_types_str);
-
-    rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>' +
-      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
-      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
-      '</Relationships>';
-    xlsxZip.addFile('_rels/.rels', rels_str);
-
-    app_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
-      '<Application>Voltage Divider Calculator</Application><AppVersion>1.11</AppVersion><DocSecurity>0</DocSecurity>' +
-      '<ScaleCrop>false</ScaleCrop><HeadingPairs><vt:vector size="2" baseType="variant">' +
-      '<vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>1</vt:i4></vt:variant>' +
-      '</vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="1" baseType="lpstr"><vt:lpstr>results</vt:lpstr>' +
-      '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc><HyperlinksChanged>false</HyperlinksChanged></Properties>';
-    xlsxZip.addFile('docProps/app.xml', app_str);
-
-    isoDate = thisMoment.toISOString().substr(0, 19) + 'Z';
-    core_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
-      '<dc:creator/><cp:lastModifiedBy/>' +
-      '<dcterms:created xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:created>' +
-      '<dcterms:modified xsi:type="dcterms:W3CDTF">' + isoDate + '</dcterms:modified>' +
-      '</cp:coreProperties>';
-    xlsxZip.addFile('docProps/core.xml', core_str);
-
-    styles_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
-      '<fonts count="1"><font><sz val="12"/><color rgb="FF000000"/><name val="Calibri"/>' +
-      '<family val="2"/><scheme val="minor"/></font></fonts><fills count="1"><fill>' +
-      '<patternFill patternType="none"/></fill></fills><borders count="1"><border>' +
-      '<left/><right/><top/><bottom/><diagonal/></border></borders>' +
-      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' +
-      '</cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
-      '<xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
-      '<xf numFmtId="11" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>';
-
-    if (settings.isExpr) {
-      styles_str += '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="right"/></xf>';
-    }
-
-    styles_str += '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/>' +
-      '</cellStyles><dxfs count="0"/><tableStyles count="0"/></styleSheet>';
-    xlsxZip.addFile('xl/styles.xml', styles_str);
-
-    workbook_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
-      '<sheets><sheet name="results" sheetId="1" r:id="rId1"/></sheets>' +
-      '<calcPr fullPrecision="1"/></workbook>';
-    xlsxZip.addFile('xl/workbook.xml', workbook_str);
-
-    wb_rels_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
-      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
-      '</Relationships>';
-    xlsxZip.addFile('xl/_rels/workbook.xml.rels', wb_rels_str);
-
-    numRows = 4 + sortedResults.length;
-    settingsRow = 1;
-    headerRow = 4;
-
-    if (settings.isExpr) {
-      numRows += 2;
-      settingsRow += 2;
-      headerRow += 2;
-    }
-
-    sheet1_str = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">' +
-      '<dimension ref="A1:H' + numRows + '"/><sheetViews><sheetView tabSelected="1" workbookViewId="0"/></sheetViews>' +
-      '<sheetFormatPr defaultRowHeight="17"/><cols>' +
-      '<col min="1" max="7" width="15" customWidth="1"/>' +
-      '<col min="8" max="8" width="18" customWidth="1"/></cols>' +
-      '<sheetData>';
-        
-    if (settings.isExpr) {
-      sheet1_str += '<row r="1" spans="1:8">' +
-        '<c r="A1" s="3" t="inlineStr"><is><t>Target Ratio Expression:\u2002</t></is></c>' +
-        '<c r="B1" s="3"/>' + 
-        '<c r="C1" t="inlineStr"><is><t>' + settings.ratioExpr + '</t></is></c>' +
-        '<c r="D1"/><c r="E1"/><c r="F1"/><c r="G1"/><c r="H1"/></row>';
-    }
-
-    sheet1_str += '<row r="' + settingsRow + '" spans="1:8">' +
-      '<c r="A' + settingsRow + '" t="inlineStr"><is><t>Target Ratio</t></is></c>' +
-      '<c r="B' + settingsRow + '" t="inlineStr"><is><t>Target Type</t></is></c>' +
-      '<c r="C' + settingsRow + '" t="inlineStr"><is><t>Res Tolerance</t></is></c>' +
-      '<c r="D' + settingsRow + '" t="inlineStr"><is><t>Min String Res</t></is></c>' +
-      '<c r="E' + settingsRow + '" t="inlineStr"><is><t>Max String Res</t></is></c>' +
-      '<c r="F' + settingsRow + '" t="inlineStr"><is><t>Res Series</t></is></c>' +
-      '<c r="G' + settingsRow + '" t="inlineStr"><is><t>Date</t></is></c>' +
-      '<c r="H' + settingsRow + '" t="inlineStr"><is><t>Time</t></is></c></row>' +
-      '<row r="' + (settingsRow + 1) + '" spans="1:8">' +
-      '<c r="A' + (settingsRow + 1) + '"><v>' + settings.targetRatio.toPrecision(17) + '</v></c>' +
-      '<c r="B' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
-
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      sheet1_str += 'Min Ratio';
-      break;
-    case ratioEnum.MAX:
-      sheet1_str += 'Max Ratio';
-      break;
-    default:
-      sheet1_str += 'Nom Ratio';
-      break;
-    }
-
-    sheet1_str += '</t></is></c>' +
-      '<c r="C' + (settingsRow + 1) + '" s="1"><v>' + (0.01 * settings.resTolerance).toString() + '</v></c>' +
-      '<c r="D' + (settingsRow + 1) + '"><v>' + settings.minStringRes.toPrecision(9) + '</v></c>' +
-      '<c r="E' + (settingsRow + 1) + '"><v>' + settings.maxStringRes.toPrecision(9) + '</v></c>' +
-      '<c r="F' + (settingsRow + 1) + '" t="inlineStr"><is><t>';
-
-    switch (settings.resSeries) {
-    case seriesEnum.E24:
-      sheet1_str += 'E24';
-      break;
-    case seriesEnum.E96:
-      sheet1_str += 'E96';
-      break;
-    default:
-      sheet1_str += 'E24 and E96';
-      break;
-    }
-
-    sheet1_str += '</t></is></c><c r="G' + (settingsRow + 1) + '" t="inlineStr"><is><t>' + 
-      thisMoment.getFullYear().toString() + '-' + zeroPad(thisMoment.getMonth() + 1) + '-' + zeroPad(thisMoment.getDate()) +
-      '</t></is></c><c r="H' + (settingsRow + 1) + '" t="inlineStr"><is><t>' +
-      zeroPad(thisMoment.getHours()) + ':' + zeroPad(thisMoment.getMinutes()) + ':' + zeroPad(thisMoment.getSeconds()) +
-      '</t></is></c></row><row r="' + headerRow + '" spans="1:8">' +
-      '<c r="A' + headerRow + '" t="inlineStr"><is><t>Group</t></is></c>' +
-      '<c r="B' + headerRow + '" t="inlineStr"><is><t>Upper</t></is></c>' +
-      '<c r="C' + headerRow + '" t="inlineStr"><is><t>Lower</t></is></c>' +
-      '<c r="D' + headerRow + '" t="inlineStr"><is><t>String</t></is></c>' +
-      '<c r="E' + headerRow + '" t="inlineStr"><is><t>Min Ratio</t></is></c>' +
-      '<c r="F' + headerRow + '" t="inlineStr"><is><t>Nom Ratio</t></is></c>' +
-      '<c r="G' + headerRow + '" t="inlineStr"><is><t>Max Ratio</t></is></c>' +
-      '<c r="H' + headerRow + '" t="inlineStr"><is><t>';
-
-    switch (settings.ratioType) {
-    case ratioEnum.MIN:
-      sheet1_str += 'Min Ratio \u2212 Target';
-      break;
-    case ratioEnum.MAX:
-      sheet1_str += 'Max Ratio \u2212 Target';
-      break;
-    default:
-      sheet1_str += 'Nom Ratio \u2212 Target';
-      break;
-    }
-
-    sheet1_str += '</t></is></c></row>';
-
-    for (jResult = 0; jResult < sortedResults.length; jResult++) {
-      thisResult = sortedResults[jResult];
-      rowNum = jResult + headerRow + 1;
-
-      sheet1_str += '<row r="' + rowNum + '" spans="1:8">' +
-        '<c r="A' + rowNum + '"><v>' + thisResult.groupNum.toString() + '</v></c>' +
-        '<c r="B' + rowNum + '"><v>' + thisResult.resUpper.toPrecision(7) + '</v></c>' +
-        '<c r="C' + rowNum + '"><v>' + thisResult.resLower.toPrecision(7) + '</v></c>' +
-        '<c r="D' + rowNum + '"><v>' + thisResult.stringRes().toPrecision(9) + '</v></c>' +
-        '<c r="E' + rowNum + '"><v>' + thisResult.minRatio.toPrecision(17) + '</v></c>' +
-        '<c r="F' + rowNum + '"><v>' + thisResult.nomRatio.toPrecision(17) + '</v></c>' +
-        '<c r="G' + rowNum + '"><v>' + thisResult.maxRatio.toPrecision(17) + '</v></c>';
-
-      if (Math.abs(thisResult.ratioDiff) < 3e-308) {
-        expString = '0.00';
-      } else {
-        expString = thisResult.ratioDiff.toExponential(17).toUpperCase();
-      }
-
-      sheet1_str += '<c r="H' + rowNum + '" s="2"><v>' + expString + '</v></c></row>';
-    }
-
-    sheet1_str += '</sheetData>';
-    if (settings.isExpr) {
-      sheet1_str += '<mergeCells count="2"><mergeCell ref="A1:B1"/><mergeCell ref="C1:H1"/></mergeCells>';
-    }
-    sheet1_str += '</worksheet>';
-    xlsxZip.addFile('xl/worksheets/sheet1.xml', sheet1_str);
-
-    return xlsxZip.compile();
-  }
-
-  // The following function comes from a Stack Overflow post
-  // https://stackoverflow.com/a/33542499
-  // by user Ludovic Feltz (on 2015-11-5), edited by user Smi (on 2016-08-12).
-  // Retrieved 2018-03-31 and changed slightly to fit this program.
-  // Stack Overflow code is distributed under the CC BY-SA 3.0 license
-  // https://creativecommons.org/licenses/by-sa/3.0/
-  // download_xlsx()
-  return function () {
-    var xlsxBlob = generate_xlsx();
-    var filename = 'results.xlsx';
-    var xlsxAnchor;
-    var blobURL;
-
-    if (window.navigator.msSaveOrOpenBlob) {
-      // Internet Explorer
-      window.navigator.msSaveBlob(xlsxBlob, filename);
-    } else {
-      xlsxAnchor = document.createElement('a');
-      blobURL = URL.createObjectURL(xlsxBlob);
-      xlsxAnchor.href = blobURL;
-      xlsxAnchor.download = filename;
-      document.body.appendChild(xlsxAnchor);
-      xlsxAnchor.click();
-      document.body.removeChild(xlsxAnchor);
-      URL.revokeObjectURL(blobURL);
-    }
-  };
-}) ();
-
-// End local scope
 }) ();
 </script>
 </body>
