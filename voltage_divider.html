@@ -146,6 +146,7 @@ express Statement of Purpose.
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
 -->
+<meta name="Description" content="A solver for optimal voltage dividers using E24 and/or E96 series resistor values."/>
 <title>Voltage Divider Calculator</title>
 <style>
 a:link {
@@ -204,7 +205,7 @@ input[type="radio"] {
 }
 
 input[type="radio"]:focus+label {
-  border: 1px solid black;
+  border: 1px solid #4d90fe;
 }
 
 input[type="radio"]:checked+label {
@@ -490,20 +491,6 @@ td.paramLabel {
 
 (function () {
 'use strict';
-  // Creates human-readable resistance value strings from
-  // resistance values in Ohms.
-  window.voltDiv.resValToString = function(resVal, precision) {
-    if (resVal >= 1.0e6) {
-      return (1.0e-6*resVal).toPrecision(precision) + 'M\u03A9';
-    } else if (resVal >= 1.0e3) {
-      return (1.0e-3*resVal).toPrecision(precision) + 'k\u03A9';
-    }   
-    return resVal.toPrecision(precision) + '\u03A9';
-  };
-}) ();
-
-(function () {
-'use strict';
   // Decide whether to display equations & schematic based on
   // sessionStorage
   var displayEqs;
@@ -610,6 +597,20 @@ td.paramLabel {
     } catch(err) {
       // Ignore exceptions
     }
+  };
+}) ();
+
+(function () {
+'use strict';
+  // Creates human-readable resistance value strings from
+  // resistance values in Ohms.
+  window.voltDiv.resValToString = function(resVal, precision) {
+    if (resVal >= 1.0e6) {
+      return (1.0e-6*resVal).toPrecision(precision) + 'M\u03A9';
+    } else if (resVal >= 1.0e3) {
+      return (1.0e-3*resVal).toPrecision(precision) + 'k\u03A9';
+    }   
+    return resVal.toPrecision(precision) + '\u03A9';
   };
 }) ();
 
@@ -2492,6 +2493,48 @@ td.paramLabel {
     };
   }) ();
 
+  // Returns an array of all valid individual resistance values, 
+  // stored in ascending order.
+  function initialize_resArray(settings) {
+    var resArray = [];
+    var jMult;
+    var multiplier;
+    var jVal;
+
+    switch (settings.resSeries) {
+    case seriesEnum.E24:
+      for (jMult = 0; jMult < multipliers.length; jMult++) {
+        multiplier = multipliers[jMult];
+
+        for (jVal = 0; jVal < E24.length; jVal++) {
+          resArray.push(multiplier*E24[jVal]);
+        }
+      }
+      break;
+    case seriesEnum.E96:
+      for (jMult = 0; jMult < multipliers.length; jMult++) {
+        multiplier = multipliers[jMult];
+
+        for (jVal = 0; jVal < E96.length; jVal++) {
+          resArray.push(multiplier*E96[jVal]);
+        }
+      }
+      break;
+    default:
+      for (jMult = 0; jMult < multipliers.length; jMult++) {
+        multiplier = multipliers[jMult];
+
+        for (jVal = 0; jVal < E24E96.length; jVal++) {
+          resArray.push(multiplier*E24E96[jVal]);
+        }
+      }
+      break;
+    }
+
+    Object.freeze(resArray);
+    return resArray;
+  }
+
   // Constructor for Settings object that stores user input settings
   function Settings() {
     this.targetRatio = NaN;
@@ -2579,55 +2622,13 @@ td.paramLabel {
     return output;
   }
 
-  function saveSettings() {
+  function storeSettings() {
     // Store settings in sessionStorage
     try {
       window.sessionStorage.setItem('settings', JSON.stringify(window.voltDiv.settings));
     } catch(err) {
       // Ignore exceptions
     }
-  }
-
-  // Returns an array of all valid individual resistance values, 
-  // stored in ascending order.
-  function initialize_resArray(settings) {
-    var resArray = [];
-    var jMult;
-    var multiplier;
-    var jVal;
-
-    switch (settings.resSeries) {
-    case seriesEnum.E24:
-      for (jMult = 0; jMult < multipliers.length; jMult++) {
-        multiplier = multipliers[jMult];
-
-        for (jVal = 0; jVal < E24.length; jVal++) {
-          resArray.push(multiplier*E24[jVal]);
-        }
-      }
-      break;
-    case seriesEnum.E96:
-      for (jMult = 0; jMult < multipliers.length; jMult++) {
-        multiplier = multipliers[jMult];
-
-        for (jVal = 0; jVal < E96.length; jVal++) {
-          resArray.push(multiplier*E96[jVal]);
-        }
-      }
-      break;
-    default:
-      for (jMult = 0; jMult < multipliers.length; jMult++) {
-        multiplier = multipliers[jMult];
-
-        for (jVal = 0; jVal < E24E96.length; jVal++) {
-          resArray.push(multiplier*E24E96[jVal]);
-        }
-      }
-      break;
-    }
-
-    Object.freeze(resArray);
-    return resArray;
   }
 
   // Parses user input, solves for resistance values most closely
@@ -2638,6 +2639,7 @@ td.paramLabel {
     var error_div;
     var resArray;
     var candidates;
+    var extractLen;
     var ratioElem;
     var ratioEval;
     var ratioOK;
@@ -2662,13 +2664,42 @@ td.paramLabel {
     } else {
       window.voltDiv.settings.resSeries = seriesEnum.E24E96;
     }
-    saveSettings();
+    
+    // Figure out whether the target ratio is a minimum, maximum, or nominal ratio.
+    if (document.getElementById('ratioTypeMin').checked) {
+      window.voltDiv.settings.ratioType = ratioEnum.MIN;
+    } else if (document.getElementById('ratioTypeMax').checked) {
+      window.voltDiv.settings.ratioType = ratioEnum.MAX;
+    } else {
+      window.voltDiv.settings.ratioType = ratioEnum.NOM;
+    }
+    
+    // Store divider ratio input expression.
+    ratioElem = document.getElementById('dividerRatio');
+    extractLen = Math.min(ratioElem.value.length, 200);
+    window.voltDiv.settings.ratioExpr = trimString(ratioElem.value.substr(0, extractLen));
+
+    // Store resistor tolerance expression
+    resTolElem = document.getElementById('resTolerance');
+    extractLen = Math.min(resTolElem.value.length, 30);
+    window.voltDiv.settings.resTolExpr = trimString(resTolElem.value.substr(0, extractLen));
+
+    // Store min string resistance expression
+    minStringElem = document.getElementById('minStringResistance');
+    extractLen = Math.min(minStringElem.value.length, 30);
+    window.voltDiv.settings.minStringExpr = trimString(minStringElem.value.substr(0, extractLen));
+
+    // Store max string resistance expression
+    maxStringElem = document.getElementById('maxStringResistance');
+    extractLen = Math.min(maxStringElem.value.length, 30);
+    window.voltDiv.settings.maxStringExpr = trimString(maxStringElem.value.substr(0, extractLen));
+
+    storeSettings();
 
     // Fill in resArray based on selected resistor series
     resArray = initialize_resArray(window.voltDiv.settings);
-
-    // Parse & validate desired divider ratio input.
-    ratioElem = document.getElementById('dividerRatio');
+    
+    // Check & evaluate divider ratio input
     if (ratioElem.value.length > 200) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -2679,8 +2710,6 @@ td.paramLabel {
       return;
     }
 
-    window.voltDiv.settings.ratioExpr = trimString(ratioElem.value);
-    saveSettings();
     ratioEval = window.voltDiv.evalExpression(ratioElem.value);
     ratioOK = ratioEval.isValid;
 
@@ -2721,18 +2750,7 @@ td.paramLabel {
       return;
     }
 
-    // Figure out whether the target ratio is a minimum, maximum, or nominal ratio.
-    if (document.getElementById('ratioTypeMin').checked) {
-      window.voltDiv.settings.ratioType = ratioEnum.MIN;
-    } else if (document.getElementById('ratioTypeMax').checked) {
-      window.voltDiv.settings.ratioType = ratioEnum.MAX;
-    } else {
-      window.voltDiv.settings.ratioType = ratioEnum.NOM;
-    }
-    saveSettings();
-
-    // Parse & validate resistor tolerance input.
-    resTolElem = document.getElementById('resTolerance');
+    // Check & evaluate resistor tolerance input.
     if (resTolElem.value.length > 30) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -2743,8 +2761,6 @@ td.paramLabel {
       return;
     }
 
-    window.voltDiv.settings.resTolExpr = trimString(resTolElem.value);
-    saveSettings();
     parserOutput = parseTolerance(resTolElem.value);
     if (parserOutput.isValid === true) {
       window.voltDiv.settings.resTolerance = parserOutput.value;
@@ -2762,8 +2778,7 @@ td.paramLabel {
       return;
     }
 
-    // Parse & validate minimum divider string resistance input.
-    minStringElem = document.getElementById('minStringResistance');
+    // Check & evaluate minimum divider string resistance input.
     if (minStringElem.value.length > 30) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -2774,8 +2789,6 @@ td.paramLabel {
       return;
     }
 
-    window.voltDiv.settings.minStringExpr = trimString(minStringElem.value);
-    saveSettings();
     parserOutput = parseResistance(minStringElem.value);
     if (parserOutput.isValid === true) {
       window.voltDiv.settings.minStringRes = parserOutput.value;
@@ -2804,8 +2817,7 @@ td.paramLabel {
       return;
     }
 
-    // Parse & validate maximum divider string resistance input.
-    maxStringElem = document.getElementById('maxStringResistance');
+    // Check & evaluate maximum divider string resistance input.
     if (maxStringElem.value.length > 30) {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
@@ -2815,12 +2827,11 @@ td.paramLabel {
       error_div.style.display = 'inline-block';
       return;
     }
-
-    window.voltDiv.settings.maxStringExpr = trimString(maxStringElem.value);
-    saveSettings();
+    
     parserOutput = parseResistance(maxStringElem.value);
     if (parserOutput.isValid === true) {
       window.voltDiv.settings.maxStringRes = parserOutput.value;
+      storeSettings();
     } else {
       title_div = document.getElementById('errorTitleDiv');
       title_div.style.display = 'block';
