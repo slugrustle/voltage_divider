@@ -147,6 +147,7 @@ express Statement of Purpose.
     this CC0 or use of the Work.
 -->
 <meta name="Description" content="A solver for optimal voltage dividers using E24 and/or E96 series resistor values."/>
+<meta name="viewport" content="width=780px, initial-scale=0.65">
 <title>Voltage Divider Calculator</title>
 <style>
 a:link {
@@ -226,6 +227,7 @@ input[type="radio"]:checked+label {
 #resultsTable, #resultsTable th, #resultsTable td {
   border: 1px solid black;
   border-collapse: collapse;
+  font-size: 12pt;
 }
 
 #resultsTable th, #resultsTable td {
@@ -264,7 +266,7 @@ td.paramLabel {
 </head>
 
 <body>
-<header class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2003;v1.12&#x2003;2018-05-06</span></header>
+<header class="titleDiv"><span class="titleSpan">Voltage Divider Calculator&#x2003;v1.12&#x2003;2018-05-07</span></header>
 <form action="javascript:void(0)" aria-label="calculator input"><table id="inputTable">
   <tr>
     <td class="labelCol"><label for="dividerRatio">Target Divider Ratio</label></td>
@@ -351,9 +353,9 @@ td.paramLabel {
 
 <main aria-labelledby="outTitleSpan">
 <h2 class="titleDiv" id="outTitleDiv" style="display: none;">
-  <span class="titleSpan" id="outTitleSpan" style="margin-right: 0.2em"></span><span id="downloadSpan" style="margin-left: 1em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.download_xlsx();">Download .xlsx</a>&#x2009;)&#x2003;(&#x2009;<a href="javascript:;" onclick="voltDiv.download_csv();">Download .csv</a>&#x2009;)</span><span id="clearSpan" style="margin-left: 1em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.clearResults();">clear</a>&#x2009;)</span><span id="ratioSpan" style="margin-left: 1em; font-size: 13pt;"></span>
+  <span class="titleSpan" id="outTitleSpan" style="margin-right: 0.2em;"></span><span id="downloadSpan" style="margin-left: 1em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.download_xlsx();">Download&nbsp;.xlsx</a>&#x2009;)&#x2003;(&#x2009;<a href="javascript:;" onclick="voltDiv.download_csv();">Download&nbsp;.csv</a>&#x2009;)</span><span id="clearSpan" style="margin-left: 1em; font-size: 14pt; display: none;">(&#x2009;<a href="javascript:;" onclick="voltDiv.clearResults();">clear</a>&#x2009;)</span><span id="ratioSpan" style="margin-left: 1em; font-size: 13pt;"></span>
 </h2>
-<table id="resultsTable" style="font-size: 12pt; display: none;"></table>
+<table id="resultsTable" style="display: none;"></table>
 </main>
 
 <section aria-labelledby="errorTitleSpan">
@@ -713,8 +715,8 @@ td.paramLabel {
 
     // Display table of resistor values
     results_table = document.getElementById('resultsTable');
-    results_table.appendChild(tableFragment);
     results_table.style.display='table';
+    results_table.appendChild(tableFragment);
 
     // Set displayType in sessionStorage and remove previously stored
     // results.
