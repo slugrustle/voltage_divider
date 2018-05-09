@@ -276,12 +276,7 @@ td.paramLabel {
   <tr>
     <td id="ratioTypeLabel" class="labelCol">Ratio Type</td>
     <td class="buttonCol" role="radiogroup" aria-labelledby="ratioTypeLabel">
-      <input type="radio" name="ratioType" id="ratioTypeMin"/>
-      <label for="ratioTypeMin" class="buttonLabel">MIN</label> &#x2002;
-      <input type="radio" name="ratioType" id="ratioTypeNom" checked/>
-      <label for="ratioTypeNom" class="buttonLabel">NOM</label> &#x2002;
-      <input type="radio" name="ratioType" id="ratioTypeMax"/>
-      <label for="ratioTypeMax" class="buttonLabel">MAX</label>
+      <input type="radio" name="ratioType" id="ratioTypeMin"/><label for="ratioTypeMin" class="buttonLabel">MIN</label>&#x2003;<input type="radio" name="ratioType" id="ratioTypeNom" checked/><label for="ratioTypeNom" class="buttonLabel">NOM</label>&#x2003;<input type="radio" name="ratioType" id="ratioTypeMax"/><label for="ratioTypeMax" class="buttonLabel">MAX</label>
     </td>
     <td>Over Tolerance</td>
   </tr>
@@ -303,12 +298,7 @@ td.paramLabel {
   <tr>
     <td id="seriesLabel" class="labelCol">Resistor Value Series</td>
     <td class="buttonCol" role="radiogroup" aria-labelledby="seriesLabel">
-      <input type="radio" name="resSeries" id="resSeriesE24"/>
-      <label for="resSeriesE24" class="buttonLabel">E24</label> &#x2002;
-      <input type="radio" name="resSeries" id="resSeriesE96"/>
-      <label for="resSeriesE96" class="buttonLabel">E96</label> &#x2002;
-      <input type="radio" name="resSeries" id="resSeriesE24E96" checked/>
-      <label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
+      <input type="radio" name="resSeries" id="resSeriesE24"/><label for="resSeriesE24" class="buttonLabel">E24</label>&#x2003;<input type="radio" name="resSeries" id="resSeriesE96"/><label for="resSeriesE96" class="buttonLabel">E96</label>&#x2003;<input type="radio" name="resSeries" id="resSeriesE24E96" checked/><label for="resSeriesE24E96" class="buttonLabel">BOTH</label>
     </td>
     <td>View&#x2002;<a href="javascript:;" onclick="voltDiv.displayResistorValues('E24');">E24</a>,&#x2002;<a href="javascript:;" onclick="voltDiv.displayResistorValues('E96');">E96</a></td>
   </tr>
@@ -444,7 +434,7 @@ td.paramLabel {
   var resSerE24E96_radio = document.getElementById('resSeriesE24E96');
 
   try {
-    settingsString = window.sessionStorage.getItem('settings');
+    settingsString = window.sessionStorage.getItem('vdiv_settings');
   } catch(err) {
     // Ignore exceptions
   }
@@ -505,7 +495,7 @@ td.paramLabel {
     var toggleAnchor;
 
     try {
-      displayEqs = window.sessionStorage.getItem('displayEqs');
+      displayEqs = window.sessionStorage.getItem('vdiv_displayEqs');
     } catch (err) {
       // Ignore exceptions
       displayEqs = null;
@@ -515,7 +505,7 @@ td.paramLabel {
       displayEqs = 'false';
 
       try {
-        window.sessionStorage.setItem('displayEqs', displayEqs);
+        window.sessionStorage.setItem('vdiv_displayEqs', displayEqs);
       } catch (err) {
         // Ignore exceptions
       }
@@ -546,7 +536,7 @@ td.paramLabel {
 
       displayEqs = 'true';
       try {
-        window.sessionStorage.setItem('displayEqs', displayEqs);
+        window.sessionStorage.setItem('vdiv_displayEqs', displayEqs);
       } catch (err) {
         // Ignore exceptions
       } 
@@ -559,7 +549,7 @@ td.paramLabel {
 
       displayEqs = 'false';
       try {
-        window.sessionStorage.setItem('displayEqs', displayEqs);
+        window.sessionStorage.setItem('vdiv_displayEqs', displayEqs);
       } catch (err) {
         // Ignore exceptions
       }
@@ -594,8 +584,8 @@ td.paramLabel {
     // Set displayType in sessionStorage and remove previous stored
     // results.
     try {
-      window.sessionStorage.removeItem('displayType');
-      window.sessionStorage.removeItem('sortedResults');
+      window.sessionStorage.removeItem('vdiv_displayType');
+      window.sessionStorage.removeItem('vdiv_sortedResults');
     } catch(err) {
       // Ignore exceptions
     }
@@ -721,9 +711,9 @@ td.paramLabel {
     // Set displayType in sessionStorage and remove previously stored
     // results.
     try {
-      window.sessionStorage.removeItem('displayType');
-      window.sessionStorage.setItem('displayType', series);
-      window.sessionStorage.removeItem('sortedResults');
+      window.sessionStorage.removeItem('vdiv_displayType');
+      window.sessionStorage.setItem('vdiv_displayType', series);
+      window.sessionStorage.removeItem('vdiv_sortedResults');
     } catch(err) {
       // Ignore exceptions
     }
@@ -869,8 +859,8 @@ td.paramLabel {
     // Set displayType in sessionStorage and remove previously
     // stored results.
     try {
-      window.sessionStorage.removeItem('displayType');
-      window.sessionStorage.removeItem('storedResults');
+      window.sessionStorage.removeItem('vdiv_displayType');
+      window.sessionStorage.removeItem('vdiv_storedResults');
     } catch(err) {
       // Ignore exceptions
     }
@@ -1044,9 +1034,9 @@ td.paramLabel {
 
     // Store results and set displayType in sessionStorage
     try {
-      window.sessionStorage.removeItem('displayType');
-      window.sessionStorage.setItem('sortedResults', JSON.stringify(window.voltDiv.sortedResults));
-      window.sessionStorage.setItem('displayType', 'results');
+      window.sessionStorage.removeItem('vdiv_displayType');
+      window.sessionStorage.setItem('vdiv_sortedResults', JSON.stringify(window.voltDiv.sortedResults));
+      window.sessionStorage.setItem('vdiv_displayType', 'results');
     } catch(err) {
       // Ignore exceptions
     }
@@ -1061,7 +1051,7 @@ td.paramLabel {
 
   // Display nothing, resistor values, or previous results based on sessionStorage
   try {
-    displayType = window.sessionStorage.getItem('displayType');
+    displayType = window.sessionStorage.getItem('vdiv_displayType');
   } catch(err) {
     // Ignore exceptions
   }
@@ -1072,14 +1062,14 @@ td.paramLabel {
     window.voltDiv.displayResistorValues('E96');
   } else if (displayType === 'results') {
     try {
-      sortedString = window.sessionStorage.getItem('sortedResults');
+      sortedString = window.sessionStorage.getItem('vdiv_sortedResults');
     } catch(err) {
       // Ignore exceptions
     }
 
     if (sortedString !== null) {
       try {
-        settingsString = window.sessionStorage.getItem('settings');
+        settingsString = window.sessionStorage.getItem('vdiv_settings');
       } catch(err) {
         // Ignore exceptions
       }
@@ -2627,7 +2617,7 @@ td.paramLabel {
   function storeSettings() {
     // Store settings in sessionStorage
     try {
-      window.sessionStorage.setItem('settings', JSON.stringify(window.voltDiv.settings));
+      window.sessionStorage.setItem('vdiv_settings', JSON.stringify(window.voltDiv.settings));
     } catch(err) {
       // Ignore exceptions
     }
